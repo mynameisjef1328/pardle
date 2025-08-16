@@ -55,7 +55,7 @@
       </tr>
       <tr id="parRow"><th>Par</th></tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="playerRows"></tbody>
   </table>
 
   <script>
@@ -71,6 +71,11 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
+    if (!window.location.search.includes("gameId")) {
+  const newUrl = `${window.location.pathname}?gameId=${gameId}`;
+  window.history.replaceState(null, "", newUrl);
+}
 
     const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
     if (!window.location.search.includes("gameId")) {
@@ -141,7 +146,7 @@
       diffCell.textContent = '0';
       row.appendChild(diffCell);
 
-      document.querySelector('tbody').appendChild(row);
+      document.getElementById('playerRows').appendChild(row);
       calculate(row);
     }
 
@@ -179,22 +184,28 @@
     }
 
     function loadData() {
-      db.ref('games/' + gameId).once('value').then(snapshot => {
-        const data = snapshot.val();
-        document.querySelector('tbody').innerHTML = '';
-        if (data) {
-          document.getElementById('courseSelect').value = data.course;
-          currentPar = courses[data.course];
-          updateParRow(currentPar);
-          updateHoleNumbers();
-          data.players.forEach((p, i) => buildPlayerRow(i, p));
-        } else {
-          updateParRow(currentPar);
-          updateHoleNumbers();
-          for (let i = 0; i < 4; i++) buildPlayerRow(i);
-        }
-      });
+  db.ref('games/' + gameId).once('value').then(snapshot => {
+    const data = snapshot.val();
+
+    // Always update header rows
+    updateParRow(currentPar);
+    updateHoleNumbers();
+
+    const tbody = document.getElementById('playerRows');
+    tbody.innerHTML = '';
+
+    if (data) {
+      document.getElementById('courseSelect').value = data.course;
+      currentPar = courses[data.course];
+      updateParRow(currentPar);
+      updateHoleNumbers();
+      data.players.forEach((player, i) => buildPlayerRow(i, player));
+    } else {
+      // First-time load fallback
+      for (let i = 0; i < 4; i++) buildPlayerRow(i);
     }
+  });
+}
 
     window.addEventListener('DOMContentLoaded', () => {
       const courseSelect = document.getElementById('courseSelect');
