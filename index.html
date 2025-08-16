@@ -111,7 +111,7 @@ export default function Scorecard() {
                       const parValue = par[holeIndex];
                       const intScore = parseInt(score);
                       const diff = intScore - parValue;
-                      let className = "border p-1 flex justify-center items-center";
+                      let className = "border p-1 text-center";
                       if (!isNaN(intScore)) {
                         if (diff < 0) className += " border-b-4 border-green-500";
                         else if (diff > 0) className += " border-b-4 border-red-500";
@@ -124,7 +124,7 @@ export default function Scorecard() {
                             onChange={(e) =>
                               handleScoreChange(playerIndex, holeIndex, e.target.value)
                             }
-                            className="w-12 text-center text-sm"
+                            className="text-center text-sm"
                           />
                         </td>
                       );
