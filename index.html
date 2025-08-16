@@ -192,7 +192,48 @@
       });
     }
 
-    function addPlayerRow(playerName, existingScores = []) {
+  function addPlayerRow(playerName, existingScores = []) {
+  const row = tableBody.insertRow();
+  const nameCell = row.insertCell();
+  nameCell.contentEditable = true;
+  nameCell.textContent = playerName;
+
+  for (let i = 0; i < 18; i++) {
+    const cell = row.insertCell();
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = 1;
+    input.max = 10;
+
+    // Load existing score from Firebase if available
+    input.value = existingScores[i] !== undefined ? existingScores[i] : "";
+
+    const button = document.createElement("button");
+    button.textContent = "Submit";
+    button.style.display = "none";
+
+    button.onclick = () => {
+      submitScore(row, i, input, button);
+    };
+
+    input.addEventListener("input", () => {
+      button.style.display = input.value ? "inline-block" : "none";
+    });
+
+    // Show/hide submit button if value is already present (on refresh)
+    if (input.value) {
+      button.style.display = "none";
+    }
+
+    cell.appendChild(input);
+    cell.appendChild(document.createElement("br"));
+    cell.appendChild(button);
+  }
+
+  row.insertCell().textContent = "";
+  row.insertCell().textContent = "";
+  updateRowStats(row);
+}
       const row = tableBody.insertRow();
       const nameCell = row.insertCell();
       nameCell.contentEditable = true;
