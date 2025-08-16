@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Wordle Golf Scorecard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -12,75 +12,48 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 30px;
-      margin: auto;
-      overflow-x: hidden;
-    }
-
-    h2 {
-      margin-bottom: 10px;
+      background: #f5f5f5;
+      padding: 20px;
       text-align: center;
     }
-
-    .controls {
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-    }
-
     table {
-      border-collapse: collapse;
-      min-width: 1000px;
       width: 100%;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-collapse: collapse;
+      margin-top: 20px;
     }
-
     th, td {
       border: 1px solid #ccc;
       padding: 6px;
-      text-align: center;
       font-size: 14px;
+      text-align: center;
     }
-
     th {
-      background-color: #666;
-      color: white;
-      font-weight: bold;
-    }
-
-    input[type="number"] {
-      width: 40px;
-      text-align: center;
-    }
-
-    button {
       background: #444;
+      color: #fff;
+    }
+    input[type="number"], input[type="text"] {
+      width: 50px;
+    }
+    .submit-btn {
+      background: #007bff;
       color: white;
-      padding: 4px 8px;
       border: none;
-      border-radius: 4px;
+      padding: 3px 6px;
+      margin-top: 2px;
       cursor: pointer;
-      font-size: 0.75em;
-      margin-top: 4px;
+      font-size: 12px;
+      border-radius: 3px;
     }
-
-    button:hover {
-      background: #222;
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: default;
     }
-
-    .footer {
-      text-align: center;
-      margin-top: 30px;
-      font-size: 0.9em;
-      color: #777;
+    .saved {
+      font-size: 0.8em;
+      color: green;
+    }
+    .controls {
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -88,31 +61,21 @@
   <h2>Wordle Golf Scorecard</h2>
 
   <div class="controls">
-    <label for="course">Choose a course:</label>
-    <select id="course">
+    <label for="courseSelect">Select Course:</label>
+    <select id="courseSelect">
       <option value="Pebble Beach">Pebble Beach</option>
       <option value="St. Andrews">St. Andrews</option>
-      <option value="Augusta">Augusta</option>
     </select>
-    <button onclick="addNewPlayer()">+ Add Player</button>
+    <button onclick="addPlayer()">+ Add Player</button>
   </div>
 
-  <div class="table-container">
-    <table id="scorecard">
-      <thead id="scorecard-head"></thead>
-      <tbody>
-        <tr>
-          <td>Par</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="footer">
-    Hosted on GitHub Pages | Data stored via Firebase 🔥
-  </div>
+  <table id="scorecard">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
 
   <script>
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
       authDomain: "wordle-golf-6c636.firebaseapp.com",
@@ -127,136 +90,133 @@
     const db = firebase.database();
 
     const courses = {
-      "Pebble Beach": [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5],
-      "St. Andrews": [4,5,4,5,4,4,3,4,4,4,4,3,4,4,5,4,3,4],
-      "Augusta": [5,3,4,3,4,4,5,3,4,4,5,3,4,4,4,3,4,5]
+      "Pebble Beach": [4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5],
+      "St. Andrews": [4, 5, 4, 5, 4, 4, 3, 4, 4, 4, 4, 3, 4, 4, 5, 4, 3, 4]
     };
 
-    const courseSelect = document.getElementById("course");
-    const tableBody = document.querySelector("#scorecard tbody");
-    const tableHead = document.getElementById("scorecard-head");
-    let currentPar = courses[courseSelect.value];
-
+    const courseSelect = document.getElementById("courseSelect");
+    const table = document.getElementById("scorecard");
+    const thead = table.querySelector("thead");
+    const tbody = table.querySelector("tbody");
     const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
     if (!window.location.search.includes("gameId")) {
       window.location.search = `?gameId=${gameId}`;
     }
 
-    function renderScorecard() {
-      currentPar = courses[courseSelect.value];
+    let currentPar = [];
 
-      tableHead.innerHTML = `
+    function renderTable() {
+      const course = courseSelect.value;
+      currentPar = courses[course];
+
+      // Build Header
+      thead.innerHTML = `
         <tr>
-          <th rowspan="2">Player</th>
-          <th colspan="18">Hole</th>
-          <th rowspan="2">Total</th>
-          <th rowspan="2">+/-</th>
+          <th>Player</th>
+          ${currentPar.map((_, i) => `<th>H${i+1}</th>`).join('')}
+          <th>Total</th>
+          <th>+/-</th>
         </tr>
         <tr>
-          ${Array.from({ length: 18 }, (_, i) => `<th>${i + 1}</th>`).join("")}
+          <td>Par</td>
+          ${currentPar.map(par => `<td>${par}</td>`).join('')}
+          <td>${currentPar.reduce((a, b) => a + b, 0)}</td>
+          <td>E</td>
         </tr>
       `;
 
-      const parRow = tableBody.rows[0];
-      while (parRow.cells.length > 1) {
-        parRow.deleteCell(1);
-      }
-      currentPar.forEach(par => {
-        const cell = parRow.insertCell();
-        cell.textContent = par;
-      });
-      parRow.insertCell().textContent = currentPar.reduce((a, b) => a + b, 0);
-      parRow.insertCell().textContent = "E";
-
-      loadScores();
-    }
-
-    function loadScores() {
-      db.ref(`games/${gameId}`).once("value", snapshot => {
-        const gameData = snapshot.val() || {};
-        while (tableBody.rows.length > 1) {
-          tableBody.deleteRow(1);
+      // Load Scores
+      db.ref(`games/${gameId}`).on("value", snap => {
+        const data = snap.val() || {};
+        tbody.innerHTML = "";
+        for (const playerName in data) {
+          createPlayerRow(playerName, data[playerName]);
         }
-
-        Object.entries(gameData).forEach(([player, scores]) => {
-          addPlayerRow(player, scores);
-        });
       });
     }
 
-    function addPlayerRow(playerName, existingScores = []) {
-      const row = tableBody.insertRow();
-      const nameCell = row.insertCell();
-      nameCell.contentEditable = true;
+    function addPlayer() {
+      const name = prompt("Player name?");
+      if (name) {
+        const scores = { scores: [], comments: [] };
+        db.ref(`games/${gameId}/${name}`).set(scores);
+      }
+    }
+
+    function createPlayerRow(playerName, playerData) {
+      const row = document.createElement("tr");
+      const nameCell = document.createElement("td");
       nameCell.textContent = playerName;
+      row.appendChild(nameCell);
+
+      let total = 0;
 
       for (let i = 0; i < 18; i++) {
-        const cell = row.insertCell();
+        const cell = document.createElement("td");
+
         const input = document.createElement("input");
         input.type = "number";
+        input.value = playerData?.scores?.[i] || "";
+        input.placeholder = "-";
         input.min = 1;
         input.max = 10;
-        input.value = existingScores[i] !== undefined ? existingScores[i] : "";
 
-        const button = document.createElement("button");
-        button.textContent = "Submit";
-        button.style.display = "none";
+        const comment = document.createElement("input");
+        comment.type = "text";
+        comment.placeholder = "Note";
+        comment.value = playerData?.comments?.[i] || "";
 
-        button.onclick = () => {
-          const val = parseInt(input.value);
-          if (!isNaN(val)) {
-            db.ref(`games/${gameId}/${playerName}/${i}`).set(val).then(() => {
-              button.style.display = "none";
-              updateRowStats(row);
-            });
-          }
+        const submit = document.createElement("button");
+        submit.className = "submit-btn";
+        submit.textContent = "✔️";
+        submit.style.display = "inline";
+
+        const animate = document.createElement("div");
+        animate.className = "saved";
+        animate.style.display = "none";
+        animate.textContent = "Saved";
+
+        if (playerData?.scores?.[i]) total += parseInt(playerData.scores[i]);
+
+        submit.onclick = () => {
+          const val = parseInt(input.value) || "";
+          const note = comment.value || "";
+
+          db.ref(`games/${gameId}/${playerName}/scores/${i}`).set(val);
+          db.ref(`games/${gameId}/${playerName}/comments/${i}`).set(note);
+
+          submit.disabled = true;
+          animate.style.display = "inline";
+          setTimeout(() => (animate.style.display = "none"), 1000);
         };
 
-        input.addEventListener("input", () => {
-          button.style.display = input.value ? "inline-block" : "none";
-        });
-
-        if (input.value) {
-          button.style.display = "none";
-        }
+        input.oninput = () => submit.disabled = false;
+        comment.oninput = () => submit.disabled = false;
 
         cell.appendChild(input);
         cell.appendChild(document.createElement("br"));
-        cell.appendChild(button);
+        cell.appendChild(comment);
+        cell.appendChild(document.createElement("br"));
+        cell.appendChild(submit);
+        cell.appendChild(animate);
+
+        row.appendChild(cell);
       }
 
-      row.insertCell().textContent = "";
-      row.insertCell().textContent = "";
-      updateRowStats(row);
+      const totalCell = document.createElement("td");
+      totalCell.textContent = total || "";
+      row.appendChild(totalCell);
+
+      const diff = total - currentPar.reduce((a,b) => a+b, 0);
+      const diffCell = document.createElement("td");
+      diffCell.textContent = diff === 0 ? "E" : (diff > 0 ? `+${diff}` : diff);
+      row.appendChild(diffCell);
+
+      tbody.appendChild(row);
     }
 
-    function updateRowStats(row) {
-      let sum = 0;
-      const inputs = Array.from(row.querySelectorAll("input"));
-      inputs.forEach((input, idx) => {
-        const val = parseInt(input.value);
-        if (!isNaN(val)) {
-          sum += val;
-        }
-      });
-
-      row.cells[19].textContent = sum;
-      const diff = sum - currentPar.reduce((a, b) => a + b, 0);
-      row.cells[20].textContent = diff === 0 ? "E" : (diff > 0 ? `+${diff}` : diff);
-    }
-
-    function addNewPlayer() {
-      const name = prompt("Enter player name:");
-      if (name) {
-        addPlayerRow(name);
-      }
-    }
-
-    courseSelect.addEventListener("change", () => {
-      renderScorecard();
-    });
-
-    courseSelect.dispatchEvent(new Event("change"));
+    courseSelect.addEventListener("change", renderTable);
+    renderTable();
   </script>
 </body>
 </html>
