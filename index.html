@@ -5,218 +5,186 @@
   <title>Wordle Golf Scorecard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <!-- Firebase v8 -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background: #f3f3f3;
+      margin: 0;
       padding: 20px;
+    }
+    h2 {
       text-align: center;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 6px;
-      font-size: 14px;
+      padding: 5px;
       text-align: center;
+      font-size: 14px;
     }
     th {
       background: #444;
-      color: #fff;
+      color: white;
     }
     input[type="number"], input[type="text"] {
-      width: 50px;
+      width: 60px;
+      font-size: 14px;
+      padding: 3px;
     }
-    .submit-btn {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 3px 6px;
-      margin-top: 2px;
-      cursor: pointer;
+    button {
+      padding: 3px 8px;
       font-size: 12px;
-      border-radius: 3px;
-    }
-    .submit-btn:disabled {
-      background: #ccc;
-      cursor: default;
+      margin-top: 3px;
+      cursor: pointer;
     }
     .saved {
-      font-size: 0.8em;
       color: green;
-    }
-    .controls {
-      margin-top: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h2>Wordle Golf Scorecard</h2>
 
+  <h2>Wordle Golf Scorecard</h2>
   <div class="controls">
-    <label for="courseSelect">Select Course:</label>
-    <select id="courseSelect">
-      <option value="Pebble Beach">Pebble Beach</option>
-      <option value="St. Andrews">St. Andrews</option>
-    </select>
     <button onclick="addPlayer()">+ Add Player</button>
   </div>
 
   <table id="scorecard">
-    <thead></thead>
-    <tbody></tbody>
+    <thead>
+      <tr>
+        <th>Player</th>
+        ${[...Array(18).keys()].map(i => `<th>H${i+1}</th>`).join('')}
+        <th>Total</th>
+        <th>+/–</th>
+      </tr>
+    </thead>
+    <tbody id="scoreBody"></tbody>
   </table>
 
   <script>
-    // Firebase Config
+    // 🔥 Replace with your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
       authDomain: "wordle-golf-6c636.firebaseapp.com",
+      databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com",
       projectId: "wordle-golf-6c636",
       storageBucket: "wordle-golf-6c636.appspot.com",
       messagingSenderId: "672104265687",
-      appId: "1:672104265687:web:2c16b0539fcd52ca4d7d92",
-      databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com"
+      appId: "1:672104265687:web:2c16b0539fcd52ca4d7d92"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const courses = {
-      "Pebble Beach": [4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5],
-      "St. Andrews": [4, 5, 4, 5, 4, 4, 3, 4, 4, 4, 4, 3, 4, 4, 5, 4, 3, 4]
-    };
+    const par = [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5];
+    const gameId = "defaultGame";
+    const scoreBody = document.getElementById("scoreBody");
 
-    const courseSelect = document.getElementById("courseSelect");
-    const table = document.getElementById("scorecard");
-    const thead = table.querySelector("thead");
-    const tbody = table.querySelector("tbody");
-    const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
-    if (!window.location.search.includes("gameId")) {
-      window.location.search = `?gameId=${gameId}`;
-    }
-
-    let currentPar = [];
-
-    function renderTable() {
-      const course = courseSelect.value;
-      currentPar = courses[course];
-
-      // Build Header
-      thead.innerHTML = `
-        <tr>
-          <th>Player</th>
-          ${currentPar.map((_, i) => `<th>H${i+1}</th>`).join('')}
-          <th>Total</th>
-          <th>+/-</th>
-        </tr>
-        <tr>
-          <td>Par</td>
-          ${currentPar.map(par => `<td>${par}</td>`).join('')}
-          <td>${currentPar.reduce((a, b) => a + b, 0)}</td>
-          <td>E</td>
-        </tr>
-      `;
-
-      // Load Scores
+    function loadScores() {
       db.ref(`games/${gameId}`).on("value", snap => {
+        scoreBody.innerHTML = "";
         const data = snap.val() || {};
-        tbody.innerHTML = "";
-        for (const playerName in data) {
-          createPlayerRow(playerName, data[playerName]);
-        }
+        Object.keys(data).forEach(name => {
+          renderPlayerRow(name, data[name]);
+        });
       });
     }
 
     function addPlayer() {
-      const name = prompt("Player name?");
-      if (name) {
-        const scores = { scores: [], comments: [] };
-        db.ref(`games/${gameId}/${name}`).set(scores);
-      }
+      const name = prompt("Enter player name:");
+      if (!name) return;
+      const initialData = {
+        scores: Array(18).fill(""),
+        comments: Array(18).fill("")
+      };
+      db.ref(`games/${gameId}/${name}`).set(initialData);
     }
 
-    function createPlayerRow(playerName, playerData) {
+    function renderPlayerRow(name, data) {
       const row = document.createElement("tr");
       const nameCell = document.createElement("td");
-      nameCell.textContent = playerName;
+      nameCell.textContent = name;
       row.appendChild(nameCell);
 
       let total = 0;
+      let scoreInputs = [];
 
       for (let i = 0; i < 18; i++) {
         const cell = document.createElement("td");
 
-        const input = document.createElement("input");
-        input.type = "number";
-        input.value = playerData?.scores?.[i] || "";
-        input.placeholder = "-";
-        input.min = 1;
-        input.max = 10;
+        const score = document.createElement("input");
+        score.type = "number";
+        score.value = data.scores?.[i] || "";
+        score.placeholder = "–";
 
         const comment = document.createElement("input");
         comment.type = "text";
-        comment.placeholder = "Note";
-        comment.value = playerData?.comments?.[i] || "";
+        comment.value = data.comments?.[i] || "";
+        comment.placeholder = "note";
+        comment.style.marginTop = "3px";
 
-        const submit = document.createElement("button");
-        submit.className = "submit-btn";
-        submit.textContent = "✔️";
-        submit.style.display = "inline";
+        const btn = document.createElement("button");
+        btn.textContent = "Submit";
 
-        const animate = document.createElement("div");
-        animate.className = "saved";
-        animate.style.display = "none";
-        animate.textContent = "Saved";
-
-        if (playerData?.scores?.[i]) total += parseInt(playerData.scores[i]);
-
-        submit.onclick = () => {
-          const val = parseInt(input.value) || "";
-          const note = comment.value || "";
-
-          db.ref(`games/${gameId}/${playerName}/scores/${i}`).set(val);
-          db.ref(`games/${gameId}/${playerName}/comments/${i}`).set(note);
-
-          submit.disabled = true;
-          animate.style.display = "inline";
-          setTimeout(() => (animate.style.display = "none"), 1000);
+        btn.onclick = () => {
+          const s = parseInt(score.value);
+          const c = comment.value;
+          db.ref(`games/${gameId}/${name}/scores/${i}`).set(s || "");
+          db.ref(`games/${gameId}/${name}/comments/${i}`).set(c);
+          btn.style.display = "none";
+          updateStats();
         };
 
-        input.oninput = () => submit.disabled = false;
-        comment.oninput = () => submit.disabled = false;
+        score.addEventListener("input", () => {
+          btn.style.display = score.value ? "inline-block" : "none";
+        });
+        comment.addEventListener("input", () => {
+          btn.style.display = "inline-block";
+        });
 
-        cell.appendChild(input);
+        if (score.value) total += parseInt(score.value) || 0;
+
+        cell.appendChild(score);
         cell.appendChild(document.createElement("br"));
         cell.appendChild(comment);
         cell.appendChild(document.createElement("br"));
-        cell.appendChild(submit);
-        cell.appendChild(animate);
-
+        cell.appendChild(btn);
         row.appendChild(cell);
+        scoreInputs.push(score);
       }
 
       const totalCell = document.createElement("td");
       totalCell.textContent = total || "";
       row.appendChild(totalCell);
 
-      const diff = total - currentPar.reduce((a,b) => a+b, 0);
       const diffCell = document.createElement("td");
-      diffCell.textContent = diff === 0 ? "E" : (diff > 0 ? `+${diff}` : diff);
+      const diff = total - par.reduce((a,b)=>a+b, 0);
+      diffCell.textContent = diff > 0 ? `+${diff}` : (diff < 0 ? diff : "E");
       row.appendChild(diffCell);
 
-      tbody.appendChild(row);
+      scoreBody.appendChild(row);
     }
 
-    courseSelect.addEventListener("change", renderTable);
-    renderTable();
+    function updateStats() {
+      loadScores(); // re-render
+    }
+
+    loadScores(); // start it up
   </script>
+
 </body>
 </html>
