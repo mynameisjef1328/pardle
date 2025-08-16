@@ -2,65 +2,37 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const courses = [
-  {
-    name: "Pebble Beach",
-    pars: [4, 4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 3, 4, 5, 4, 4, 3, 5]
-  },
-  {
-    name: "St. Andrews",
-    pars: [4, 5, 4, 3, 4, 4, 5, 3, 4, 4, 3, 4, 5, 4, 3, 4, 4, 5]
-  },
-  {
-    name: "Augusta National",
-    pars: [4, 3, 5, 4, 4, 5, 3, 4, 4, 4, 5, 4, 3, 4, 4, 3, 5, 4]
-  },
-  {
-    name: "Torrey Pines",
-    pars: [4, 4, 5, 3, 4, 4, 3, 5, 4, 4, 4, 3, 5, 4, 4, 3, 4, 5]
-  },
-  {
-    name: "TPC Sawgrass",
-    pars: [4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 5, 3, 4, 4, 3, 5, 4, 4]
-  },
-  {
-    name: "Bethpage Black",
-    pars: [4, 4, 5, 3, 4, 5, 3, 4, 4, 4, 4, 3, 5, 4, 3, 5, 4, 4]
-  },
-  {
-    name: "Pinehurst No. 2",
-    pars: [4, 3, 4, 5, 4, 4, 3, 4, 5, 4, 3, 5, 4, 4, 3, 4, 5, 4]
-  },
-  {
-    name: "Whistling Straits",
-    pars: [4, 4, 5, 3, 4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 5, 4, 3, 4]
-  },
-  {
-    name: "Royal Melbourne",
-    pars: [4, 3, 5, 4, 4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 3, 4, 4, 5]
-  },
-  {
-    name: "Bandon Dunes",
-    pars: [4, 4, 3, 5, 4, 3, 4, 5, 4, 4, 5, 3, 4, 4, 3, 5, 4, 4]
-  }
-];
+const courses = {
+  "Pebble Beach": [4, 5, 4, 3, 4, 4, 3, 4, 4, 4, 5, 3, 4, 4, 4, 4, 3, 5],
+  "Augusta National": [4, 4, 3, 5, 4, 4, 5, 3, 4, 5, 3, 4, 4, 4, 4, 3, 4, 5],
+  "St. Andrews": [4, 5, 4, 3, 4, 3, 5, 4, 4, 4, 4, 5, 3, 3, 4, 5, 4, 4],
+  "Bethpage Black": [4, 3, 5, 4, 4, 5, 4, 3, 4, 5, 4, 3, 4, 4, 4, 3, 5, 4],
+  "TPC Sawgrass": [4, 5, 4, 3, 4, 4, 3, 4, 4, 4, 3, 5, 4, 4, 4, 3, 4, 5],
+  "Pinehurst No. 2": [4, 3, 4, 4, 5, 4, 3, 4, 4, 5, 4, 4, 3, 4, 4, 5, 3, 4],
+  "Bandon Dunes": [4, 4, 3, 5, 4, 4, 3, 5, 4, 3, 4, 5, 4, 4, 3, 4, 4, 5],
+  "Whistling Straits": [5, 4, 3, 4, 4, 5, 4, 3, 4, 4, 5, 4, 4, 4, 3, 4, 4, 5],
+  "Chambers Bay": [5, 3, 4, 4, 4, 5, 4, 3, 4, 4, 5, 3, 4, 4, 4, 4, 3, 5],
+  "Torrey Pines": [5, 4, 4, 3, 4, 4, 4, 5, 3, 5, 4, 3, 4, 4, 4, 3, 4, 5],
+};
 
 const NUM_HOLES = 18;
 const NUM_PLAYERS = 4;
 
 export default function Scorecard() {
-  const [selectedCourse, setSelectedCourse] = useState(courses[0]);
+  const [selectedCourse, setSelectedCourse] = useState("Pebble Beach");
   const [scores, setScores] = useState(
-    Array.from({ length: NUM_PLAYERS }, () => Array(NUM_HOLES).fill(""))
+    Array(NUM_PLAYERS)
+      .fill()
+      .map(() => Array(NUM_HOLES).fill(""))
   );
-  const [playerNames, setPlayerNames] = useState([
-    "Player 1",
-    "Player 2",
-    "Player 3",
-    "Player 4"
-  ]);
 
   const handleScoreChange = (playerIndex, holeIndex, value) => {
     const newScores = [...scores];
@@ -68,122 +40,109 @@ export default function Scorecard() {
     setScores(newScores);
   };
 
-  const calculateTotal = (playerIndex) => {
-    return scores[playerIndex].reduce((total, score) => {
-      const parsed = parseInt(score);
-      return total + (isNaN(parsed) ? 0 : parsed);
-    }, 0);
+  const calculateTotal = (playerScores) => {
+    return playerScores.reduce((acc, val) => acc + (parseInt(val) || 0), 0);
   };
 
-  const calculateParDiff = (playerIndex) => {
-    let diff = 0;
-    scores[playerIndex].forEach((score, idx) => {
-      const parsed = parseInt(score);
-      if (!isNaN(parsed)) {
-        diff += parsed - selectedCourse.pars[idx];
-      }
-    });
-    return diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : "0";
+  const calculateParDiff = (playerScores) => {
+    const par = courses[selectedCourse];
+    const diff = playerScores.reduce(
+      (acc, val, idx) => acc + ((parseInt(val) || 0) - par[idx]),
+      0
+    );
+    if (diff > 0) return "+" + diff;
+    if (diff < 0) return diff;
+    return "0";
   };
+
+  const par = courses[selectedCourse];
 
   return (
     <Card className="overflow-x-auto">
-      <CardContent>
+      <CardContent className="p-4">
         <div className="mb-4">
-          <Label htmlFor="course">Select Course</Label>
-          <Select
-            onValueChange={(value) => {
-              const course = courses.find((c) => c.name === value);
-              if (course) setSelectedCourse(course);
-            }}
-          >
-            <SelectTrigger className="w-[300px]">
-              <SelectValue placeholder={selectedCourse.name} />
+          <Label className="text-md font-bold">Select Course</Label>
+          <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+            <SelectTrigger className="w-[260px]">
+              <SelectValue placeholder="Select a course" />
             </SelectTrigger>
             <SelectContent>
-              {courses.map((course) => (
-                <SelectItem key={course.name} value={course.name}>
-                  {course.name}
+              {Object.keys(courses).map((course) => (
+                <SelectItem key={course} value={course}>
+                  {course}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="table-auto border-collapse w-full text-sm">
-            <thead>
-              <tr className="bg-gray-300">
-                <th className="p-1 border" rowSpan={2}></th>
-                {Array.from({ length: NUM_HOLES }).map((_, i) => (
-                  <th key={i} className="p-1 border text-center align-middle">
-                    Hole {i + 1}
-                  </th>
-                ))}
-                <th className="p-1 border text-center align-middle" rowSpan={2}>
-                  Total
+        <table className="table-auto border-collapse w-full text-xs md:text-sm">
+          <thead>
+            <tr className="bg-gray-300 text-center">
+              <th className="border px-1 md:px-2">Hole</th>
+              {Array.from({ length: NUM_HOLES }, (_, i) => (
+                <th className="border px-1 md:px-2" key={i}>
+                  {i + 1}
                 </th>
-                <th className="p-1 border text-center align-middle" rowSpan={2}>
-                  +/- Par
-                </th>
-              </tr>
-              <tr className="bg-gray-200">
-                {selectedCourse.pars.map((par, i) => (
-                  <td key={i} className="p-1 border text-center align-middle">
-                    Par {par}
-                  </td>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {scores.map((playerScores, playerIdx) => (
-                <tr key={playerIdx}>
-                  <td className="p-1 border min-w-[90px]">
-                    <Input
-                      value={playerNames[playerIdx]}
-                      onChange={(e) => {
-                        const newNames = [...playerNames];
-                        newNames[playerIdx] = e.target.value;
-                        setPlayerNames(newNames);
-                      }}
-                      className="text-xs w-full"
-                    />
-                  </td>
-                  {playerScores.map((score, holeIdx) => {
-                    const diff =
-                      score === ""
-                        ? ""
-                        : parseInt(score) - selectedCourse.pars[holeIdx];
-                    const borderColor =
-                      diff < 0
-                        ? "border-green-500"
-                        : diff > 0
-                        ? "border-red-500"
-                        : "border-gray-300";
-                    return (
-                      <td key={holeIdx} className={`p-1 border ${borderColor}`}>
-                        <Input
-                          type="number"
-                          value={score}
-                          onChange={(e) =>
-                            handleScoreChange(playerIdx, holeIdx, e.target.value)
-                          }
-                          className="text-center text-xs w-[50px] h-[30px]"
-                        />
-                      </td>
-                    );
-                  })}
-                  <td className="p-1 border text-center text-sm font-bold">
-                    {calculateTotal(playerIdx)}
-                  </td>
-                  <td className="p-1 border text-center text-sm font-bold">
-                    {calculateParDiff(playerIdx)}
-                  </td>
-                </tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+              <th className="border px-1 md:px-2">Total</th>
+              <th className="border px-1 md:px-2">+/–</th>
+            </tr>
+            <tr className="bg-gray-200 text-center">
+              <th className="border px-1 md:px-2">Par</th>
+              {par.map((p, i) => (
+                <td key={i} className="border px-1 md:px-2">
+                  {p}
+                </td>
+              ))}
+              <td className="border px-1 md:px-2 font-bold">
+                {par.reduce((a, b) => a + b, 0)}
+              </td>
+              <td className="border px-1 md:px-2 font-bold">0</td>
+            </tr>
+          </thead>
+          <tbody>
+            {scores.map((playerScores, playerIndex) => (
+              <tr key={playerIndex}>
+                <td className="border px-1 md:px-2">
+                  <Input
+                    type="text"
+                    placeholder={`Player ${playerIndex + 1}`}
+                    className="w-full text-xs"
+                  />
+                </td>
+                {playerScores.map((score, holeIndex) => {
+                  const parValue = par[holeIndex];
+                  const intScore = parseInt(score);
+                  const diff = intScore - parValue;
+                  let className = "border text-center align-middle text-xs md:text-sm";
+                  if (!isNaN(intScore)) {
+                    if (diff < 0) className += " border-b-4 border-green-500";
+                    else if (diff > 0) className += " border-b-4 border-red-500";
+                  }
+                  return (
+                    <td key={holeIndex} className={className}>
+                      <Input
+                        type="number"
+                        value={score}
+                        onChange={(e) =>
+                          handleScoreChange(playerIndex, holeIndex, e.target.value)
+                        }
+                        className="text-center text-xs md:text-sm h-6"
+                      />
+                    </td>
+                  );
+                })}
+                <td className="border px-1 md:px-2 text-center font-bold">
+                  {calculateTotal(playerScores)}
+                </td>
+                <td className="border px-1 md:px-2 text-center font-bold">
+                  {calculateParDiff(playerScores)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </CardContent>
     </Card>
   );
