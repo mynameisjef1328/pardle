@@ -45,7 +45,7 @@
 <body>
   <h2>Wordle Golf Scorecard</h2>
   <label for="course">Choose a course:</label>
-  <select id="course" onchange="renderScorecard()">
+  <select id="course">
     <option value="Pebble Beach">Pebble Beach</option>
     <option value="St. Andrews">St. Andrews</option>
     <option value="Augusta">Augusta</option>
@@ -69,7 +69,7 @@
   </table>
 
   <script>
-    // ✅ Firebase config
+    // ✅ Firebase v8 Config
     const firebaseConfig = {
       apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
       authDomain: "wordle-golf-6c636.firebaseapp.com",
@@ -80,7 +80,7 @@
       databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com"
     };
 
-    // ✅ Initialize Firebase (v8 style)
+    // ✅ Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -109,21 +109,24 @@
         parRow.deleteCell(1);
       }
 
-      // Add holes + total + +/- columns
+      // Add hole par values
       currentPar.forEach(par => {
         const cell = parRow.insertCell();
         cell.textContent = par;
       });
-      parRow.insertCell().textContent = currentPar.reduce((a,b)=>a+b, 0); // Total
-      parRow.insertCell().textContent = "E"; // +/-
+
+      // Add Total and +/- placeholders
+      parRow.insertCell().textContent = currentPar.reduce((a, b) => a + b, 0);
+      parRow.insertCell().textContent = "E";
 
       loadScores();
     }
 
     function loadScores() {
-      db.ref(`games/${gameId}`).once("value").then(snapshot => {
+      db.ref(`games/${gameId}`).once("value", snapshot => {
         const gameData = snapshot.val();
-        // Remove all rows except par row
+
+        // Clear all rows except par row
         while (tableBody.rows.length > 1) {
           tableBody.deleteRow(1);
         }
@@ -142,9 +145,6 @@
       const row = tableBody.insertRow();
       const nameCell = row.insertCell();
       nameCell.textContent = playerName;
-
-      let total = 0;
-      let parTotal = currentPar.reduce((a,b)=>a+b, 0);
 
       for (let i = 0; i < 18; i++) {
         const cell = row.insertCell();
