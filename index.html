@@ -4,13 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wordle Golf Scorecard</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f9f9f9;
       padding: 20px;
+    }
+    h2 {
+      margin-bottom: 10px;
     }
     table {
       border-collapse: collapse;
@@ -25,24 +28,31 @@
       background-color: #999;
       color: white;
     }
-    .under-par { background-color: lightgreen; }
-    .over-par { background-color: lightcoral; }
-    .even-par { background-color: white; }
-    input[type="number"], input[type="text"] {
-      width: 50px;
-      text-align: center;
+    .under-par {
+      background-color: lightgreen;
     }
-    input[type="text"] {
-      width: 100px;
+    .over-par {
+      background-color: lightcoral;
+    }
+    .even-par {
+      background-color: white;
+    }
+    input[type="number"] {
+      width: 50px;
     }
   </style>
 </head>
 <body>
   <h2>Wordle Golf Scorecard</h2>
-  <label for="courseSelect">Choose a course:</label>
-  <select id="courseSelect"></select>
+  <label for="course">Choose a course:</label>
+  <select id="course" onchange="renderScorecard()">
+    <option value="Pebble Beach">Pebble Beach</option>
+    <option value="St. Andrews">St. Andrews</option>
+    <option value="Augusta">Augusta</option>
+  </select>
 
-  <table>
+  <br><br>
+  <table id="scorecard">
     <thead>
       <tr>
         <th>Player</th>
@@ -50,172 +60,142 @@
         <th>Total</th>
         <th>+/-</th>
       </tr>
-      <tr id="holeNumbers">
-        <th></th>
-      </tr>
-      <tr id="parRow"><th>Par</th></tr>
     </thead>
-    <tbody id="playerRows"></tbody>
+    <tbody>
+      <tr>
+        <td>Par</td>
+      </tr>
+    </tbody>
   </table>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
-      authDomain: "wordle-golf-6c636.firebaseapp.com",
-      projectId: "wordle-golf-6c636",
-      storageBucket: "wordle-golf-6c636.appspot.com",
-      messagingSenderId: "67210425687",
-      appId: "1:67210425687:web:2c16b0539fcd52ca4d7d92",
-      databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com/"
+    // 🔥 YOUR FIREBASE CONFIG HERE:
+    var firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
-    if (!window.location.search.includes("gameId")) {
-      const newUrl = `${window.location.pathname}?gameId=${gameId}`;
-      window.history.replaceState(null, "", newUrl);
-    }
-
     const courses = {
-      'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
-      'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
-      'Augusta':      [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3]
+      "Pebble Beach": [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5],
+      "St. Andrews": [4,5,4,5,4,4,3,4,4,4,4,3,4,4,5,4,3,4],
+      "Augusta": [5,3,4,3,4,4,5,3,4,4,5,3,4,4,4,3,4,5]
     };
 
-    let currentPar = courses['Pebble Beach'];
-
-    function updateParRow(parValues) {
-      const parRow = document.getElementById('parRow');
-      parRow.innerHTML = '<th>Par</th>';
-      parValues.forEach(par => {
-        const th = document.createElement('th');
-        th.textContent = par;
-        parRow.appendChild(th);
-      });
-      parRow.innerHTML += '<th></th><th></th>';
+    const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
+    if (!window.location.search.includes("gameId")) {
+      window.location.search = `?gameId=${gameId}`;
     }
 
-    function updateHoleNumbers() {
-      const holeRow = document.getElementById('holeNumbers');
-      holeRow.innerHTML = '<th></th>';
-      for (let i = 1; i <= 18; i++) {
-        const th = document.createElement('th');
-        th.textContent = i;
-        holeRow.appendChild(th);
+    const courseSelect = document.getElementById("course");
+    const tableBody = document.querySelector("#scorecard tbody");
+    let currentPar = courses[courseSelect.value];
+
+    function renderScorecard() {
+      const selected = courseSelect.value;
+      currentPar = courses[selected];
+      const parRow = tableBody.rows[0];
+
+      // Clear old par row cells
+      while (parRow.cells.length > 1) {
+        parRow.deleteCell(1);
       }
-      holeRow.innerHTML += '<th></th><th></th>';
+
+      // Add holes + total + +/- columns
+      currentPar.forEach(par => {
+        const cell = parRow.insertCell();
+        cell.textContent = par;
+      });
+      parRow.insertCell().textContent = currentPar.reduce((a,b)=>a+b, 0); // Total
+      parRow.insertCell().textContent = "E"; // +/-
+
+      loadScores();
     }
 
-    function buildPlayerRow(playerId, data = {}) {
-      const row = document.createElement('tr');
-      const nameCell = document.createElement('td');
-      const nameInput = document.createElement('input');
-      nameInput.type = 'text';
-      nameInput.value = data.name || `Player ${playerId + 1}`;
-      nameInput.onchange = () => saveData();
-      nameCell.appendChild(nameInput);
-      row.appendChild(nameCell);
+    function loadScores() {
+      db.ref(`games/${gameId}`).once("value", snapshot => {
+        const gameData = snapshot.val();
+        // Remove all rows except par row
+        while (tableBody.rows.length > 1) {
+          tableBody.deleteRow(1);
+        }
+
+        if (gameData) {
+          Object.entries(gameData).forEach(([player, scores]) => {
+            addPlayerRow(player, scores);
+          });
+        } else {
+          addPlayerRow("Player 1");
+        }
+      });
+    }
+
+    function addPlayerRow(playerName, existingScores = []) {
+      const row = tableBody.insertRow();
+      const nameCell = row.insertCell();
+      nameCell.textContent = playerName;
+
+      let total = 0;
+      let parTotal = currentPar.reduce((a,b)=>a+b, 0);
 
       for (let i = 0; i < 18; i++) {
-        const cell = document.createElement('td');
-        const input = document.createElement('input');
-        input.type = 'number';
+        const cell = row.insertCell();
+        const input = document.createElement("input");
+        input.type = "number";
         input.min = 1;
-        input.value = data.scores?.[i] || '';
-        input.oninput = () => {
-          calculate(row);
-          saveData();
+        input.max = 10;
+        input.value = existingScores[i] || "";
+        input.onchange = () => {
+          saveScores();
+          updateRowStats(row);
         };
         cell.appendChild(input);
-        row.appendChild(cell);
       }
 
-      const totalCell = document.createElement('td');
-      totalCell.className = 'total';
-      totalCell.textContent = '0';
-      row.appendChild(totalCell);
+      row.insertCell().textContent = ""; // Total
+      row.insertCell().textContent = ""; // +/-
 
-      const diffCell = document.createElement('td');
-      diffCell.className = 'diff';
-      diffCell.textContent = '0';
-      row.appendChild(diffCell);
-
-      document.getElementById('playerRows').appendChild(row);
-      calculate(row);
+      updateRowStats(row);
     }
 
-    function calculate(row) {
-      const inputs = row.querySelectorAll('input[type="number"]');
-      let total = 0;
-      let parTotal = 0;
-
-      inputs.forEach((input, index) => {
+    function updateRowStats(row) {
+      let sum = 0;
+      const inputs = Array.from(row.querySelectorAll("input"));
+      inputs.forEach((input, idx) => {
         const val = parseInt(input.value);
-        const par = currentPar[index];
-        const cell = input.parentElement;
-        cell.className = '';
         if (!isNaN(val)) {
-          total += val;
-          parTotal += par;
-          if (val < par) cell.className = 'under-par';
-          else if (val > par) cell.className = 'over-par';
-          else cell.className = 'even-par';
+          sum += val;
         }
       });
 
-      row.querySelector('.total').textContent = total || '0';
-      row.querySelector('.diff').textContent = total ? (total - parTotal) : '0';
+      row.cells[19].textContent = sum;
+      const diff = sum - currentPar.reduce((a,b)=>a+b, 0);
+      row.cells[20].textContent = diff === 0 ? "E" : (diff > 0 ? `+${diff}` : diff);
     }
 
-    function saveData() {
-      const players = [];
-      document.querySelectorAll('tbody tr').forEach(row => {
-        const name = row.querySelector('input[type="text"]').value;
-        const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(input => parseInt(input.value) || '');
-        players.push({ name, scores });
-      });
-      db.ref('games/' + gameId).set({ course: document.getElementById('courseSelect').value, players });
+    function saveScores() {
+      const players = {};
+      for (let i = 1; i < tableBody.rows.length; i++) {
+        const row = tableBody.rows[i];
+        const name = row.cells[0].textContent;
+        const scores = Array.from(row.querySelectorAll("input")).map(input => parseInt(input.value) || 0);
+        players[name] = scores;
+      }
+      db.ref(`games/${gameId}`).set(players);
     }
 
-    function loadData() {
-      db.ref('games/' + gameId).once('value').then(snapshot => {
-        const data = snapshot.val();
-        const selectedCourse = data?.course || 'Pebble Beach';
-        document.getElementById('courseSelect').value = selectedCourse;
-        currentPar = courses[selectedCourse];
-
-        updateParRow(currentPar);
-        updateHoleNumbers();
-
-        const tbody = document.getElementById('playerRows');
-        tbody.innerHTML = '';
-
-        const players = data?.players || Array(4).fill(null).map((_, i) => ({ name: `Player ${i + 1}`, scores: [] }));
-        players.forEach((player, i) => buildPlayerRow(i, player));
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const courseSelect = document.getElementById('courseSelect');
-      Object.keys(courses).forEach(course => {
-        const option = document.createElement('option');
-        option.value = course;
-        option.textContent = course;
-        courseSelect.appendChild(option);
-      });
-
-      courseSelect.onchange = () => {
-        currentPar = courses[courseSelect.value];
-        updateParRow(currentPar);
-        updateHoleNumbers();
-        saveData();
-      };
-
-      updateHoleNumbers();
-      loadData();
+    courseSelect.addEventListener("change", () => {
+      renderScorecard();
+      saveScores();
     });
+
+    renderScorecard();
   </script>
 </body>
 </html>
