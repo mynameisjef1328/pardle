@@ -25,13 +25,13 @@
       color: white;
     }
     .under-par {
-      border: 2px solid green;
+      background-color: lightgreen;
     }
     .over-par {
-      border: 2px solid red;
+      background-color: lightcoral;
     }
     .even-par {
-      border: 2px solid white;
+      background-color: white;
     }
     input[type="number"] {
       width: 50px;
@@ -53,6 +53,7 @@
       <tr>
         <th>Player</th>
         <th colspan="18">Hole</th>
+        <th>Par</th>
         <th>Total</th>
         <th>+/-</th>
       </tr>
@@ -65,6 +66,7 @@
         </script>
         <th></th>
         <th></th>
+        <th></th>
       </tr>
       <tr id="parRow">
         <th>Par</th>
@@ -73,14 +75,14 @@
     <tbody>
       <script>
         const courses = {
-          'Pebble Par': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
-          'St. Gridrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
+          'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
+          'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
           'August Alphabet': [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
-          'Pine Wordley':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
-          'Torrey Tiles': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
-          'TPC Solvergrass': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
-          'Bethpage Board': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
-          'Whistling Wordles': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
+          'Pine Valley':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
+          'Torrey Pines': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
+          'TPC Sawgrass': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
+          'Bethpage Black': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
+          'Whistling Words': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
           'Kiawah Clues': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
           'Bully Big Words': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
         };
@@ -97,12 +99,18 @@
 
         function updateParRow(parValues) {
           parRow.innerHTML = '<th>Par</th>';
+          let totalPar = 0;
           parValues.forEach(par => {
+            totalPar += par;
             const th = document.createElement('th');
             th.textContent = par;
             parRow.appendChild(th);
           });
-          parRow.innerHTML += '<th></th><th></th>';
+          const totalParCell = document.createElement('th');
+          totalParCell.textContent = totalPar;
+          parRow.appendChild(totalParCell);
+
+          parRow.innerHTML += '<th></th>';
         }
 
         function buildPlayerRow(name = '') {
@@ -125,6 +133,10 @@
             cell.appendChild(input);
             row.appendChild(cell);
           }
+
+          const parCell = document.createElement('td');
+          parCell.textContent = '';
+          row.appendChild(parCell);
 
           const totalCell = document.createElement('td');
           totalCell.className = 'total';
@@ -159,8 +171,8 @@
           });
 
           row.querySelector('.total').textContent = total || '0';
-          const diff = total ? (total - parTotal) : 0;
-          row.querySelector('.diff').textContent = diff > 0 ? `+${diff}` : (diff < 0 ? `${diff}` : '0');
+          const diff = total ? total - parTotal : 0;
+          row.querySelector('.diff').textContent = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '0';
         }
 
         const tbody = document.querySelector('tbody');
