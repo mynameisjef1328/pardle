@@ -218,6 +218,10 @@
           button.style.display = input.value ? "inline-block" : "none";
         });
 
+        if (existingScores[i]) {
+          button.style.display = "none"; // Already submitted scores hide button
+        }
+
         cell.appendChild(input);
         cell.appendChild(document.createElement("br"));
         cell.appendChild(button);
