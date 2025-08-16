@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bully Wordle - Wordle Golf by Jef</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f8ff;
+      color: #333;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 0;
+    }
+    p {
+      max-width: 600px;
+      margin: 10px auto;
+    }
+    select, input[type="text"], button {
+      font-size: 1em;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #results {
+      margin-top: 30px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏌️‍♂️ Bully Wordle - Wordle Golf by Jef</h1>
+  <p><strong>Scoring Rules:</strong><br>Lower score = better! Guess it in 1 try (hole-in-one) = 1 stroke. Each additional guess adds a stroke. 6 guesses = max score of 6. Didn't solve? That's a 7. Try to stay under par, legend.</p>
+  
+  <p>Select your course and enter your Wordle scores for each hole. Format: use a single digit for each hole (e.g., 324235 for 6 holes)</p>
+
+  <label for="course">Choose your course:</label>
+  <select id="course">
+    <option value="bully">Bully Pulpit (ND)</option>
+    <option value="pebble">Pebble Beach (CA)</option>
+    <option value="pinehurst">Pinehurst No. 2 (NC)</option>
+    <option value="st-andrews">St Andrews (Scotland)</option>
+  </select><br>
+
+  <label for="scores">Enter your Wordle scores:</label>
+  <input type="text" id="scores" placeholder="e.g., 324235"><br>
+
+  <button onclick="calculateScore()">Submit</button>
+
+  <div id="results"></div>
+
+  <script>
+    function calculateScore() {
+      const raw = document.getElementById("scores").value.trim();
+      const course = document.getElementById("course").value;
+      const resultsDiv = document.getElementById("results");
+
+      if (!/^[1-7]+$/.test(raw)) {
+        resultsDiv.innerHTML = "Please enter only digits 1–7 (no spaces or letters).";
+        return;
+      }
+
+      const strokes = raw.split('').map(Number);
+      const total = strokes.reduce((a, b) => a + b, 0);
+      const holes = strokes.length;
+
+      let par = 0;
+      if (holes === 6) par = 21;
+      else if (holes === 9) par = 32;
+      else if (holes === 18) par = 72;
+      else par = holes * 3.5;
+
+      const diff = total - par;
+      let scoreText = diff === 0 ? "Even par" : (diff > 0 ? `+${diff}` : `${diff}`);
+
+      resultsDiv.innerHTML = `
+        <p>You played <strong>${holes}</strong> holes at <strong>${getCourseName(course)}</strong>.</p>
+        <p>Total strokes: <strong>${total}</strong></p>
+        <p>Course par: <strong>${par}</strong></p>
+        <p>Your score: <strong>${scoreText}</strong></p>
+      `;
+    }
+
+    function getCourseName(val) {
+      switch(val) {
+        case "bully": return "Bully Pulpit (ND)";
+        case "pebble": return "Pebble Beach (CA)";
+        case "pinehurst": return "Pinehurst No. 2 (NC)";
+        case "st-andrews": return "St Andrews (Scotland)";
+        default: return "Unknown";
+      }
+    }
+  </script>
+</body>
+</html>
