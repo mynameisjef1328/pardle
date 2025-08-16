@@ -1,182 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wordle Golf Scorecard</title>
+  <meta charset="UTF-8">
+  <title>Golf Scorecard</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f9f9f9;
+      font-family: sans-serif;
     }
     table {
       border-collapse: collapse;
       width: 100%;
+      margin-top: 20px;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
       text-align: center;
+      padding: 8px;
     }
     th {
-      background-color: #999;
-      color: white;
+      background-color: #ddd;
     }
-    .under-par {
-      background-color: lightgreen;
+    .green-border {
+      border-bottom: 3px solid green;
     }
-    .over-par {
-      background-color: lightcoral;
+    .red-border {
+      border-bottom: 3px solid red;
     }
-    .even-par {
-      background-color: white;
-    }
-    input[type="number"] {
-      width: 50px;
-    }
-    input[type="text"] {
-      width: 100px;
+    .white-border {
+      border-bottom: 3px solid gray;
     }
   </style>
 </head>
 <body>
-  <h2>Wordle Golf Scorecard</h2>
 
-  <label for="courseSelect">Choose a course:</label>
-  <select id="courseSelect"></select>
+  <label for="course">Select Course: </label>
+  <select id="course">
+    <option value="course1">Course 1</option>
+    <option value="course2">Course 2</option>
+    <option value="course3">Course 3</option>
+    <option value="course4">Course 4</option>
+    <option value="course5">Course 5</option>
+    <option value="course6">Course 6</option>
+    <option value="course7">Course 7</option>
+    <option value="course8">Course 8</option>
+    <option value="course9">Course 9</option>
+    <option value="course10">Course 10</option>
+  </select>
 
-  <table id="scorecard">
-    <thead>
-      <tr>
-        <th>Player</th>
-        <th colspan="18">Hole</th>
-        <th>Total</th>
-        <th>+/-</th>
-      </tr>
-      <tr>
-        <th></th>
-        <script>
-          for (let i = 1; i <= 18; i++) {
-            document.write(`<th>${i}</th>`);
+  <table id="scorecard"></table>
+
+  <script>
+    const parLayouts = {
+      course1: [4,4,3,5,4,3,4,5,4,4,3,5,4,4,3,4,5,4],
+      course2: [3,4,4,4,5,3,4,4,5,4,3,4,5,4,4,3,4,5],
+      course3: [4,5,3,4,4,3,5,4,4,3,4,5,4,3,4,5,4,4],
+      course4: [5,4,4,3,4,5,4,3,4,4,5,4,4,3,4,5,3,4],
+      course5: [4,3,5,4,4,5,3,4,4,3,4,5,3,4,4,5,4,4],
+      course6: [4,4,5,3,4,3,4,4,5,3,4,4,5,4,3,5,4,4],
+      course7: [3,5,4,4,3,4,5,4,4,5,3,4,4,4,3,5,4,4],
+      course8: [5,3,4,4,4,3,4,5,4,3,4,4,5,4,3,4,4,5],
+      course9: [4,3,5,4,5,4,3,4,4,5,4,3,4,4,5,3,4,4],
+      course10:[3,4,4,4,5,4,3,5,4,4,4,3,4,4,5,3,4,5]
+    };
+
+    const table = document.getElementById("scorecard");
+    const select = document.getElementById("course");
+
+    function renderTable(pars) {
+      table.innerHTML = "";
+      
+      // Hole numbers row
+      const holeRow = document.createElement("tr");
+      holeRow.innerHTML = "<th>Hole</th>" + pars.map((_, i) => `<th>${i+1}</th>`).join('') + '<th>Total</th><th>+/-</th>';
+      table.appendChild(holeRow);
+
+      // Par row
+      const parRow = document.createElement("tr");
+      parRow.innerHTML = `<th>Par</th>` + pars.map(p => `<td>${p}</td>`).join('') + `<td>${pars.reduce((a,b)=>a+b)}</td><td>0</td>`;
+      table.appendChild(parRow);
+
+      // Player rows
+      for (let i = 0; i < 4; i++) {
+        const tr = document.createElement("tr");
+        const nameCell = document.createElement("td");
+        const nameInput = document.createElement("input");
+        nameInput.value = `Player ${i+1}`;
+        nameInput.style.width = "100%";
+        nameCell.appendChild(nameInput);
+        tr.appendChild(nameCell);
+
+        for (let j = 0; j < 18; j++) {
+          const td = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = "number";
+          input.style.width = "40px";
+          input.addEventListener("input", () => updateScores());
+          td.appendChild(input);
+          tr.appendChild(td);
+        }
+
+        const totalCell = document.createElement("td");
+        totalCell.className = "total";
+        tr.appendChild(totalCell);
+
+        const diffCell = document.createElement("td");
+        diffCell.className = "diff";
+        tr.appendChild(diffCell);
+
+        table.appendChild(tr);
+      }
+    }
+
+    function updateScores() {
+      const rows = Array.from(table.rows).slice(2); // skip hole + par rows
+      const pars = parLayouts[select.value];
+      rows.forEach(row => {
+        const inputs = Array.from(row.cells).slice(1, 19).map(cell => cell.firstChild);
+        let sum = 0;
+        let diff = 0;
+        inputs.forEach((input, i) => {
+          const val = parseInt(input.value);
+          const cell = input.parentElement;
+          if (!isNaN(val)) {
+            sum += val;
+            const holeDiff = val - pars[i];
+            diff += holeDiff;
+            cell.className = holeDiff < 0 ? "green-border" : holeDiff > 0 ? "red-border" : "white-border";
+          } else {
+            cell.className = "white-border";
           }
-        </script>
-        <th></th>
-        <th></th>
-      </tr>
-      <tr id="parRow">
-        <th>Par</th>
-      </tr>
-    </thead>
-    <tbody>
-      <script>
-        const courses = {
-          'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
-          'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
-          'Augusta':      [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
-          'Pine Valley':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
-          'Torrey Pines': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
-          'TPC Sawgrass': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
-          'Bethpage Black': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
-          'Whistling Straits': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
-          'Kiawah Island': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
-          'Bandon Dunes': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
-        };
-
-        const parRow = document.getElementById('parRow');
-        const courseSelect = document.getElementById('courseSelect');
-
-        Object.keys(courses).forEach(course => {
-          const option = document.createElement('option');
-          option.value = course;
-          option.textContent = course;
-          courseSelect.appendChild(option);
         });
+        row.querySelector(".total").textContent = sum || "";
+        const diffCell = row.querySelector(".diff");
+        diffCell.textContent = diff === 0 ? "E" : diff > 0 ? "+" + diff : diff;
+      });
+    }
 
-        function updateParRow(parValues) {
-          parRow.innerHTML = '<th>Par</th>';
-          parValues.forEach(par => {
-            const th = document.createElement('th');
-            th.textContent = par;
-            parRow.appendChild(th);
-          });
-          parRow.innerHTML += '<th></th><th></th>';
-        }
+    select.addEventListener("change", () => {
+      renderTable(parLayouts[select.value]);
+      updateScores();
+    });
 
-        function buildPlayerRow(name = '') {
-          const row = document.createElement('tr');
-
-          const nameCell = document.createElement('td');
-          const nameInput = document.createElement('input');
-          nameInput.type = 'text';
-          nameInput.value = name;
-          nameCell.appendChild(nameInput);
-          row.appendChild(nameCell);
-
-          for (let i = 0; i < 18; i++) {
-            const cell = document.createElement('td');
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.min = 1;
-            input.addEventListener('input', () => calculate(row));
-            cell.appendChild(input);
-            row.appendChild(cell);
-          }
-
-          const totalCell = document.createElement('td');
-          totalCell.className = 'total';
-          totalCell.textContent = '0';
-          row.appendChild(totalCell);
-
-          const diffCell = document.createElement('td');
-          diffCell.className = 'diff';
-          diffCell.textContent = '0';
-          row.appendChild(diffCell);
-
-          return row;
-        }
-
-        function calculate(row) {
-          const inputs = row.querySelectorAll('input[type="number"]');
-          let total = 0;
-          let parTotal = 0;
-
-          inputs.forEach((input, index) => {
-            const val = parseInt(input.value);
-            const par = currentPar[index];
-            const cell = input.parentElement;
-            cell.className = '';
-            if (!isNaN(val)) {
-              total += val;
-              parTotal += par;
-              if (val < par) cell.className = 'under-par';
-              else if (val > par) cell.className = 'over-par';
-              else cell.className = 'even-par';
-            }
-          });
-
-          row.querySelector('.total').textContent = total || '0';
-          row.querySelector('.diff').textContent = total ? (total - parTotal) : '0';
-        }
-
-        const tbody = document.querySelector('tbody');
-        let currentPar = courses[courseSelect.value];
-
-        function loadScorecard(courseName) {
-          tbody.innerHTML = '';
-          currentPar = courses[courseName];
-          updateParRow(currentPar);
-          for (let i = 1; i <= 4; i++) {
-            const row = buildPlayerRow(`Player ${i}`);
-            tbody.appendChild(row);
-          }
-        }
-
-        courseSelect.addEventListener('change', (e) => loadScorecard(e.target.value));
-
-        loadScorecard(courseSelect.value);
-      </script>
-    </tbody>
-  </table>
+    renderTable(parLayouts[select.value]);
+  </script>
 </body>
 </html>
