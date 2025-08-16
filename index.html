@@ -75,7 +75,9 @@
     <thead>
       <tr>
         <th>Player</th>
-        ${Array.from({ length: 18 }, (_, i) => `<th>H${i+1}</th>`).join('')}
+        <th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>H5</th><th>H6</th>
+        <th>H7</th><th>H8</th><th>H9</th><th>H10</th><th>H11</th><th>H12</th>
+        <th>H13</th><th>H14</th><th>H15</th><th>H16</th><th>H17</th><th>H18</th>
         <th>Total</th>
         <th>+/-</th>
       </tr>
@@ -128,6 +130,15 @@
 
           const submitBtn = document.createElement("button");
           submitBtn.textContent = "✔";
+          submitBtn.style.display = "none";
+
+          const showCheck = () => {
+            submitBtn.style.display = "inline";
+          };
+
+          input.addEventListener("input", showCheck);
+          commentBox.addEventListener("input", showCheck);
+
           submitBtn.onclick = () => {
             const s = parseInt(input.value);
             const c = commentBox.value;
@@ -135,10 +146,6 @@
             db.ref(`games/${gameId}/${player}/comments/${i}`).set(c);
             submitBtn.style.display = "none";
           };
-
-          input.addEventListener("input", () => {
-            submitBtn.style.display = "inline";
-          });
 
           cell.appendChild(input);
           cell.appendChild(document.createElement("br"));
