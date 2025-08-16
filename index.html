@@ -2,32 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wordle Golf by Jef</title>
+  <title>Bully Wordle – Wordle Golf Scorecard</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #eef3f7;
-      color: #333;
       text-align: center;
+      background-color: #f5faff;
       padding: 20px;
     }
-    h1 {
-      font-size: 2em;
-      margin-bottom: 10px;
-    }
-    .instructions {
-      font-size: 0.9em;
-      margin-bottom: 20px;
-    }
-    select, input {
-      padding: 8px;
-      margin: 10px;
-      font-size: 1em;
-    }
     table {
+      margin: 0 auto;
       border-collapse: collapse;
-      margin: 0 auto 30px;
     }
     th, td {
       border: 1px solid #ccc;
@@ -35,116 +20,156 @@
       text-align: center;
       min-width: 30px;
     }
-    th {
-      background-color: #ddd;
-    }
     .under-par {
-      background-color: #c8f7c5;
-    }
-    .par {
-      background-color: #fff;
+      background-color: lightgreen;
     }
     .over-par {
-      background-color: #f7c5c5;
+      background-color: #f88;
+    }
+    .par {
+      background-color: white;
+    }
+    input[type="number"] {
+      width: 40px;
+    }
+    input[type="text"] {
+      width: 100px;
     }
   </style>
 </head>
 <body>
-  <h1>⛳ Bully Wordle - Wordle Golf by Jef</h1>
-  <div class="instructions">
-    <strong>Scoring Rules:</strong><br>
-    Guess it in 1 = hole-in-one (1 stroke). Each extra guess = +1 stroke.<br>
-    Max 6 guesses = 6. Didn’t solve = 7.<br>
-    Enter a single digit per hole (e.g., 324235 for 6 holes). Lower = better!
-  </div>
+  <h1>⛳ Bully Wordle – Wordle Golf by Jef</h1>
+  <p><strong>Scoring Rules:</strong> Each hole has a different par (3, 4, or 5).<br>
+  Green = under par, white = par, red = over par. Type your score (1–6) or 7 for a missed day.</p>
 
   <label for="course">Choose your course: </label>
-  <select id="course">
-    <option>Bully Pulpit (ND)</option>
-    <option>Bandon Dunes (OR)</option>
-    <option>Pinehurst No. 2 (NC)</option>
-    <option>Sand Hills (NE)</option>
-    <option>Streamsong Red (FL)</option>
-    <option>Pacific Dunes (OR)</option>
-    <option>Whistling Straits (WI)</option>
-    <option>Chambers Bay (WA)</option>
-    <option>Kiawah Ocean Course (SC)</option>
-    <option>Erin Hills (WI)</option>
+  <select id="course" onchange="setPar()">
+    <option value="bully">Bully Pulpit (ND)</option>
+    <option value="whistling">Whistling Wordle</option>
+    <option value="augusta">Augusta Alphabet</option>
+    <option value="pebble">Pebble Picks</option>
+    <option value="tpc">TPC Tiles</option>
+    <option value="pinehurst">Pinehurst Puzzlers</option>
+    <option value="sawgrass">Sawgrass Syllables</option>
+    <option value="cypress">Cypress Codes</option>
+    <option value="torrey">Torrey Texts</option>
+    <option value="firestone">Firestone Five</option>
   </select>
 
-  <table>
+  <br><br>
+  <table id="scorecard">
     <thead>
       <tr>
-        <th>Player</th>
+        <th>Name</th>
         <th colspan="18">Hole</th>
         <th>Total</th>
-        <th>± Par</th>
+        <th>Par Diff</th>
       </tr>
       <tr>
-        <th></th>
-        <script>
-          for (let i = 1; i <= 18; i++) {
-            document.write(`<th>${i}</th>`);
-          }
-        </script>
-        <th></th>
-        <th></th>
+        <td></td>
+        <td colspan="18" id="hole-numbers"></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td colspan="18" id="par-row"></td>
+        <td></td>
+        <td></td>
       </tr>
     </thead>
     <tbody>
       <script>
-        const PAR = 4;
-        const PLAYERS = 4;
+        const players = 4;
+        const holes = 18;
+        const coursePars = {
+          bully: [4,5,3,4,4,3,5,4,4,4,4,5,3,4,4,3,4,5],
+          whistling: [3,4,5,4,4,4,3,5,4,4,3,4,5,4,3,4,4,5],
+          augusta: [4,4,3,5,4,4,3,4,5,4,4,5,4,3,4,3,4,5],
+          pebble: [4,3,4,5,3,4,4,5,4,3,4,5,4,4,3,4,5,4],
+          tpc: [4,5,3,4,4,5,4,3,4,5,3,4,5,4,3,4,4,5],
+          pinehurst: [3,4,5,4,3,4,4,4,5,3,4,5,4,4,3,4,5,4],
+          sawgrass: [4,4,3,5,4,3,5,4,4,3,5,4,3,5,4,4,3,4],
+          cypress: [5,4,3,4,4,5,3,4,4,5,4,3,5,3,4,4,4,5],
+          torrey: [4,3,4,4,5,3,4,4,5,4,3,5,4,4,3,4,5,4],
+          firestone: [4,5,3,4,4,4,3,5,4,4,5,4,3,4,4,3,4,5]
+        };
 
-        for (let row = 0; row < PLAYERS; row++) {
-          document.write(`<tr>`);
-          document.write(`<td><input type="text" value="Player ${row + 1}" /></td>`);
+        const table = document.getElementById('scorecard');
+        const holeNumbersRow = document.getElementById('hole-numbers');
+        const parRow = document.getElementById('par-row');
 
-          for (let col = 0; col < 18; col++) {
-            document.write(`<td><input type="number" min="1" max="7" class="score" data-row="${row}" data-col="${col}" style="width: 2em;" /></td>`);
+        for (let i = 1; i <= holes; i++) {
+          holeNumbersRow.innerHTML += `<th>${i}</th>`;
+          parRow.innerHTML += `<th id="par-${i}"></th>`;
+        }
+
+        for (let p = 0; p < players; p++) {
+          const row = table.insertRow();
+          const nameCell = row.insertCell();
+          nameCell.innerHTML = `<input type="text" placeholder="Player" />`;
+          nameCell.style.fontWeight = "bold";
+
+          let scoreInputs = [];
+          for (let h = 0; h < holes; h++) {
+            const cell = row.insertCell();
+            const input = document.createElement("input");
+            input.type = "number";
+            input.min = 1;
+            input.max = 7;
+            input.addEventListener("input", updateScores);
+            cell.appendChild(input);
+            scoreInputs.push(input);
           }
 
-          document.write(`<td id="total-${row}">0</td>`);
-          document.write(`<td id="par-diff-${row}">E</td>`);
-          document.write(`</tr>`);
+          const totalCell = row.insertCell();
+          const diffCell = row.insertCell();
+
+          row.dataset.inputs = JSON.stringify(scoreInputs.map(i => i.outerHTML));
+          row.dataset.totalCell = totalCell;
+          row.dataset.diffCell = diffCell;
         }
+
+        function setPar() {
+          const course = document.getElementById("course").value;
+          const parList = coursePars[course];
+          for (let i = 1; i <= holes; i++) {
+            document.getElementById(`par-${i}`).innerText = parList[i - 1];
+          }
+          updateScores();
+        }
+
+        function updateScores() {
+          const course = document.getElementById("course").value;
+          const parList = coursePars[course];
+          for (let i = 3; i < table.rows.length; i++) {
+            const row = table.rows[i];
+            let total = 0;
+            let diff = 0;
+            for (let h = 0; h < holes; h++) {
+              const cell = row.cells[h + 1];
+              const input = cell.firstChild;
+              const score = parseInt(input.value);
+              const par = parList[h];
+              if (!isNaN(score)) {
+                total += score;
+                const comparison = score - par;
+                if (comparison < 0) cell.className = 'under-par';
+                else if (comparison > 0) cell.className = 'over-par';
+                else cell.className = 'par';
+                diff += comparison;
+              } else {
+                cell.className = '';
+              }
+            }
+            row.cells[holes + 1].innerText = total;
+            row.cells[holes + 2].innerText = diff > 0 ? "+" + diff : diff;
+          }
+        }
+
+        setPar();
       </script>
     </tbody>
   </table>
-
-  <script>
-    const inputs = document.querySelectorAll('.score');
-
-    function updateScores() {
-      for (let r = 0; r < 4; r++) {
-        let total = 0;
-        for (let c = 0; c < 18; c++) {
-          const input = document.querySelector(`input[data-row="${r}"][data-col="${c}"]`);
-          const val = parseInt(input.value);
-
-          if (!isNaN(val)) total += val;
-        }
-        document.getElementById(`total-${r}`).textContent = total;
-
-        const diff = total - (18 * PAR);
-        const parCell = document.getElementById(`par-diff-${r}`);
-        parCell.textContent = (diff > 0 ? `+${diff}` : diff === 0 ? "E" : diff);
-      }
-
-      // color-code inputs
-      inputs.forEach(input => {
-        const val = parseInt(input.value);
-        if (isNaN(val)) {
-          input.className = '';
-          return;
-        }
-        if (val < PAR) input.className = 'under-par';
-        else if (val === PAR) input.className = 'par';
-        else input.className = 'over-par';
-      });
-    }
-
-    inputs.forEach(input => input.addEventListener('input', updateScores));
-  </script>
 </body>
 </html>
