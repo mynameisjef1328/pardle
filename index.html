@@ -72,15 +72,12 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    if (!window.location.search.includes("gameId")) {
+    // Generate or get gameId from URL
+const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
+if (!window.location.search.includes("gameId")) {
   const newUrl = `${window.location.pathname}?gameId=${gameId}`;
   window.history.replaceState(null, "", newUrl);
 }
-
-    const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
-    if (!window.location.search.includes("gameId")) {
-      window.location.search = `?gameId=${gameId}`;
-    }
 
     const courses = {
       'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
