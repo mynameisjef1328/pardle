@@ -3,126 +3,136 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bully Wordle Golf</title>
+  <title>Wordle Golf Scorecard</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f0f6fc;
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f3f3f3;
     }
     table {
       border-collapse: collapse;
-      margin: 20px auto;
+      width: 100%;
+      background: white;
+      margin-top: 20px;
     }
     th, td {
-      border: 1px solid #888;
+      border: 1px solid #ccc;
       padding: 6px;
       text-align: center;
     }
-    .header {
-      background-color: #d0d7de;
+    th {
+      background-color: #666;
+      color: white;
+    }
+    .par-row td {
+      background-color: #ddd;
       font-weight: bold;
     }
-    .par {
-      background-color: #f3f4f6;
-      font-style: italic;
+    input[type="number"] {
+      width: 40px;
+      text-align: center;
     }
-    .green { background-color: #c8e6c9; }
-    .white { background-color: #ffffff; }
-    .red { background-color: #ffcdd2; }
+    input[type="text"] {
+      width: 100px;
+    }
+    .under { background-color: #90ee90; } /* green */
+    .even  { background-color: #fff; }     /* white */
+    .over  { background-color: #f08080; } /* red */
   </style>
 </head>
 <body>
-  <h1>⛳️ Bully Wordle - Wordle Golf by Jef</h1>
-  <label for="course">Choose your course:</label>
-  <select id="course" onchange="loadParRow()">
-    <option value="0">Bully Pulpit (ND)</option>
-    <option value="1">Torrey Pines (CA)</option>
-    <option value="2">Bethpage Black (NY)</option>
-    <option value="3">Pebble Beach (CA)</option>
-    <option value="4">Kapalua Plantation (HI)</option>
-    <option value="5">Pinehurst No. 2 (NC)</option>
-    <option value="6">Augusta National (GA)</option>
-    <option value="7">TPC Scottsdale (AZ)</option>
-    <option value="8">Erin Hills (WI)</option>
-    <option value="9">Sand Hills (NE)</option>
+  <h1>Wordle Golf Scorecard</h1>
+  <label for="course">Select Course:</label>
+  <select id="course" onchange="loadParValues()">
+    <option value="0">Cypress Dunes</option>
+    <option value="1">Augusta Remix</option>
+    <option value="2">Pebble Beach IRL</option>
+    <option value="3">Desert Mirage</option>
+    <option value="4">Mountain View</option>
+    <option value="5">Pineapple Ridge</option>
+    <option value="6">The Lynx</option>
+    <option value="7">Emerald Oasis</option>
+    <option value="8">Back Nine Heaven</option>
+    <option value="9">El Jefe’s Gauntlet</option>
   </select>
-  <table id="scorecard"></table>
+
+  <table id="scorecard">
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th colspan="18">Hole</th>
+        <th>Total</th>
+        <th>+/-</th>
+      </tr>
+      <tr class="par-row">
+        <td>Par</td>
+        <!-- JS fills these -->
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Player rows JS-generated -->
+    </tbody>
+  </table>
 
   <script>
-    const courses = [
-      [4,4,3,5,4,4,3,5,4,4,4,3,5,4,4,3,5,4], // Bully Pulpit
-      [5,4,3,4,4,5,3,4,4,4,4,3,5,4,4,3,5,4], // Torrey Pines
-      [4,5,3,4,4,3,4,4,5,4,4,3,5,4,4,3,5,4], // Bethpage Black
-      [3,4,4,5,4,3,5,4,4,4,3,5,4,4,4,3,5,4], // Pebble Beach
-      [5,3,4,4,4,4,3,4,5,4,4,3,5,4,4,3,5,4], // Kapalua Plantation
-      [4,3,5,4,4,3,4,5,4,3,5,4,4,4,3,5,4,4], // Pinehurst No. 2
-      [3,5,4,4,3,5,4,4,4,4,3,5,4,4,3,5,4,4], // Augusta National
-      [4,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4], // TPC Scottsdale
-      [5,4,4,4,3,5,4,3,5,4,3,5,4,4,3,5,4,4], // Erin Hills
-      [4,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4]  // Sand Hills
+    const parRow = document.querySelector(".par-row");
+    const tbody = document.querySelector("#scorecard tbody");
+    const parLayouts = [
+      [4,4,3,5,4,4,3,4,5,4,4,4,3,5,4,4,4,3],
+      [3,4,5,4,4,4,3,5,4,4,3,4,5,4,4,4,3,5],
+      [4,3,5,4,3,4,4,5,4,4,4,4,3,5,4,4,3,4],
+      [5,4,3,4,4,5,4,3,4,4,4,3,5,4,4,3,4,4],
+      [4,5,4,4,3,4,3,5,4,4,4,4,3,4,5,3,4,4],
+      [3,5,4,4,4,3,5,4,4,4,3,5,4,4,4,3,4,4],
+      [4,4,4,4,4,5,3,4,4,4,4,3,4,4,5,3,4,4],
+      [3,4,4,4,4,4,5,4,3,4,4,4,4,3,5,4,4,4],
+      [4,4,4,3,4,4,5,4,3,4,4,4,5,4,4,3,4,4],
+      [5,3,4,4,4,3,5,4,4,4,4,3,4,4,4,4,3,5]
     ];
 
-    const table = document.getElementById("scorecard");
+    function loadParValues() {
+      const courseIndex = document.getElementById("course").value;
+      const pars = parLayouts[courseIndex];
+      // Clear par row
+      parRow.innerHTML = '<td>Par</td>' + pars.map(par => `<td>${par}</td>`).join('') + '<td></td><td></td>';
+      // Save to hidden attr for calc
+      for (let r of tbody.rows) updateScores(r);
+    }
 
     function buildTable() {
-      table.innerHTML = "";
-
-      const holeRow = document.createElement("tr");
-      holeRow.className = "header";
-      holeRow.innerHTML = "<th>Hole</th>" + [...Array(18).keys()].map(i => `<th>${i+1}</th>`).join('') + "<th>Total</th><th>+/-</th>";
-      table.appendChild(holeRow);
-
-      const parRow = document.createElement("tr");
-      parRow.className = "par";
-      parRow.id = "parRow";
-      parRow.innerHTML = "<td>Par</td>" + [...Array(18).keys()].map(i => `<td id='par-${i}'>4</td>`).join('') + "<td></td><td></td>";
-      table.appendChild(parRow);
-
-      for (let p = 1; p <= 4; p++) {
+      for (let i = 1; i <= 4; i++) {
         const row = document.createElement("tr");
-        row.id = `player-${p}`;
-        row.innerHTML = `<td><input value="Player ${p}" onchange="calc(${p})"></td>` +
-          [...Array(18).keys()].map(i => `<td><input type='number' min='1' max='10' onchange='calc(${p})' id='p${p}h${i}'></td>`).join('') +
-          `<td id='total-${p}'></td><td id='diff-${p}'></td>`;
-        table.appendChild(row);
+        row.innerHTML = `<td><input type="text" value="Player ${i}"></td>` +
+          Array.from({ length: 18 }, (_, h) => `<td><input type="number" min="1" oninput="updateScores(this.parentElement.parentElement)"></td>`).join('') +
+          `<td class="total"></td><td class="diff"></td>`;
+        tbody.appendChild(row);
       }
     }
 
-    function loadParRow() {
-      const selected = document.getElementById("course").value;
-      const par = courses[selected];
-      par.forEach((val, i) => {
-        document.getElementById(`par-${i}`).textContent = val;
-      });
-      for (let i = 1; i <= 4; i++) calc(i);
-    }
-
-    function calc(player) {
-      const selected = document.getElementById("course").value;
-      const par = courses[selected];
-      let total = 0;
-      let parTotal = 0;
-      for (let h = 0; h < 18; h++) {
-        const input = document.getElementById(`p${player}h${h}`);
+    function updateScores(row) {
+      const courseIndex = document.getElementById("course").value;
+      const pars = parLayouts[courseIndex];
+      const inputs = row.querySelectorAll("input[type='number']");
+      let total = 0, diff = 0;
+      inputs.forEach((input, i) => {
+        const val = parseInt(input.value);
         const cell = input.parentElement;
-        const score = parseInt(input.value);
-        const p = par[h];
-        parTotal += p;
-        if (!isNaN(score)) {
-          total += score;
-          const diff = score - p;
-          cell.className = diff < 0 ? 'green' : diff === 0 ? 'white' : 'red';
+        if (!isNaN(val)) {
+          total += val;
+          const scoreDiff = val - pars[i];
+          diff += scoreDiff;
+          cell.className = scoreDiff < 0 ? 'under' : scoreDiff > 0 ? 'over' : 'even';
         } else {
           cell.className = '';
         }
-      }
-      document.getElementById(`total-${player}`).textContent = total;
-      document.getElementById(`diff-${player}`).textContent = total - parTotal;
+      });
+      row.querySelector(".total").textContent = total || '';
+      row.querySelector(".diff").textContent = diff === 0 && total ? 'E' : diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '';
     }
 
     buildTable();
-    loadParRow();
+    loadParValues();
   </script>
 </body>
 </html>
