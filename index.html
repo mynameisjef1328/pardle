@@ -2,56 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wordle Golf Scorecard</title>
+
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f9f9f9;
-      padding: 20px;
+      padding: 30px;
+      max-width: 1000px;
+      margin: auto;
     }
+
     h2 {
       margin-bottom: 10px;
+      text-align: center;
     }
+
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #666;
+      color: white;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      width: 40px;
       text-align: center;
     }
-    th {
-      background-color: #999;
+
+    button {
+      background: #444;
       color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
-    .under-par {
-      background-color: lightgreen;
+
+    button:hover {
+      background: #222;
     }
-    .over-par {
-      background-color: lightcoral;
-    }
-    .even-par {
-      background-color: white;
-    }
-    input[type="number"] {
-      width: 50px;
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 0.9em;
+      color: #777;
     }
   </style>
 </head>
+
 <body>
   <h2>Wordle Golf Scorecard</h2>
-  <label for="course">Choose a course:</label>
-  <select id="course">
-    <option value="Pebble Beach">Pebble Beach</option>
-    <option value="St. Andrews">St. Andrews</option>
-    <option value="Augusta">Augusta</option>
-  </select>
 
-  <br><br>
+  <div class="controls">
+    <label for="course">Choose a course:</label>
+    <select id="course">
+      <option value="Pebble Beach">Pebble Beach</option>
+      <option value="St. Andrews">St. Andrews</option>
+      <option value="Augusta">Augusta</option>
+    </select>
+
+    <button onclick="addNewPlayer()">+ Add Player</button>
+  </div>
+
   <table id="scorecard">
     <thead>
       <tr>
@@ -68,6 +108,10 @@
     </tbody>
   </table>
 
+  <div class="footer">
+    Hosted on GitHub Pages | Data stored via Firebase 🔥
+  </div>
+
   <script>
     // ✅ Firebase v8 Config
     const firebaseConfig = {
@@ -80,7 +124,6 @@
       databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com"
     };
 
-    // ✅ Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -90,32 +133,29 @@
       "Augusta": [5,3,4,3,4,4,5,3,4,4,5,3,4,4,4,3,4,5]
     };
 
+    const courseSelect = document.getElementById("course");
+    const tableBody = document.querySelector("#scorecard tbody");
+    let currentPar = courses[courseSelect.value];
+
     const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
     if (!window.location.search.includes("gameId")) {
       window.location.search = `?gameId=${gameId}`;
     }
-
-    const courseSelect = document.getElementById("course");
-    const tableBody = document.querySelector("#scorecard tbody");
-    let currentPar = courses[courseSelect.value];
 
     function renderScorecard() {
       const selected = courseSelect.value;
       currentPar = courses[selected];
       const parRow = tableBody.rows[0];
 
-      // Clear old par row cells
       while (parRow.cells.length > 1) {
         parRow.deleteCell(1);
       }
 
-      // Add hole par values
       currentPar.forEach(par => {
         const cell = parRow.insertCell();
         cell.textContent = par;
       });
 
-      // Add Total and +/- placeholders
       parRow.insertCell().textContent = currentPar.reduce((a, b) => a + b, 0);
       parRow.insertCell().textContent = "E";
 
@@ -126,7 +166,6 @@
       db.ref(`games/${gameId}`).once("value", snapshot => {
         const gameData = snapshot.val();
 
-        // Clear all rows except par row
         while (tableBody.rows.length > 1) {
           tableBody.deleteRow(1);
         }
@@ -144,6 +183,7 @@
     function addPlayerRow(playerName, existingScores = []) {
       const row = tableBody.insertRow();
       const nameCell = row.insertCell();
+      nameCell.contentEditable = true;
       nameCell.textContent = playerName;
 
       for (let i = 0; i < 18; i++) {
@@ -162,8 +202,15 @@
 
       row.insertCell().textContent = ""; // Total
       row.insertCell().textContent = ""; // +/-
-
       updateRowStats(row);
+    }
+
+    function addNewPlayer() {
+      const name = prompt("Enter player name:");
+      if (name) {
+        addPlayerRow(name);
+        saveScores();
+      }
     }
 
     function updateRowStats(row) {
@@ -185,7 +232,7 @@
       const players = {};
       for (let i = 1; i < tableBody.rows.length; i++) {
         const row = tableBody.rows[i];
-        const name = row.cells[0].textContent;
+        const name = row.cells[0].textContent || `Player ${i}`;
         const scores = Array.from(row.querySelectorAll("input")).map(input => parseInt(input.value) || 0);
         players[name] = scores;
       }
