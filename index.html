@@ -2,31 +2,65 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
-const courses = {
-  "Pebble Beach": [4, 5, 3, 4, 4, 5, 3, 4, 4, 4, 3, 5, 4, 4, 3, 4, 5, 4],
-  "Augusta National": [4, 4, 3, 5, 4, 3, 4, 5, 4, 3, 5, 4, 4, 4, 3, 5, 4, 4],
-  "St. Andrews": [4, 4, 5, 3, 4, 4, 5, 3, 4, 4, 3, 5, 4, 3, 4, 4, 5, 4],
-  "Torrey Pines": [5, 4, 3, 4, 4, 3, 4, 5, 4, 4, 4, 3, 5, 4, 4, 3, 4, 5],
-  "Bethpage Black": [4, 5, 4, 3, 4, 4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 5],
-  "TPC Sawgrass": [4, 4, 5, 3, 4, 3, 5, 4, 4, 5, 4, 3, 4, 3, 4, 5, 4, 4],
-  "Pinehurst No. 2": [4, 4, 3, 5, 4, 4, 3, 4, 5, 3, 4, 4, 4, 5, 4, 3, 4, 4],
-  "Bandon Dunes": [4, 4, 5, 3, 4, 3, 5, 4, 4, 4, 3, 5, 4, 4, 3, 4, 4, 5],
-  "Whistling Straits": [5, 4, 4, 3, 4, 4, 3, 5, 4, 3, 5, 4, 4, 4, 3, 5, 4, 4],
-  "Chambers Bay": [4, 5, 3, 4, 4, 5, 3, 4, 4, 4, 4, 3, 5, 4, 4, 3, 4, 5]
-};
+const courses = [
+  {
+    name: "Pebble Beach",
+    pars: [4, 4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 3, 4, 5, 4, 4, 3, 5]
+  },
+  {
+    name: "St. Andrews",
+    pars: [4, 5, 4, 3, 4, 4, 5, 3, 4, 4, 3, 4, 5, 4, 3, 4, 4, 5]
+  },
+  {
+    name: "Augusta National",
+    pars: [4, 3, 5, 4, 4, 5, 3, 4, 4, 4, 5, 4, 3, 4, 4, 3, 5, 4]
+  },
+  {
+    name: "Torrey Pines",
+    pars: [4, 4, 5, 3, 4, 4, 3, 5, 4, 4, 4, 3, 5, 4, 4, 3, 4, 5]
+  },
+  {
+    name: "TPC Sawgrass",
+    pars: [4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 5, 3, 4, 4, 3, 5, 4, 4]
+  },
+  {
+    name: "Bethpage Black",
+    pars: [4, 4, 5, 3, 4, 5, 3, 4, 4, 4, 4, 3, 5, 4, 3, 5, 4, 4]
+  },
+  {
+    name: "Pinehurst No. 2",
+    pars: [4, 3, 4, 5, 4, 4, 3, 4, 5, 4, 3, 5, 4, 4, 3, 4, 5, 4]
+  },
+  {
+    name: "Whistling Straits",
+    pars: [4, 4, 5, 3, 4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 5, 4, 3, 4]
+  },
+  {
+    name: "Royal Melbourne",
+    pars: [4, 3, 5, 4, 4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 3, 4, 4, 5]
+  },
+  {
+    name: "Bandon Dunes",
+    pars: [4, 4, 3, 5, 4, 3, 4, 5, 4, 4, 5, 3, 4, 4, 3, 5, 4, 4]
+  }
+];
 
 const NUM_HOLES = 18;
 const NUM_PLAYERS = 4;
 
 export default function Scorecard() {
-  const [selectedCourse, setSelectedCourse] = useState("Pebble Beach");
+  const [selectedCourse, setSelectedCourse] = useState(courses[0]);
   const [scores, setScores] = useState(
-    Array(NUM_PLAYERS)
-      .fill()
-      .map(() => Array(NUM_HOLES).fill(""))
+    Array.from({ length: NUM_PLAYERS }, () => Array(NUM_HOLES).fill(""))
   );
+  const [playerNames, setPlayerNames] = useState([
+    "Player 1",
+    "Player 2",
+    "Player 3",
+    "Player 4"
+  ]);
 
   const handleScoreChange = (playerIndex, holeIndex, value) => {
     const newScores = [...scores];
@@ -34,96 +68,123 @@ export default function Scorecard() {
     setScores(newScores);
   };
 
-  const calculateTotal = (playerScores) => {
-    return playerScores.reduce((acc, val) => acc + (parseInt(val) || 0), 0);
+  const calculateTotal = (playerIndex) => {
+    return scores[playerIndex].reduce((total, score) => {
+      const parsed = parseInt(score);
+      return total + (isNaN(parsed) ? 0 : parsed);
+    }, 0);
   };
 
-  const calculateParDiff = (playerScores) => {
-    const par = courses[selectedCourse];
-    const diff = playerScores.reduce((acc, val, idx) => acc + ((parseInt(val) || 0) - par[idx]), 0);
-    if (diff > 0) return `+${diff}`;
-    if (diff < 0) return `${diff}`;
-    return "0";
+  const calculateParDiff = (playerIndex) => {
+    let diff = 0;
+    scores[playerIndex].forEach((score, idx) => {
+      const parsed = parseInt(score);
+      if (!isNaN(parsed)) {
+        diff += parsed - selectedCourse.pars[idx];
+      }
+    });
+    return diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : "0";
   };
-
-  const par = courses[selectedCourse];
 
   return (
-    <div className="overflow-x-auto p-4">
-      <div className="mb-4 w-64">
-        <Label htmlFor="course">Select Course</Label>
-        <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-          <SelectTrigger className="w-full text-lg">
-            <SelectValue placeholder="Select a course" />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.keys(courses).map((course) => (
-              <SelectItem key={course} value={course}>
-                {course}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <Card className="overflow-x-auto">
+      <CardContent>
+        <div className="mb-4">
+          <Label htmlFor="course">Select Course</Label>
+          <Select
+            onValueChange={(value) => {
+              const course = courses.find((c) => c.name === value);
+              if (course) setSelectedCourse(course);
+            }}
+          >
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder={selectedCourse.name} />
+            </SelectTrigger>
+            <SelectContent>
+              {courses.map((course) => (
+                <SelectItem key={course.name} value={course.name}>
+                  {course.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      <Card className="w-full">
-        <CardContent className="overflow-x-auto p-2">
-          <table className="min-w-full table-auto border-collapse text-center">
+        <div className="overflow-x-auto">
+          <table className="table-auto border-collapse w-full text-sm">
             <thead>
-              <tr>
-                <th className="w-24 border p-1"></th>
-                {Array.from({ length: NUM_HOLES }, (_, i) => (
-                  <th key={i} className="w-12 border p-1 align-middle">Hole {i + 1}</th>
+              <tr className="bg-gray-300">
+                <th className="p-1 border" rowSpan={2}></th>
+                {Array.from({ length: NUM_HOLES }).map((_, i) => (
+                  <th key={i} className="p-1 border text-center align-middle">
+                    Hole {i + 1}
+                  </th>
                 ))}
-                <th className="w-24 border p-1">Total</th>
-                <th className="w-24 border p-1">+/–</th>
+                <th className="p-1 border text-center align-middle" rowSpan={2}>
+                  Total
+                </th>
+                <th className="p-1 border text-center align-middle" rowSpan={2}>
+                  +/- Par
+                </th>
               </tr>
-              <tr>
-                <td className="border p-1 font-bold">Par</td>
-                {par.map((p, i) => (
-                  <td key={i} className="border p-1 font-bold align-middle">{p}</td>
+              <tr className="bg-gray-200">
+                {selectedCourse.pars.map((par, i) => (
+                  <td key={i} className="p-1 border text-center align-middle">
+                    Par {par}
+                  </td>
                 ))}
-                <td className="border p-1 font-bold">{par.reduce((a, b) => a + b, 0)}</td>
-                <td className="border p-1 font-bold">0</td>
               </tr>
             </thead>
             <tbody>
-              {scores.map((playerScores, playerIndex) => (
-                <tr key={playerIndex}>
-                  <td className="border p-1">
+              {scores.map((playerScores, playerIdx) => (
+                <tr key={playerIdx}>
+                  <td className="p-1 border min-w-[90px]">
                     <Input
-                      defaultValue={`Player ${playerIndex + 1}`}
-                      className="text-sm"
+                      value={playerNames[playerIdx]}
+                      onChange={(e) => {
+                        const newNames = [...playerNames];
+                        newNames[playerIdx] = e.target.value;
+                        setPlayerNames(newNames);
+                      }}
+                      className="text-xs w-full"
                     />
                   </td>
-                  {playerScores.map((score, holeIndex) => {
-                    const parValue = par[holeIndex];
-                    const intScore = parseInt(score);
-                    const diff = intScore - parValue;
-                    let className = "border p-1";
-                    if (!isNaN(intScore)) {
-                      if (diff < 0) className += " border-b-4 border-green-500";
-                      else if (diff > 0) className += " border-b-4 border-red-500";
-                    }
+                  {playerScores.map((score, holeIdx) => {
+                    const diff =
+                      score === ""
+                        ? ""
+                        : parseInt(score) - selectedCourse.pars[holeIdx];
+                    const borderColor =
+                      diff < 0
+                        ? "border-green-500"
+                        : diff > 0
+                        ? "border-red-500"
+                        : "border-gray-300";
                     return (
-                      <td key={holeIndex} className={className + " align-middle text-center"}>
+                      <td key={holeIdx} className={`p-1 border ${borderColor}`}>
                         <Input
                           type="number"
                           value={score}
-                          onChange={(e) => handleScoreChange(playerIndex, holeIndex, e.target.value)}
-                          className="text-center text-sm"
+                          onChange={(e) =>
+                            handleScoreChange(playerIdx, holeIdx, e.target.value)
+                          }
+                          className="text-center text-xs w-[50px] h-[30px]"
                         />
                       </td>
                     );
                   })}
-                  <td className="border p-1 font-bold align-middle">{calculateTotal(playerScores)}</td>
-                  <td className="border p-1 font-bold align-middle">{calculateParDiff(playerScores)}</td>
+                  <td className="p-1 border text-center text-sm font-bold">
+                    {calculateTotal(playerIdx)}
+                  </td>
+                  <td className="p-1 border text-center text-sm font-bold">
+                    {calculateParDiff(playerIdx)}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
