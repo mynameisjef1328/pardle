@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Wordle Golf Scorecard</title>
+  <style>
+    th, td {
+      font-size: 0.9em;
+      padding: 4px;
+    }
+    input[type="number"] {
+      width: 40px;
+      font-size: 0.9em;
+    }
+  </style>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wordle Golf Scorecard</title>
 
@@ -92,21 +104,27 @@
     <button onclick="addNewPlayer()">+ Add Player</button>
   </div>
 
+  <div style="overflow-x:auto;">
   <table id="scorecard">
-    <thead>
-      <tr>
-        <th>Player</th>
-        <th colspan="18">Hole</th>
-        <th>Total</th>
-        <th>+/-</th>
-      </tr>
-    </thead>
+    const thead = document.querySelector("#scorecard thead");
+thead.innerHTML = `
+  <tr>
+    <th rowspan="2">Player</th>
+    <th colspan="18">Hole</th>
+    <th rowspan="2">Total</th>
+    <th rowspan="2">+/-</th>
+  </tr>
+  <tr>
+    ${Array.from({ length: 18 }, (_, i) => `<th>${i + 1}</th>`).join("")}
+  </tr>
+`;
     <tbody>
       <tr>
         <td>Par</td>
       </tr>
     </tbody>
   </table>
+    </div>
 
   <div class="footer">
     Hosted on GitHub Pages | Data stored via Firebase 🔥
