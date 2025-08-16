@@ -107,7 +107,7 @@
       holeRow.innerHTML += '<th></th><th></th>';
     }
 
-    function buildPlayerRow(playerId, data = []) {
+    function buildPlayerRow(playerId, data = {}) {
       const row = document.createElement('tr');
       const nameCell = document.createElement('td');
       const nameInput = document.createElement('input');
@@ -124,7 +124,7 @@
         input.min = 1;
         input.value = data.scores?.[i] || '';
         input.oninput = () => {
-          calculate(row, playerId);
+          calculate(row);
           saveData();
         };
         cell.appendChild(input);
@@ -142,10 +142,10 @@
       row.appendChild(diffCell);
 
       document.querySelector('tbody').appendChild(row);
-      calculate(row, playerId);
+      calculate(row);
     }
 
-    function calculate(row, playerId) {
+    function calculate(row) {
       const inputs = row.querySelectorAll('input[type="number"]');
       let total = 0;
       let parTotal = 0;
@@ -181,12 +181,12 @@
     function loadData() {
       db.ref('games/' + gameId).once('value').then(snapshot => {
         const data = snapshot.val();
+        document.querySelector('tbody').innerHTML = '';
         if (data) {
           document.getElementById('courseSelect').value = data.course;
           currentPar = courses[data.course];
           updateParRow(currentPar);
           updateHoleNumbers();
-          document.querySelector('tbody').innerHTML = '';
           data.players.forEach((p, i) => buildPlayerRow(i, p));
         } else {
           updateParRow(currentPar);
