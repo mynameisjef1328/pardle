@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Wordle Golf Scorecard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -84,7 +84,6 @@
     }
   </style>
 </head>
-
 <body>
   <h2>Wordle Golf Scorecard</h2>
 
@@ -95,7 +94,6 @@
       <option value="St. Andrews">St. Andrews</option>
       <option value="Augusta">Augusta</option>
     </select>
-
     <button onclick="addNewPlayer()">+ Add Player</button>
   </div>
 
@@ -145,8 +143,7 @@
     }
 
     function renderScorecard() {
-      const selected = courseSelect.value;
-      currentPar = courses[selected];
+      currentPar = courses[courseSelect.value];
 
       tableHead.innerHTML = `
         <tr>
@@ -176,19 +173,14 @@
 
     function loadScores() {
       db.ref(`games/${gameId}`).once("value", snapshot => {
-        const gameData = snapshot.val();
-
+        const gameData = snapshot.val() || {};
         while (tableBody.rows.length > 1) {
           tableBody.deleteRow(1);
         }
 
-        if (gameData) {
-          Object.entries(gameData).forEach(([player, scores]) => {
-            addPlayerRow(player, scores);
-          });
-        } else {
-          addPlayerRow("Player 1");
-        }
+        Object.entries(gameData).forEach(([player, scores]) => {
+          addPlayerRow(player, scores);
+        });
       });
     }
 
@@ -208,23 +200,25 @@
 
         const button = document.createElement("button");
         button.textContent = "Submit";
-
-        const hasValue = input.value !== "";
-        if (hasValue) button.style.display = "none";
+        button.style.display = "none";
 
         button.onclick = () => {
-          const score = parseInt(input.value) || 0;
-          const playerName = row.cells[0].textContent;
-
-          db.ref(`games/${gameId}/${playerName}/${i}`).set(score).then(() => {
-            button.style.display = "none";
-            updateRowStats(row);
-          });
+          const val = parseInt(input.value);
+          if (!isNaN(val)) {
+            db.ref(`games/${gameId}/${playerName}/${i}`).set(val).then(() => {
+              button.style.display = "none";
+              updateRowStats(row);
+            });
+          }
         };
 
         input.addEventListener("input", () => {
           button.style.display = input.value ? "inline-block" : "none";
         });
+
+        if (input.value) {
+          button.style.display = "none";
+        }
 
         cell.appendChild(input);
         cell.appendChild(document.createElement("br"));
@@ -247,7 +241,7 @@
       });
 
       row.cells[19].textContent = sum;
-      const diff = sum - currentPar.reduce((a,b)=>a+b, 0);
+      const diff = sum - currentPar.reduce((a, b) => a + b, 0);
       row.cells[20].textContent = diff === 0 ? "E" : (diff > 0 ? `+${diff}` : diff);
     }
 
@@ -262,7 +256,7 @@
       renderScorecard();
     });
 
-    renderScorecard();
+    courseSelect.dispatchEvent(new Event("change"));
   </script>
 </body>
 </html>
