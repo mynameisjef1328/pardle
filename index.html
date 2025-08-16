@@ -64,10 +64,12 @@
     button {
       background: #444;
       color: white;
-      padding: 8px 16px;
+      padding: 4px 8px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 0.75em;
+      margin-top: 4px;
     }
 
     button:hover {
@@ -146,7 +148,6 @@
       const selected = courseSelect.value;
       currentPar = courses[selected];
 
-      // Rebuild thead
       tableHead.innerHTML = `
         <tr>
           <th rowspan="2">Player</th>
@@ -159,7 +160,6 @@
         </tr>
       `;
 
-      // Rebuild Par row
       const parRow = tableBody.rows[0];
       while (parRow.cells.length > 1) {
         parRow.deleteCell(1);
@@ -205,16 +205,38 @@
         input.min = 1;
         input.max = 10;
         input.value = existingScores[i] || "";
-        input.onchange = () => {
-          saveScores();
-          updateRowStats(row);
+
+        const button = document.createElement("button");
+        button.textContent = "Submit";
+        button.style.display = "none";
+        button.onclick = () => {
+          submitScore(row, i);
         };
+
+        input.addEventListener("input", () => {
+          button.style.display = input.value ? "inline-block" : "none";
+        });
+
         cell.appendChild(input);
+        cell.appendChild(document.createElement("br"));
+        cell.appendChild(button);
       }
 
-      row.insertCell().textContent = ""; // Total
-      row.insertCell().textContent = ""; // +/-
+      row.insertCell().textContent = "";
+      row.insertCell().textContent = "";
       updateRowStats(row);
+    }
+
+    function submitScore(row, holeIndex) {
+      const name = row.cells[0].textContent || "Unnamed Player";
+      const input = row.cells[holeIndex + 1].querySelector("input");
+      const val = parseInt(input.value) || 0;
+
+      db.ref(`games/${gameId}/${name}/${holeIndex}`).set(val)
+        .then(() => {
+          console.log(`Saved ${val} for ${name} on hole ${holeIndex + 1}`);
+          updateRowStats(row);
+        });
     }
 
     function addNewPlayer() {
