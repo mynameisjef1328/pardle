@@ -25,24 +25,20 @@
       color: white;
     }
     .under-par {
-      background-color: lightgreen;
+      border: 2px solid green;
     }
     .over-par {
-      background-color: lightcoral;
+      border: 2px solid red;
     }
     .even-par {
-      background-color: white;
+      border: none;
     }
     input[type="number"] {
       width: 50px;
+      text-align: center;
     }
     input[type="text"] {
-      width: 120px;
-    }
-    select {
-      font-size: 16px;
-      padding: 4px;
-      margin-bottom: 10px;
+      width: 100px;
     }
   </style>
 </head>
@@ -77,13 +73,13 @@
     <tbody>
       <script>
         const courses = {
-          'Pebble Puzzles': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
-          'St. Streaks':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
+          'Pebble Word': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
+          'St. Letters':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
           'August Alphabet': [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
-          'Pine Pixels':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
+          'Pine Synonyms':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
           'Torrey Tiles': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
           'TPC Tokens': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
-          'Bethpage Blanks': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
+          'Bethpage Bits': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
           'Whistling Words': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
           'Kiawah Keys': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
           'Bully Big Words': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
@@ -124,6 +120,7 @@
             const input = document.createElement('input');
             input.type = 'number';
             input.min = 1;
+            input.style.textAlign = 'center';
             input.addEventListener('input', () => calculate(row));
             cell.appendChild(input);
             row.appendChild(cell);
@@ -162,9 +159,8 @@
           });
 
           row.querySelector('.total').textContent = total || '0';
-          const diff = total ? total - parTotal : 0;
-          const diffText = diff > 0 ? `+${diff}` : (diff < 0 ? `${diff}` : '0');
-          row.querySelector('.diff').textContent = diffText;
+          let diff = total - parTotal;
+          row.querySelector('.diff').textContent = diff > 0 ? '+' + diff : (diff < 0 ? diff : '0');
         }
 
         const tbody = document.querySelector('tbody');
