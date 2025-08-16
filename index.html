@@ -69,18 +69,18 @@
   </table>
 
   <script>
-    // 🔥 YOUR FIREBASE CONFIG HERE:
-    var firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID",
-      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+const firebaseConfig = {
+  apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
+  authDomain: "wordle-golf-6c636.firebaseapp.com",
+  projectId: "wordle-golf-6c636",
+  storageBucket: "wordle-golf-6c636.firebasestorage.app",
+  messagingSenderId: "672104265687",
+  appId: "1:672104265687:web:2c16b0539fcd52ca4d7d92"
+  databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
     const courses = {
       "Pebble Beach": [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5],
