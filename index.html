@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Wordle Golf Scorecard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -12,8 +12,9 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 30px;
+      background: #f4f4f4;
+      padding: 20px;
+      margin: 0;
     }
 
     h2 {
@@ -27,65 +28,65 @@
     }
 
     .controls button {
-      padding: 8px 14px;
+      padding: 10px 18px;
       font-size: 14px;
+      cursor: pointer;
     }
 
     table {
-      border-collapse: collapse;
       width: 100%;
+      border-collapse: collapse;
       background: white;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       padding: 6px;
       text-align: center;
       font-size: 14px;
     }
 
     th {
-      background-color: #666;
+      background-color: #444;
       color: white;
     }
 
     input[type="number"], input[type="text"] {
-      width: 50px;
-      padding: 3px;
-      font-size: 13px;
+      width: 45px;
+      padding: 2px;
+      margin: 2px;
     }
 
-    .checkmark {
-      color: green;
-      font-weight: bold;
-      display: inline-block;
-      margin-left: 4px;
+    button.submit-btn {
+      padding: 2px 6px;
+      margin-top: 2px;
+      font-size: 12px;
+      cursor: pointer;
     }
+
+    .even-par { background-color: #fff; }
+    .under-par { background-color: #d4f4d4; }
+    .over-par { background-color: #f8dada; }
   </style>
 </head>
 <body>
+
   <h2>Wordle Golf Scorecard</h2>
 
   <div class="controls">
-    <button onclick="promptAddPlayer()">+ Add Player</button>
+    <button onclick="addPlayer()">+ Add Player</button>
   </div>
 
   <table id="scorecard">
-    <thead>
-      <tr>
-        <th>Player</th>
-        <th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>H5</th><th>H6</th>
-        <th>H7</th><th>H8</th><th>H9</th><th>H10</th><th>H11</th><th>H12</th>
-        <th>H13</th><th>H14</th><th>H15</th><th>H16</th><th>H17</th><th>H18</th>
-        <th>Total</th>
-        <th>+/-</th>
-      </tr>
+    <thead id="thead">
+      <tr id="header-row"></tr>
     </thead>
     <tbody id="scorecard-body"></tbody>
   </table>
 
   <script>
+    // Firebase setup
     const firebaseConfig = {
       apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
       authDomain: "wordle-golf-6c636.firebaseapp.com",
@@ -95,20 +96,52 @@
       messagingSenderId: "672104265687",
       appId: "1:672104265687:web:2c16b0539fcd52ca4d7d92"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const gameId = "wordle-default";
-    const parValues = [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5];
-    const scorecardBody = document.getElementById("scorecard-body");
 
-    function renderScorecard(players = {}) {
+    const parValues = [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5];
+    const gameId = "wordle-default";
+    const scorecardBody = document.getElementById("scorecard-body");
+    const headerRow = document.getElementById("header-row");
+
+    // Render the table header
+    function renderHeader() {
+      headerRow.innerHTML = "";
+      const thPlayer = document.createElement("th");
+      thPlayer.textContent = "Player";
+      headerRow.appendChild(thPlayer);
+
+      for (let i = 0; i < 18; i++) {
+        const th = document.createElement("th");
+        th.textContent = `H${i + 1}`;
+        headerRow.appendChild(th);
+      }
+
+      const thTotal = document.createElement("th");
+      thTotal.textContent = "Total";
+      headerRow.appendChild(thTotal);
+
+      const thDiff = document.createElement("th");
+      thDiff.textContent = "+/-";
+      headerRow.appendChild(thDiff);
+    }
+
+    // Load players from Firebase and render
+    function loadPlayers() {
+      db.ref(`games/${gameId}`).on("value", snapshot => {
+        const players = snapshot.val() || {};
+        renderPlayers(players);
+      });
+    }
+
+    // Render players and scores
+    function renderPlayers(players) {
       scorecardBody.innerHTML = "";
 
-      Object.entries(players).forEach(([player, data]) => {
+      Object.entries(players).forEach(([playerName, data]) => {
         const row = scorecardBody.insertRow();
         const nameCell = row.insertCell();
-        nameCell.textContent = player;
+        nameCell.textContent = playerName;
 
         let total = 0;
 
@@ -117,75 +150,69 @@
           const comment = data?.comments?.[i] || "";
 
           const cell = row.insertCell();
-          const input = document.createElement("input");
-          input.type = "number";
-          input.value = score;
-          input.min = 1;
-          input.max = 10;
 
-          const commentBox = document.createElement("input");
-          commentBox.type = "text";
-          commentBox.placeholder = "📝";
-          commentBox.value = comment;
+          const scoreInput = document.createElement("input");
+          scoreInput.type = "number";
+          scoreInput.value = score;
+          scoreInput.min = 1;
+          scoreInput.max = 10;
+
+          const commentInput = document.createElement("input");
+          commentInput.type = "text";
+          commentInput.placeholder = "📝";
+          commentInput.value = comment;
 
           const submitBtn = document.createElement("button");
           submitBtn.textContent = "✔";
-          submitBtn.style.display = "none";
-
-          const showCheck = () => {
-            submitBtn.style.display = "inline";
-          };
-
-          input.addEventListener("input", showCheck);
-          commentBox.addEventListener("input", showCheck);
+          submitBtn.className = "submit-btn";
 
           submitBtn.onclick = () => {
-            const s = parseInt(input.value);
-            const c = commentBox.value;
-            db.ref(`games/${gameId}/${player}/scores/${i}`).set(s);
-            db.ref(`games/${gameId}/${player}/comments/${i}`).set(c);
+            const s = parseInt(scoreInput.value);
+            const c = commentInput.value;
+            db.ref(`games/${gameId}/${playerName}/scores/${i}`).set(s);
+            db.ref(`games/${gameId}/${playerName}/comments/${i}`).set(c);
             submitBtn.style.display = "none";
           };
 
-          cell.appendChild(input);
-          cell.appendChild(document.createElement("br"));
-          cell.appendChild(commentBox);
-          cell.appendChild(document.createElement("br"));
-          cell.appendChild(submitBtn);
+          scoreInput.addEventListener("input", () => {
+            submitBtn.style.display = "inline";
+          });
 
-          if (!isNaN(score)) total += score;
+          if (!isNaN(score)) total += parseInt(score);
+
+          cell.appendChild(scoreInput);
+          cell.appendChild(commentInput);
+          cell.appendChild(submitBtn);
         }
 
         const totalCell = row.insertCell();
         totalCell.textContent = total;
 
         const diffCell = row.insertCell();
-        const parSum = parValues.reduce((a,b)=>a+b, 0);
+        const parSum = parValues.reduce((a, b) => a + b, 0);
         const diff = total - parSum;
-        diffCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff);
+
+        if (diff < 0) diffCell.classList.add("under-par");
+        else if (diff > 0) diffCell.classList.add("over-par");
+        else diffCell.classList.add("even-par");
+
+        diffCell.textContent = diff === 0 ? "E" : (diff > 0 ? `+${diff}` : diff);
       });
     }
 
-    function loadScoresRealtime() {
-      db.ref(`games/${gameId}`).on("value", snapshot => {
-        const data = snapshot.val() || {};
-        renderScorecard(data);
-      });
-    }
-
-    function promptAddPlayer() {
-      const name = prompt("Enter new player name:");
+    // Add player prompt
+    function addPlayer() {
+      const name = prompt("Enter player name:");
       if (name) {
-        const emptyScores = Array(18).fill("");
-        const emptyComments = Array(18).fill("");
-        db.ref(`games/${gameId}/${name}`).set({
-          scores: emptyScores,
-          comments: emptyComments
-        });
+        const scores = Array(18).fill("");
+        const comments = Array(18).fill("");
+        db.ref(`games/${gameId}/${name}`).set({ scores, comments });
       }
     }
 
-    loadScoresRealtime();
+    // Initialize
+    renderHeader();
+    loadPlayers();
   </script>
 </body>
 </html>
