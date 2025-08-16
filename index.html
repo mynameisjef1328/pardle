@@ -4,11 +4,155 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wordle Golf Scorecard</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
+      authDomain: "wordle-golf-6c636.firebaseapp.com",
+      projectId: "wordle-golf-6c636",
+      storageBucket: "wordle-golf-6c636.appspot.com",
+      messagingSenderId: "67210425687",
+      appId: "1:67210425687:web:2c16b0539fcd52ca4d7d92",
+      databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const gameId = new URLSearchParams(window.location.search).get("gameId") || `game-${Date.now()}`;
+    if (!window.location.search.includes("gameId")) {
+      window.location.search = `?gameId=${gameId}`;
+    }
+
+    const courses = {
+      'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
+      'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
+      'Augusta':      [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3]
+    };
+
+    let currentPar = courses['Pebble Beach'];
+
+    function updateParRow(parValues) {
+      const parRow = document.getElementById('parRow');
+      parRow.innerHTML = '<th>Par</th>';
+      parValues.forEach(par => {
+        const th = document.createElement('th');
+        th.textContent = par;
+        parRow.appendChild(th);
+      });
+      parRow.innerHTML += '<th></th><th></th>';
+    }
+
+    function buildPlayerRow(playerId, data = []) {
+      const row = document.createElement('tr');
+      const nameCell = document.createElement('td');
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.value = data.name || `Player ${playerId + 1}`;
+      nameInput.onchange = () => saveData();
+      nameCell.appendChild(nameInput);
+      row.appendChild(nameCell);
+
+      for (let i = 0; i < 18; i++) {
+        const cell = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = 1;
+        input.value = data.scores?.[i] || '';
+        input.oninput = () => {
+          calculate(row, playerId);
+          saveData();
+        };
+        cell.appendChild(input);
+        row.appendChild(cell);
+      }
+
+      const totalCell = document.createElement('td');
+      totalCell.className = 'total';
+      totalCell.textContent = '0';
+      row.appendChild(totalCell);
+
+      const diffCell = document.createElement('td');
+      diffCell.className = 'diff';
+      diffCell.textContent = '0';
+      row.appendChild(diffCell);
+
+      document.querySelector('tbody').appendChild(row);
+      calculate(row, playerId);
+    }
+
+    function calculate(row, playerId) {
+      const inputs = row.querySelectorAll('input[type="number"]');
+      let total = 0;
+      let parTotal = 0;
+
+      inputs.forEach((input, index) => {
+        const val = parseInt(input.value);
+        const par = currentPar[index];
+        const cell = input.parentElement;
+        cell.className = '';
+        if (!isNaN(val)) {
+          total += val;
+          parTotal += par;
+          if (val < par) cell.className = 'under-par';
+          else if (val > par) cell.className = 'over-par';
+          else cell.className = 'even-par';
+        }
+      });
+
+      row.querySelector('.total').textContent = total || '0';
+      row.querySelector('.diff').textContent = total ? (total - parTotal) : '0';
+    }
+
+    function saveData() {
+      const players = [];
+      document.querySelectorAll('tbody tr').forEach(row => {
+        const name = row.querySelector('input[type="text"]').value;
+        const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(input => parseInt(input.value) || '');
+        players.push({ name, scores });
+      });
+      set(ref(db, 'games/' + gameId), { course: document.getElementById('courseSelect').value, players });
+    }
+
+    async function loadData() {
+      const snapshot = await get(child(ref(db), `games/${gameId}`));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        document.getElementById('courseSelect').value = data.course;
+        currentPar = courses[data.course];
+        updateParRow(currentPar);
+        document.querySelector('tbody').innerHTML = '';
+        data.players.forEach((p, i) => buildPlayerRow(i, p));
+      } else {
+        updateParRow(currentPar);
+        for (let i = 0; i < 4; i++) buildPlayerRow(i);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const courseSelect = document.getElementById('courseSelect');
+      Object.keys(courses).forEach(course => {
+        const option = document.createElement('option');
+        option.value = course;
+        option.textContent = course;
+        courseSelect.appendChild(option);
+      });
+      courseSelect.onchange = () => {
+        currentPar = courses[courseSelect.value];
+        updateParRow(currentPar);
+        saveData();
+      };
+      loadData();
+    });
+  </script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
       background: #f9f9f9;
+      padding: 20px;
     }
     table {
       border-collapse: collapse;
@@ -23,32 +167,25 @@
       background-color: #999;
       color: white;
     }
-    .under-par {
-      background-color: lightgreen;
+    .under-par { background-color: lightgreen; }
+    .over-par { background-color: lightcoral; }
+    .even-par { background-color: white; }
+    input[type="number"], input[type="text"] {
+      width: 50px;
+      text-align: center;
     }
-    .over-par {
-      background-color: lightcoral;
+    input[type="text"] {
+      width: 100px;
     }
-    .even-par {
-      background-color: white;
-    }
-    input[type="number"] {
-  width: 50px;
-  text-align: center;
-}
-input[type="text"] {
-  width: 100px;
-  text-align: center;
-}
   </style>
 </head>
+
 <body>
   <h2>Wordle Golf Scorecard</h2>
-
   <label for="courseSelect">Choose a course:</label>
   <select id="courseSelect"></select>
 
-  <table id="scorecard">
+  <table>
     <thead>
       <tr>
         <th>Player</th>
@@ -59,126 +196,13 @@ input[type="text"] {
       <tr>
         <th></th>
         <script>
-          for (let i = 1; i <= 18; i++) {
-            document.write(`<th>${i}</th>`);
-          }
+          for (let i = 1; i <= 18; i++) document.write(`<th>${i}</th>`);
         </script>
-        <th></th>
-        <th></th>
+        <th></th><th></th>
       </tr>
-      <tr id="parRow">
-        <th>Par</th>
-      </tr>
+      <tr id="parRow"><th>Par</th></tr>
     </thead>
-    <tbody>
-      <script>
-        const courses = {
-          'Sweetwater Creek': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
-          'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
-          'Augusta':      [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
-          'Shoal Creek':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
-          'Torrey Pines': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
-          'TPC Sawgrass': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
-          'Bethpage Black': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
-          'Whistling Straits': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
-          'Kiawah Island': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
-          'Bully Pulpit': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
-        };
-
-        const parRow = document.getElementById('parRow');
-        const courseSelect = document.getElementById('courseSelect');
-
-        Object.keys(courses).forEach(course => {
-          const option = document.createElement('option');
-          option.value = course;
-          option.textContent = course;
-          courseSelect.appendChild(option);
-        });
-
-        function updateParRow(parValues) {
-          parRow.innerHTML = '<th>Par</th>';
-          parValues.forEach(par => {
-            const th = document.createElement('th');
-            th.textContent = par;
-            parRow.appendChild(th);
-          });
-          parRow.innerHTML += '<th></th><th></th>';
-        }
-
-        function buildPlayerRow(name = '') {
-          const row = document.createElement('tr');
-
-          const nameCell = document.createElement('td');
-          const nameInput = document.createElement('input');
-          nameInput.type = 'text';
-          nameInput.value = name;
-          nameCell.appendChild(nameInput);
-          row.appendChild(nameCell);
-
-          for (let i = 0; i < 18; i++) {
-            const cell = document.createElement('td');
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.min = 1;
-            input.addEventListener('input', () => calculate(row));
-            cell.appendChild(input);
-            row.appendChild(cell);
-          }
-
-          const totalCell = document.createElement('td');
-          totalCell.className = 'total';
-          totalCell.textContent = '0';
-          row.appendChild(totalCell);
-
-          const diffCell = document.createElement('td');
-          diffCell.className = 'diff';
-          diffCell.textContent = '0';
-          row.appendChild(diffCell);
-
-          return row;
-        }
-
-        function calculate(row) {
-          const inputs = row.querySelectorAll('input[type="number"]');
-          let total = 0;
-          let parTotal = 0;
-
-          inputs.forEach((input, index) => {
-            const val = parseInt(input.value);
-            const par = currentPar[index];
-            const cell = input.parentElement;
-            cell.className = '';
-            if (!isNaN(val)) {
-              total += val;
-              parTotal += par;
-              if (val < par) cell.className = 'under-par';
-              else if (val > par) cell.className = 'over-par';
-              else cell.className = 'even-par';
-            }
-          });
-
-          row.querySelector('.total').textContent = total || '0';
-          row.querySelector('.diff').textContent = total ? (total - parTotal) : '0';
-        }
-
-        const tbody = document.querySelector('tbody');
-        let currentPar = courses[courseSelect.value];
-
-        function loadScorecard(courseName) {
-          tbody.innerHTML = '';
-          currentPar = courses[courseName];
-          updateParRow(currentPar);
-          for (let i = 1; i <= 4; i++) {
-            const row = buildPlayerRow(`Player ${i}`);
-            tbody.appendChild(row);
-          }
-        }
-
-        courseSelect.addEventListener('change', (e) => loadScorecard(e.target.value));
-
-        loadScorecard(courseSelect.value);
-      </script>
-    </tbody>
+    <tbody></tbody>
   </table>
 </body>
 </html>
