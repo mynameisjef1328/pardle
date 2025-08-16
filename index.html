@@ -31,7 +31,7 @@
       border: 2px solid red;
     }
     .even-par {
-      border: none;
+      border: 2px solid white;
     }
     input[type="number"] {
       width: 50px;
@@ -73,15 +73,15 @@
     <tbody>
       <script>
         const courses = {
-          'Pebble Word': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
-          'St. Letters':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
+          'Pebble Par': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
+          'St. Gridrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
           'August Alphabet': [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
-          'Pine Synonyms':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
+          'Pine Wordley':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
           'Torrey Tiles': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
-          'TPC Tokens': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
-          'Bethpage Bits': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
-          'Whistling Words': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
-          'Kiawah Keys': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
+          'TPC Solvergrass': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
+          'Bethpage Board': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
+          'Whistling Wordles': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
+          'Kiawah Clues': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
           'Bully Big Words': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
         };
 
@@ -159,8 +159,8 @@
           });
 
           row.querySelector('.total').textContent = total || '0';
-          let diff = total - parTotal;
-          row.querySelector('.diff').textContent = diff > 0 ? '+' + diff : (diff < 0 ? diff : '0');
+          const diff = total ? (total - parTotal) : 0;
+          row.querySelector('.diff').textContent = diff > 0 ? `+${diff}` : (diff < 0 ? `${diff}` : '0');
         }
 
         const tbody = document.querySelector('tbody');
