@@ -209,8 +209,9 @@
         const button = document.createElement("button");
         button.textContent = "Submit";
         button.style.display = "none";
+
         button.onclick = () => {
-          submitScore(row, i);
+          submitScore(row, i, input, button);
         };
 
         input.addEventListener("input", () => {
@@ -227,14 +228,14 @@
       updateRowStats(row);
     }
 
-    function submitScore(row, holeIndex) {
+    function submitScore(row, holeIndex, inputEl, buttonEl) {
       const name = row.cells[0].textContent || "Unnamed Player";
-      const input = row.cells[holeIndex + 1].querySelector("input");
-      const val = parseInt(input.value) || 0;
+      const val = parseInt(inputEl.value) || 0;
 
       db.ref(`games/${gameId}/${name}/${holeIndex}`).set(val)
         .then(() => {
           console.log(`Saved ${val} for ${name} on hole ${holeIndex + 1}`);
+          buttonEl.style.display = "none";
           updateRowStats(row);
         });
     }
