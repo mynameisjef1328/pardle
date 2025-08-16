@@ -18,6 +18,7 @@
       border: 1px solid #ccc;
       padding: 8px;
       text-align: center;
+      vertical-align: middle;
     }
     th {
       background-color: #999;
@@ -36,7 +37,12 @@
       width: 50px;
     }
     input[type="text"] {
-      width: 100px;
+      width: 120px;
+    }
+    select {
+      font-size: 16px;
+      padding: 4px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -71,16 +77,16 @@
     <tbody>
       <script>
         const courses = {
-          'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
-          'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
-          'Augusta':      [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
-          'Pine Valley':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
-          'Torrey Pines': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
-          'TPC Sawgrass': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
-          'Bethpage Black': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
-          'Whistling Straits': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
-          'Kiawah Island': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
-          'Bandon Dunes': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
+          'Pebble Puzzles': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
+          'St. Streaks':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
+          'August Alphabet': [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
+          'Pine Pixels':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
+          'Torrey Tiles': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
+          'TPC Tokens': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
+          'Bethpage Blanks': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
+          'Whistling Words': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
+          'Kiawah Keys': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
+          'Bully Big Words': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
         };
 
         const parRow = document.getElementById('parRow');
@@ -156,7 +162,9 @@
           });
 
           row.querySelector('.total').textContent = total || '0';
-          row.querySelector('.diff').textContent = total ? (total - parTotal) : '0';
+          const diff = total ? total - parTotal : 0;
+          const diffText = diff > 0 ? `+${diff}` : (diff < 0 ? `${diff}` : '0');
+          row.querySelector('.diff').textContent = diffText;
         }
 
         const tbody = document.querySelector('tbody');
