@@ -106,6 +106,21 @@
 
   <div style="overflow-x:auto;">
   <table id="scorecard">
+    <table id="scorecard">
+  <thead></thead>
+  <tbody>
+    <tr>
+      <td>Par</td>
+    </tr>
+  </tbody>
+  </table>
+    </div>
+
+  <div class="footer">
+    Hosted on GitHub Pages | Data stored via Firebase 🔥
+  </div>
+
+  <script>
     const thead = document.querySelector("#scorecard thead");
 thead.innerHTML = `
   <tr>
@@ -118,19 +133,6 @@ thead.innerHTML = `
     ${Array.from({ length: 18 }, (_, i) => `<th>${i + 1}</th>`).join("")}
   </tr>
 `;
-    <tbody>
-      <tr>
-        <td>Par</td>
-      </tr>
-    </tbody>
-  </table>
-    </div>
-
-  <div class="footer">
-    Hosted on GitHub Pages | Data stored via Firebase 🔥
-  </div>
-
-  <script>
     // ✅ Firebase v8 Config
     const firebaseConfig = {
       apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
