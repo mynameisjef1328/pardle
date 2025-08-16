@@ -6,6 +6,58 @@
   <title>Wordle Golf Scorecard</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #999;
+      color: white;
+    }
+    .under-par { background-color: lightgreen; }
+    .over-par { background-color: lightcoral; }
+    .even-par { background-color: white; }
+    input[type="number"], input[type="text"] {
+      width: 50px;
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Wordle Golf Scorecard</h2>
+  <label for="courseSelect">Choose a course:</label>
+  <select id="courseSelect"></select>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th colspan="18">Hole</th>
+        <th>Total</th>
+        <th>+/-</th>
+      </tr>
+      <tr id="holeNumbers">
+        <th></th>
+      </tr>
+      <tr id="parRow"><th>Par</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
@@ -42,6 +94,17 @@
         parRow.appendChild(th);
       });
       parRow.innerHTML += '<th></th><th></th>';
+    }
+
+    function updateHoleNumbers() {
+      const holeRow = document.getElementById('holeNumbers');
+      holeRow.innerHTML = '<th></th>';
+      for (let i = 1; i <= 18; i++) {
+        const th = document.createElement('th');
+        th.textContent = i;
+        holeRow.appendChild(th);
+      }
+      holeRow.innerHTML += '<th></th><th></th>';
     }
 
     function buildPlayerRow(playerId, data = []) {
@@ -122,10 +185,12 @@
           document.getElementById('courseSelect').value = data.course;
           currentPar = courses[data.course];
           updateParRow(currentPar);
+          updateHoleNumbers();
           document.querySelector('tbody').innerHTML = '';
           data.players.forEach((p, i) => buildPlayerRow(i, p));
         } else {
           updateParRow(currentPar);
+          updateHoleNumbers();
           for (let i = 0; i < 4; i++) buildPlayerRow(i);
         }
       });
@@ -142,65 +207,12 @@
       courseSelect.onchange = () => {
         currentPar = courses[courseSelect.value];
         updateParRow(currentPar);
+        updateHoleNumbers();
         saveData();
       };
+      updateHoleNumbers();
       loadData();
     });
   </script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 20px;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #999;
-      color: white;
-    }
-    .under-par { background-color: lightgreen; }
-    .over-par { background-color: lightcoral; }
-    .even-par { background-color: white; }
-    input[type="number"], input[type="text"] {
-      width: 50px;
-      text-align: center;
-    }
-    input[type="text"] {
-      width: 100px;
-    }
-  </style>
-</head>
-<body>
-  <h2>Wordle Golf Scorecard</h2>
-  <label for="courseSelect">Choose a course:</label>
-  <select id="courseSelect"></select>
-  <table>
-    <thead>
-      <tr>
-        <th>Player</th>
-        <th colspan="18">Hole</th>
-        <th>Total</th>
-        <th>+/-</th>
-      </tr>
-      <tr>
-        <th></th>
-        <script>
-          for (let i = 1; i <= 18; i++) document.write(`<th>${i}</th>`);
-        </script>
-        <th></th><th></th>
-      </tr>
-      <tr id="parRow"><th>Par</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 </body>
 </html>
