@@ -2,114 +2,149 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🏌️‍♂️ Bully Wordle – Wordle Golf by Jef</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle Golf by Jef</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f8ff;
+      font-family: Arial, sans-serif;
+      background-color: #eef3f7;
       color: #333;
       text-align: center;
-      padding: 40px;
+      padding: 20px;
     }
     h1 {
-      font-size: 2.2em;
-      margin-bottom: 0;
+      font-size: 2em;
+      margin-bottom: 10px;
     }
-    p {
-      max-width: 600px;
-      margin: 10px auto;
+    .instructions {
+      font-size: 0.9em;
+      margin-bottom: 20px;
     }
-    select, input[type="text"], button {
+    select, input {
+      padding: 8px;
+      margin: 10px;
       font-size: 1em;
-      padding: 10px;
-      margin-top: 10px;
     }
-    .score-output {
-      margin-top: 20px;
-      font-size: 1.4em;
-      font-weight: bold;
+    table {
+      border-collapse: collapse;
+      margin: 0 auto 30px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 5px;
+      text-align: center;
+      min-width: 30px;
+    }
+    th {
+      background-color: #ddd;
+    }
+    .under-par {
+      background-color: #c8f7c5;
+    }
+    .par {
+      background-color: #fff;
+    }
+    .over-par {
+      background-color: #f7c5c5;
     }
   </style>
 </head>
 <body>
-  <h1>🏌️ Bully Wordle – Wordle Golf by Jef</h1>
-  <p><strong>Scoring Rules:</strong><br>
-    Lower score = better! Guess it in 1 try (hole-in-one) = 1 stroke. Each additional guess adds a stroke.  
-    6 guesses = max score of 6. Didn’t solve? That’s a 7.<br>
-    Try to stay under par, legend.</p>
+  <h1>⛳ Bully Wordle - Wordle Golf by Jef</h1>
+  <div class="instructions">
+    <strong>Scoring Rules:</strong><br>
+    Guess it in 1 = hole-in-one (1 stroke). Each extra guess = +1 stroke.<br>
+    Max 6 guesses = 6. Didn’t solve = 7.<br>
+    Enter a single digit per hole (e.g., 324235 for 6 holes). Lower = better!
+  </div>
 
-  <p>Select your course and enter your Wordle scores for each hole.  
-    Format: use a single digit for each hole (e.g., 324235 for 6 holes)</p>
-
-  <label for="course">Choose your course:</label>
+  <label for="course">Choose your course: </label>
   <select id="course">
-    <option value="bully">Bully Pulpit (ND)</option>
-    <option value="pinehurst">Pinehurst No. 2 (NC)</option>
-    <option value="bandondunes">Bandon Dunes (OR)</option>
-    <option value="sandhills">Sand Hills (NE)</option>
-    <option value="whistling">Whistling Straits (WI)</option>
-    <option value="pebble">Pebble Beach (CA)</option>
-    <option value="streamsong">Streamsong (FL)</option>
-    <option value="prairieclub">The Prairie Club (NE)</option>
-  </select><br><br>
+    <option>Bully Pulpit (ND)</option>
+    <option>Bandon Dunes (OR)</option>
+    <option>Pinehurst No. 2 (NC)</option>
+    <option>Sand Hills (NE)</option>
+    <option>Streamsong Red (FL)</option>
+    <option>Pacific Dunes (OR)</option>
+    <option>Whistling Straits (WI)</option>
+    <option>Chambers Bay (WA)</option>
+    <option>Kiawah Ocean Course (SC)</option>
+    <option>Erin Hills (WI)</option>
+  </select>
 
-  <label for="scores">Enter your Wordle scores:</label>
-  <input type="text" id="scores" placeholder="e.g., 324235"><br><br>
+  <table>
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th colspan="18">Hole</th>
+        <th>Total</th>
+        <th>± Par</th>
+      </tr>
+      <tr>
+        <th></th>
+        <script>
+          for (let i = 1; i <= 18; i++) {
+            document.write(`<th>${i}</th>`);
+          }
+        </script>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <script>
+        const PAR = 4;
+        const PLAYERS = 4;
 
-  <button onclick="calculateScore()">Submit</button>
+        for (let row = 0; row < PLAYERS; row++) {
+          document.write(`<tr>`);
+          document.write(`<td><input type="text" value="Player ${row + 1}" /></td>`);
 
-  <div class="score-output" id="output"></div>
+          for (let col = 0; col < 18; col++) {
+            document.write(`<td><input type="number" min="1" max="7" class="score" data-row="${row}" data-col="${col}" style="width: 2em;" /></td>`);
+          }
+
+          document.write(`<td id="total-${row}">0</td>`);
+          document.write(`<td id="par-diff-${row}">E</td>`);
+          document.write(`</tr>`);
+        }
+      </script>
+    </tbody>
+  </table>
 
   <script>
-    const parByCourse = {
-      bully: [4, 3, 5, 4, 4, 3, 5, 4, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4],
-      pinehurst: [4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 3, 4, 4],
-      bandondunes: [4, 5, 3, 4, 4, 5, 3, 4, 4, 5, 4, 3, 4, 4, 5, 3, 4, 4],
-      sandhills: [4, 4, 5, 3, 4, 4, 5, 3, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4],
-      whistling: [4, 4, 3, 5, 4, 4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4],
-      pebble: [4, 5, 3, 4, 4, 3, 5, 4, 4, 4, 3, 4, 4, 5, 4, 3, 4, 5],
-      streamsong: [5, 4, 3, 4, 4, 5, 3, 4, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4],
-      prairieclub: [4, 5, 4, 3, 4, 4, 5, 3, 4, 4, 4, 3, 5, 4, 4, 3, 4, 5]
-    };
+    const inputs = document.querySelectorAll('.score');
 
-    function calculateScore() {
-      const course = document.getElementById("course").value;
-      const scores = document.getElementById("scores").value.trim();
-      const par = parByCourse[course];
+    function updateScores() {
+      for (let r = 0; r < 4; r++) {
+        let total = 0;
+        for (let c = 0; c < 18; c++) {
+          const input = document.querySelector(`input[data-row="${r}"][data-col="${c}"]`);
+          const val = parseInt(input.value);
 
-      if (scores.length !== par.length) {
-        document.getElementById("output").innerHTML =
-          `This course has ${par.length} holes. You entered ${scores.length} scores.`;
-        return;
+          if (!isNaN(val)) total += val;
+        }
+        document.getElementById(`total-${r}`).textContent = total;
+
+        const diff = total - (18 * PAR);
+        const parCell = document.getElementById(`par-diff-${r}`);
+        parCell.textContent = (diff > 0 ? `+${diff}` : diff === 0 ? "E" : diff);
       }
 
-      let total = 0;
-      let totalPar = 0;
-      let details = [];
-
-      for (let i = 0; i < scores.length; i++) {
-        let stroke = parseInt(scores[i]);
-        if (isNaN(stroke) || stroke < 1 || stroke > 7) {
-          document.getElementById("output").innerHTML =
-            `Invalid score "${scores[i]}" on hole ${i + 1}. Please use digits 1–7.`;
+      // color-code inputs
+      inputs.forEach(input => {
+        const val = parseInt(input.value);
+        if (isNaN(val)) {
+          input.className = '';
           return;
         }
-
-        let parHole = par[i];
-        total += stroke;
-        totalPar += parHole;
-        let diff = stroke - parHole;
-        let result = diff === 0 ? "par" : (diff < 0 ? `${Math.abs(diff)} under` : `${diff} over`);
-        details.push(`Hole ${i + 1}: ${stroke} (${result})`);
-      }
-
-      let finalResult = total === totalPar ? "EVEN PAR" : (total < totalPar ? `${totalPar - total} UNDER PAR` : `${total - totalPar} OVER PAR`);
-
-      document.getElementById("output").innerHTML =
-        `<p>Total strokes: <strong>${total}</strong><br>
-        Course par: <strong>${totalPar}</strong><br>
-        Final score: <strong>${finalResult}</strong></p><hr><p>${details.join("<br>")}</p>`;
+        if (val < PAR) input.className = 'under-par';
+        else if (val === PAR) input.className = 'par';
+        else input.className = 'over-par';
+      });
     }
+
+    inputs.forEach(input => input.addEventListener('input', updateScores));
   </script>
 </body>
 </html>
