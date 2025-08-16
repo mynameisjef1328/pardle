@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bully Wordle - Wordle Golf by Jef</title>
+  <title>🏌️‍♂️ Bully Wordle – Wordle Golf by Jef</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -22,77 +22,93 @@
     select, input[type="text"], button {
       font-size: 1em;
       padding: 10px;
-      margin: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      margin-top: 10px;
     }
-    #results {
-      margin-top: 30px;
+    .score-output {
+      margin-top: 20px;
+      font-size: 1.4em;
       font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>🏌️‍♂️ Bully Wordle - Wordle Golf by Jef</h1>
-  <p><strong>Scoring Rules:</strong><br>Lower score = better! Guess it in 1 try (hole-in-one) = 1 stroke. Each additional guess adds a stroke. 6 guesses = max score of 6. Didn't solve? That's a 7. Try to stay under par, legend.</p>
-  
-  <p>Select your course and enter your Wordle scores for each hole. Format: use a single digit for each hole (e.g., 324235 for 6 holes)</p>
+  <h1>🏌️ Bully Wordle – Wordle Golf by Jef</h1>
+  <p><strong>Scoring Rules:</strong><br>
+    Lower score = better! Guess it in 1 try (hole-in-one) = 1 stroke. Each additional guess adds a stroke.  
+    6 guesses = max score of 6. Didn’t solve? That’s a 7.<br>
+    Try to stay under par, legend.</p>
+
+  <p>Select your course and enter your Wordle scores for each hole.  
+    Format: use a single digit for each hole (e.g., 324235 for 6 holes)</p>
 
   <label for="course">Choose your course:</label>
   <select id="course">
     <option value="bully">Bully Pulpit (ND)</option>
-    <option value="pebble">Pebble Beach (CA)</option>
     <option value="pinehurst">Pinehurst No. 2 (NC)</option>
-    <option value="st-andrews">St Andrews (Scotland)</option>
-  </select><br>
+    <option value="bandondunes">Bandon Dunes (OR)</option>
+    <option value="sandhills">Sand Hills (NE)</option>
+    <option value="whistling">Whistling Straits (WI)</option>
+    <option value="pebble">Pebble Beach (CA)</option>
+    <option value="streamsong">Streamsong (FL)</option>
+    <option value="prairieclub">The Prairie Club (NE)</option>
+  </select><br><br>
 
   <label for="scores">Enter your Wordle scores:</label>
-  <input type="text" id="scores" placeholder="e.g., 324235"><br>
+  <input type="text" id="scores" placeholder="e.g., 324235"><br><br>
 
   <button onclick="calculateScore()">Submit</button>
 
-  <div id="results"></div>
+  <div class="score-output" id="output"></div>
 
   <script>
-    function calculateScore() {
-      const raw = document.getElementById("scores").value.trim();
-      const course = document.getElementById("course").value;
-      const resultsDiv = document.getElementById("results");
+    const parByCourse = {
+      bully: [4, 3, 5, 4, 4, 3, 5, 4, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4],
+      pinehurst: [4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 3, 4, 4],
+      bandondunes: [4, 5, 3, 4, 4, 5, 3, 4, 4, 5, 4, 3, 4, 4, 5, 3, 4, 4],
+      sandhills: [4, 4, 5, 3, 4, 4, 5, 3, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4],
+      whistling: [4, 4, 3, 5, 4, 4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4],
+      pebble: [4, 5, 3, 4, 4, 3, 5, 4, 4, 4, 3, 4, 4, 5, 4, 3, 4, 5],
+      streamsong: [5, 4, 3, 4, 4, 5, 3, 4, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4],
+      prairieclub: [4, 5, 4, 3, 4, 4, 5, 3, 4, 4, 4, 3, 5, 4, 4, 3, 4, 5]
+    };
 
-      if (!/^[1-7]+$/.test(raw)) {
-        resultsDiv.innerHTML = "Please enter only digits 1–7 (no spaces or letters).";
+    function calculateScore() {
+      const course = document.getElementById("course").value;
+      const scores = document.getElementById("scores").value.trim();
+      const par = parByCourse[course];
+
+      if (scores.length !== par.length) {
+        document.getElementById("output").innerHTML =
+          `This course has ${par.length} holes. You entered ${scores.length} scores.`;
         return;
       }
 
-      const strokes = raw.split('').map(Number);
-      const total = strokes.reduce((a, b) => a + b, 0);
-      const holes = strokes.length;
+      let total = 0;
+      let totalPar = 0;
+      let details = [];
 
-      let par = 0;
-      if (holes === 6) par = 21;
-      else if (holes === 9) par = 32;
-      else if (holes === 18) par = 72;
-      else par = holes * 3.5;
+      for (let i = 0; i < scores.length; i++) {
+        let stroke = parseInt(scores[i]);
+        if (isNaN(stroke) || stroke < 1 || stroke > 7) {
+          document.getElementById("output").innerHTML =
+            `Invalid score "${scores[i]}" on hole ${i + 1}. Please use digits 1–7.`;
+          return;
+        }
 
-      const diff = total - par;
-      let scoreText = diff === 0 ? "Even par" : (diff > 0 ? `+${diff}` : `${diff}`);
-
-      resultsDiv.innerHTML = `
-        <p>You played <strong>${holes}</strong> holes at <strong>${getCourseName(course)}</strong>.</p>
-        <p>Total strokes: <strong>${total}</strong></p>
-        <p>Course par: <strong>${par}</strong></p>
-        <p>Your score: <strong>${scoreText}</strong></p>
-      `;
-    }
-
-    function getCourseName(val) {
-      switch(val) {
-        case "bully": return "Bully Pulpit (ND)";
-        case "pebble": return "Pebble Beach (CA)";
-        case "pinehurst": return "Pinehurst No. 2 (NC)";
-        case "st-andrews": return "St Andrews (Scotland)";
-        default: return "Unknown";
+        let parHole = par[i];
+        total += stroke;
+        totalPar += parHole;
+        let diff = stroke - parHole;
+        let result = diff === 0 ? "par" : (diff < 0 ? `${Math.abs(diff)} under` : `${diff} over`);
+        details.push(`Hole ${i + 1}: ${stroke} (${result})`);
       }
+
+      let finalResult = total === totalPar ? "EVEN PAR" : (total < totalPar ? `${totalPar - total} UNDER PAR` : `${total - totalPar} OVER PAR`);
+
+      document.getElementById("output").innerHTML =
+        `<p>Total strokes: <strong>${total}</strong><br>
+        Course par: <strong>${totalPar}</strong><br>
+        Final score: <strong>${finalResult}</strong></p><hr><p>${details.join("<br>")}</p>`;
     }
   </script>
 </body>
