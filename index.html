@@ -29,6 +29,7 @@
     .controls button {
       padding: 8px 14px;
       font-size: 14px;
+      cursor: pointer;
     }
 
     table {
@@ -67,6 +68,23 @@
       font-size: 12px;
       cursor: pointer;
     }
+
+    .saved-msg {
+      font-size: 12px;
+      color: green;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .saved-msg.show {
+      display: block;
+      animation: fadeOut 2s forwards;
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; display: none; }
+    }
   </style>
 </head>
 <body>
@@ -80,7 +98,6 @@
     <thead>
       <tr>
         <th>Player</th>
-        <!-- Hole headers -->
         <script>
           document.write([...Array(18)].map((_, i) => `<th>H${i + 1}</th>`).join(''));
         </script>
@@ -106,7 +123,6 @@
     const gameId = "wordle-default";
     const parValues = [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5];
     const parSum = parValues.reduce((a, b) => a + b, 0);
-
     const scorecardBody = document.getElementById("scorecard-body");
 
     function renderScorecard(players = {}) {
@@ -118,6 +134,7 @@
         nameCell.textContent = player;
 
         let totalScore = 0;
+        let validScores = 0;
 
         for (let i = 0; i < 18; i++) {
           const score = data?.scores?.[i] ?? "";
@@ -130,7 +147,6 @@
           input.value = score;
           input.min = 1;
           input.max = 10;
-          input.style.textAlign = "center";
 
           const commentBox = document.createElement("input");
           commentBox.type = "text";
@@ -142,12 +158,16 @@
           submitBtn.textContent = "Submit";
           submitBtn.style.display = "none";
 
+          const savedMsg = document.createElement("div");
+          savedMsg.className = "saved-msg";
+          savedMsg.textContent = "Saved ✅";
+
           input.addEventListener("input", () => {
-            submitBtn.style.display = "inline";
+            submitBtn.style.display = "inline-block";
           });
 
           commentBox.addEventListener("input", () => {
-            submitBtn.style.display = "inline";
+            submitBtn.style.display = "inline-block";
           });
 
           submitBtn.onclick = () => {
@@ -156,30 +176,46 @@
 
             db.ref(`games/${gameId}/${player}/scores/${i}`).set(scoreValue);
             db.ref(`games/${gameId}/${player}/comments/${i}`).set(commentValue);
+
             submitBtn.style.display = "none";
+            savedMsg.classList.add("show");
+            setTimeout(() => savedMsg.classList.remove("show"), 2000);
           };
+
+          if (!isNaN(score)) {
+            totalScore += parseInt(score);
+            validScores++;
+          }
 
           cell.appendChild(input);
           cell.appendChild(document.createElement("br"));
           cell.appendChild(commentBox);
           cell.appendChild(document.createElement("br"));
           cell.appendChild(submitBtn);
-
-          if (!isNaN(score)) totalScore += parseInt(score);
+          cell.appendChild(savedMsg);
         }
 
         const totalCell = row.insertCell();
-        const diff = totalScore - parSum;
-        totalCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff);
+        if (validScores === 18) {
+          const diff = totalScore - parSum;
+          totalCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff);
+        } else {
+          totalCell.textContent = "--";
+        }
       });
     }
 
     function promptAddPlayer() {
       const name = prompt("Enter player name:");
-      if (name) {
-        const emptyScores = Array(18).fill("");
-        const emptyComments = Array(18).fill("");
-        db.ref(`games/${gameId}/${name}`).set({ scores: emptyScores, comments: emptyComments });
+      if (name && name.trim()) {
+        const playerRef = db.ref(`games/${gameId}/${name}`);
+        playerRef.once("value", (snapshot) => {
+          if (!snapshot.exists()) {
+            const emptyScores = Array(18).fill("");
+            const emptyComments = Array(18).fill("");
+            playerRef.set({ scores: emptyScores, comments: emptyComments });
+          }
+        });
       }
     }
 
