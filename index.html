@@ -75,10 +75,8 @@
         <th>Par</th>
       </tr>
     </thead>
-    <tbody id="scorecardBody"></tbody>
-
-<script>
-  const tbody = document.getElementById("scorecardBody");
+    <tbody>
+      <script>
         const courses = {
           'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
           'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
@@ -94,6 +92,7 @@
 
         const parRow = document.getElementById('parRow');
         const courseSelect = document.getElementById('courseSelect');
+        const tbody = document.querySelector('tbody');
 
         Object.keys(courses).forEach(course => {
           const option = document.createElement('option');
@@ -191,65 +190,54 @@ row.querySelector('.diff').textContent = total
         }
 
         async function saveScores() {
-  const selectedCourse = courseSelect.value;
-  if (!selectedCourse) return; // Don't save unless a course is selected
-
   const data = {
-    course: selectedCourse,
+    course: courseSelect.value,
     players: []
   };
 
   tbody.querySelectorAll('tr').forEach(row => {
-    const nameInput = row.querySelector('input[type="text"]');
-    const name = nameInput?.value.trim();
-
-    if (name) {
-      const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
-      data.players.push({ name, scores });
-    }
+    const name = row.querySelector('input[type="text"]')?.value || '';
+    const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
+    data.players.push({ name, scores });
   });
 
   try {
     await db.collection("scorecards").doc("shared").set(data);
-    console.log("✅ Scores saved to Firebase!");
+    console.log("Scores saved to Firebase!");
   } catch (error) {
-    console.error("❌ Error saving scores:", error);
+    console.error("Error saving scores:", error);
   }
 }
 
-       async function loadScorecard(courseName) {
-  const statusDiv = document.getElementById("status");
+        async function loadScorecard(courseName) {
   tbody.innerHTML = '';
-  currentPar = courses[courseName]; // ensure this is set
+  currentPar = courses[courseName];
   updateParRow(currentPar);
 
   try {
     const doc = await db.collection("scorecards").doc("shared").get();
-    if (doc.exists) {
-      const saved = doc.data();
+    const saved = doc.exists ? doc.data() : null;
+    const players = saved?.course === courseName ? saved.players : [];
 
-      if (!saved || !saved.players || !Array.isArray(saved.players)) {
-        throw new Error("Saved scorecard is malformed or missing player data.");
-      }
+    for (let i = 0; i < 4; i++) {
+      const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
+      const row = buildPlayerRow(p.name, i, p.scores);
+      tbody.appendChild(row);
+    }
+  } catch (error) {
+    console.error("Error loading scores:", error);
+  }
+}
 
-      statusDiv.textContent = `✅ Loaded scorecard for course: ${saved.course}`;
-      courseSelect.value = saved.course;
-
-      const players = saved.course === courseName ? saved.players : [];
-      for (let i = 0; i < 4; i++) {
-        const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
-        const row = buildPlayerRow(p.name, i, p.scores);
-        tbody.appendChild(row);
-      }
         courseSelect.addEventListener('change', e => {
           loadScorecard(e.target.value);
           saveScores();
         });
 
         // Load last selected course or default
-        // Load from Firebase on first load
-courseSelect.value = courseSelect.options[0].value;
-loadScorecard(courseSelect.value);
+        const saved = JSON.parse(localStorage.getItem('scorecardData'));
+        courseSelect.value = saved?.course || courseSelect.options[0].value;
+        loadScorecard(courseSelect.value);
       </script>
     </tbody>
   </table>
@@ -270,6 +258,5 @@ loadScorecard(courseSelect.value);
   const app = firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 </script>
-  <div id="status" style="margin-top: 20px; font-weight: bold;"></div>
 </body>
 </html>
