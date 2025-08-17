@@ -217,25 +217,42 @@ row.querySelector('.diff').textContent = total
   }
 }
 
-        async function loadScorecard(courseName) {
+       async function loadScorecard(courseName) {
   const statusDiv = document.getElementById("status");
   tbody.innerHTML = '';
-  currentPar = courses[courseName];
+  currentPar = courses[courseName]; // ensure this is set
   updateParRow(currentPar);
 
   try {
     const doc = await db.collection("scorecards").doc("shared").get();
     if (doc.exists) {
       const saved = doc.data();
+
+      if (!saved || !saved.players || !Array.isArray(saved.players)) {
+        throw new Error("Saved scorecard is malformed or missing player data.");
+      }
+
       statusDiv.textContent = `✅ Loaded scorecard for course: ${saved.course}`;
       courseSelect.value = saved.course;
 
       const players = saved.course === courseName ? saved.players : [];
-for (let i = 0; i < 4; i++) {
-  const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
-  const row = buildPlayerRow(p.name, i, p.scores);
-  tbody.appendChild(row);
-}
+      for (let i = 0; i < 4; i++) {
+        const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
+        const row = buildPlayerRow(p.name, i, p.scores);
+        tbody.appendChild(row);
+      }
+    } else {
+      statusDiv.textContent = `📭 No scorecard found. Starting fresh.`;
+      for (let i = 0; i < 4; i++) {
+        const row = buildPlayerRow(`Player ${i + 1}`, i);
+        tbody.appendChild(row);
+      }
+    }
+  } catch (error) {
+    console.error(error); // Log exact error
+    statusDiv.textContent = `🚨 Error loading scores: ${error.message}`;
+  }
+} 
 
     } else {
       statusDiv.textContent = `📭 No scorecard found. Starting fresh.`;
