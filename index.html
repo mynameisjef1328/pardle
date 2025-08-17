@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <title>Wordle Golf Scorecard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -48,14 +51,10 @@
       color: white;
     }
 
-    input[type="number"] {
-      width: 40px;
+    input[type="number"], input[type="text"] {
+      width: 50px;
       text-align: center;
-    }
-
-    input[type="text"] {
-      width: 60px;
-      font-size: 12px;
+      font-size: 13px;
     }
 
     .submit-btn {
@@ -97,7 +96,7 @@
         <script>
           document.write([...Array(18)].map((_, i) => `<th>H${i + 1}</th>`).join(''));
         </script>
-        <th>+/-</th>
+        <th>Total</th>
       </tr>
     </thead>
     <tbody id="scorecard-body"></tbody>
@@ -129,12 +128,7 @@
           if (!snapshot.exists()) {
             const emptyScores = Array(18).fill("");
             const emptyComments = Array(18).fill("");
-            playerRef.set({ scores: emptyScores, comments: emptyComments }, () => {
-              // Force refresh UI after setting
-              db.ref(`games/${gameId}`).once("value", (snapshot) => {
-                renderScorecard(snapshot.val() || {});
-              });
-            });
+            playerRef.set({ scores: emptyScores, comments: emptyComments });
           }
         });
       }
@@ -153,14 +147,14 @@
 
         for (let i = 0; i < 18; i++) {
           const cell = row.insertCell();
-          const score = data.scores?.[i] ?? "";
+          const score = parseInt(data.scores?.[i]);
           const comment = data.comments?.[i] ?? "";
 
           const input = document.createElement("input");
           input.type = "number";
           input.min = 1;
           input.max = 10;
-          input.value = score;
+          input.value = isNaN(score) ? "" : score;
           input.style.textAlign = "center";
 
           const commentBox = document.createElement("input");
@@ -183,20 +177,19 @@
           submitBtn.onclick = () => {
             const newScore = parseInt(input.value);
             const newComment = commentBox.value;
-            db.ref(`games/${gameId}/${player}/scores/${i}`).set(newScore || "");
-            db.ref(`games/${gameId}/${player}/comments/${i}`).set(newComment || "");
+            db.ref(`games/${gameId}/${player}/scores/${i}`).set(!isNaN(newScore) ? newScore : "");
+            db.ref(`games/${gameId}/${player}/comments/${i}`).set(newComment);
             submitBtn.style.display = "none";
             savedMsg.classList.add("show");
             setTimeout(() => savedMsg.classList.remove("show"), 2000);
           };
 
-          // Tally score if valid
+          // For calculating running +/- totals
           if (!isNaN(score)) {
-            playerTotal += parseInt(score);
+            playerTotal += score;
             parTotal += parValues[i];
           }
 
-          // Append to cell
           cell.appendChild(input);
           cell.appendChild(document.createElement("br"));
           cell.appendChild(commentBox);
@@ -206,9 +199,13 @@
         }
 
         const totalCell = row.insertCell();
-        const diff = playerTotal - parTotal;
-        totalCell.textContent = isNaN(diff) ? "--" : (diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff));
-        totalCell.style.fontWeight = "bold";
+        if (parTotal === 0) {
+          totalCell.textContent = "--";
+        } else {
+          const diff = playerTotal - parTotal;
+          totalCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" : "") + diff;
+        }
+
         totalCell.style.textAlign = "center";
       });
     }
