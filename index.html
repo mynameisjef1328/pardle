@@ -1,219 +1,184 @@
+Posting 2 draft here:
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Wordle Golf Scorecard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Firebase v8 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
+  <title>Wordle Golf Scorecard</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 20px;
       background: #f9f9f9;
-      padding: 30px;
     }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .controls {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .controls button {
-      padding: 8px 14px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
     table {
       border-collapse: collapse;
       width: 100%;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
     th, td {
       border: 1px solid #ccc;
-      padding: 6px;
+      padding: 8px;
       text-align: center;
-      font-size: 14px;
     }
-
     th {
-      background-color: #666;
+      background-color: #999;
       color: white;
     }
-
-    input[type="number"], input[type="text"] {
+    .under-par {
+      background-color: lightgreen;
+    }
+    .over-par {
+      background-color: lightcoral;
+    }
+    .even-par {
+      background-color: white;
+    }
+    input[type="number"] {
       width: 50px;
-      text-align: center;
-      font-size: 13px;
     }
-
-    .submit-btn {
-      margin-top: 4px;
-      padding: 4px 6px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .saved-msg {
-      font-size: 12px;
-      color: green;
-      margin-top: 4px;
-      display: none;
-    }
-
-    .saved-msg.show {
-      display: block;
-      animation: fadeOut 2s forwards;
-    }
-
-    @keyframes fadeOut {
-      0% { opacity: 1; }
-      100% { opacity: 0; display: none; }
+    input[type="text"] {
+      width: 100px;
     }
   </style>
 </head>
 <body>
   <h2>Wordle Golf Scorecard</h2>
 
-  <div class="controls">
-    <button onclick="promptAddPlayer()">+ Add Player</button>
-  </div>
+  <label for="courseSelect">Choose a course:</label>
+  <select id="courseSelect"></select>
 
-  <table>
+  <table id="scorecard">
     <thead>
       <tr>
         <th>Player</th>
-        <script>
-          document.write([...Array(18)].map((_, i) => `<th>H${i + 1}</th>`).join(''));
-        </script>
+        <th colspan="18">Hole</th>
         <th>Total</th>
+        <th>+/-</th>
+      </tr>
+      <tr>
+        <th></th>
+        <script>
+          for (let i = 1; i <= 18; i++) {
+            document.write(`<th>${i}</th>`);
+          }
+        </script>
+        <th></th>
+        <th></th>
+      </tr>
+      <tr id="parRow">
+        <th>Par</th>
       </tr>
     </thead>
-    <tbody id="scorecard-body"></tbody>
-  </table>
+    <tbody>
+      <script>
+        const courses = {
+          'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
+          'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
+          'Augusta':      [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
+          'Pine Valley':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
+          'Torrey Pines': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
+          'TPC Sawgrass': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
+          'Bethpage Black': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
+          'Whistling Straits': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
+          'Kiawah Island': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
+          'Bandon Dunes': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
+        };
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
-      authDomain: "wordle-golf-6c636.firebaseapp.com",
-      databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com",
-      projectId: "wordle-golf-6c636",
-      storageBucket: "wordle-golf-6c636.appspot.com",
-      messagingSenderId: "672104265687",
-      appId: "1:672104265687:web:2c16b0539fcd52ca4d7d92"
-    };
+        const parRow = document.getElementById('parRow');
+        const courseSelect = document.getElementById('courseSelect');
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const gameId = "wordle-default";
-    const scorecardBody = document.getElementById("scorecard-body");
-
-    const parValues = [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5];
-
-    function promptAddPlayer() {
-      const name = prompt("Enter player name:");
-      if (name && name.trim()) {
-        const playerRef = db.ref(`games/${gameId}/${name}`);
-        playerRef.once("value", (snapshot) => {
-          if (!snapshot.exists()) {
-            const emptyScores = Array(18).fill("");
-            const emptyComments = Array(18).fill("");
-            playerRef.set({ scores: emptyScores, comments: emptyComments });
-          }
+        Object.keys(courses).forEach(course => {
+          const option = document.createElement('option');
+          option.value = course;
+          option.textContent = course;
+          courseSelect.appendChild(option);
         });
-      }
-    }
 
-    function renderScorecard(players = {}) {
-      scorecardBody.innerHTML = "";
+        function updateParRow(parValues) {
+          parRow.innerHTML = '<th>Par</th>';
+          parValues.forEach(par => {
+            const th = document.createElement('th');
+            th.textContent = par;
+            parRow.appendChild(th);
+          });
+          parRow.innerHTML += '<th></th><th></th>';
+        }
 
-      Object.entries(players).forEach(([player, data]) => {
-        const row = scorecardBody.insertRow();
-        const nameCell = row.insertCell();
-        nameCell.textContent = player;
+        function buildPlayerRow(name = '') {
+          const row = document.createElement('tr');
 
-        let playerTotal = 0;
-        let parTotal = 0;
+          const nameCell = document.createElement('td');
+          const nameInput = document.createElement('input');
+          nameInput.type = 'text';
+          nameInput.value = name;
+          nameCell.appendChild(nameInput);
+          row.appendChild(nameCell);
 
-        for (let i = 0; i < 18; i++) {
-          const cell = row.insertCell();
-          const score = parseInt(data.scores?.[i]);
-          const comment = data.comments?.[i] ?? "";
-
-          const input = document.createElement("input");
-          input.type = "number";
-          input.min = 1;
-          input.max = 10;
-          input.value = isNaN(score) ? "" : score;
-          input.style.textAlign = "center";
-
-          const commentBox = document.createElement("input");
-          commentBox.type = "text";
-          commentBox.value = comment;
-          commentBox.placeholder = "📝";
-
-          const submitBtn = document.createElement("button");
-          submitBtn.className = "submit-btn";
-          submitBtn.textContent = "Submit";
-          submitBtn.style.display = "none";
-
-          const savedMsg = document.createElement("div");
-          savedMsg.className = "saved-msg";
-          savedMsg.textContent = "Saved ✅";
-
-          input.addEventListener("input", () => submitBtn.style.display = "inline-block");
-          commentBox.addEventListener("input", () => submitBtn.style.display = "inline-block");
-
-          submitBtn.onclick = () => {
-            const newScore = parseInt(input.value);
-            const newComment = commentBox.value;
-            db.ref(`games/${gameId}/${player}/scores/${i}`).set(!isNaN(newScore) ? newScore : "");
-            db.ref(`games/${gameId}/${player}/comments/${i}`).set(newComment);
-            submitBtn.style.display = "none";
-            savedMsg.classList.add("show");
-            setTimeout(() => savedMsg.classList.remove("show"), 2000);
-          };
-
-          // For calculating running +/- totals
-          if (!isNaN(score)) {
-            playerTotal += score;
-            parTotal += parValues[i];
+          for (let i = 0; i < 18; i++) {
+            const cell = document.createElement('td');
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = 1;
+            input.addEventListener('input', () => calculate(row));
+            cell.appendChild(input);
+            row.appendChild(cell);
           }
 
-          cell.appendChild(input);
-          cell.appendChild(document.createElement("br"));
-          cell.appendChild(commentBox);
-          cell.appendChild(document.createElement("br"));
-          cell.appendChild(submitBtn);
-          cell.appendChild(savedMsg);
+          const totalCell = document.createElement('td');
+          totalCell.className = 'total';
+          totalCell.textContent = '0';
+          row.appendChild(totalCell);
+
+          const diffCell = document.createElement('td');
+          diffCell.className = 'diff';
+          diffCell.textContent = '0';
+          row.appendChild(diffCell);
+
+          return row;
         }
 
-        const totalCell = row.insertCell();
-        if (parTotal === 0) {
-          totalCell.textContent = "--";
-        } else {
-          const diff = playerTotal - parTotal;
-          totalCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" : "") + diff;
+        function calculate(row) {
+          const inputs = row.querySelectorAll('input[type="number"]');
+          let total = 0;
+          let parTotal = 0;
+
+          inputs.forEach((input, index) => {
+            const val = parseInt(input.value);
+            const par = currentPar[index];
+            const cell = input.parentElement;
+            cell.className = '';
+            if (!isNaN(val)) {
+              total += val;
+              parTotal += par;
+              if (val < par) cell.className = 'under-par';
+              else if (val > par) cell.className = 'over-par';
+              else cell.className = 'even-par';
+            }
+          });
+
+          row.querySelector('.total').textContent = total || '0';
+          row.querySelector('.diff').textContent = total ? (total - parTotal) : '0';
         }
 
-        totalCell.style.textAlign = "center";
-      });
-    }
+        const tbody = document.querySelector('tbody');
+        let currentPar = courses[courseSelect.value];
 
-    db.ref(`games/${gameId}`).on("value", (snapshot) => {
-      const data = snapshot.val() || {};
-      renderScorecard(data);
-    });
-  </script>
+        function loadScorecard(courseName) {
+          tbody.innerHTML = '';
+          currentPar = courses[courseName];
+          updateParRow(currentPar);
+          for (let i = 1; i <= 4; i++) {
+            const row = buildPlayerRow(`Player ${i}`);
+            tbody.appendChild(row);
+          }
+        }
+
+        courseSelect.addEventListener('change', (e) => loadScorecard(e.target.value));
+
+        loadScorecard(courseSelect.value);
+      </script>
+    </tbody>
+  </table>
 </body>
 </html>
