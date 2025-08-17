@@ -100,7 +100,7 @@
         let currentPar = [];
 
         function updateParRow(parValues) {
-          parRow.innerHTML = '<th>Par</th>';
+          parRow.innerHTML += '<th>Par</th><th></th>';
           parValues.forEach(par => {
             const th = document.createElement('th');
             th.textContent = par;
