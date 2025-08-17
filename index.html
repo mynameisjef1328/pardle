@@ -221,6 +221,7 @@ row.querySelector('.diff').textContent = total
       const saved = doc.data();
       statusDiv.textContent = `✅ Loaded scorecard for course: ${saved.course}`;
       courseSelect.value = saved.course;
+
       const players = saved.course === courseName ? saved.players : [];
       for (let i = 0; i < 4; i++) {
         const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
@@ -238,7 +239,6 @@ row.querySelector('.diff').textContent = total
     statusDiv.textContent = `🚨 Error loading scores: ${error.message}`;
   }
 }
-
         courseSelect.addEventListener('change', e => {
           loadScorecard(e.target.value);
           saveScores();
