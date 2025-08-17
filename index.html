@@ -75,8 +75,10 @@
         <th>Par</th>
       </tr>
     </thead>
-    <tbody>
-      <script>
+    <tbody id="scorecardBody"></tbody>
+
+<script>
+  const tbody = document.getElementById("scorecardBody");
         const courses = {
           'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
           'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
