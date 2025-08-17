@@ -100,14 +100,25 @@
         let currentPar = [];
 
         function updateParRow(parValues) {
-          parRow.innerHTML += '<th>Par</th><th></th>';
-          parValues.forEach(par => {
-            const th = document.createElement('th');
-            th.textContent = par;
-            parRow.appendChild(th);
-          });
-          parRow.innerHTML += '<th></th><th></th>';
-        }
+  // Clear the row
+  parRow.innerHTML = '';
+
+  // First cell under the "Player" column (blank)
+  parRow.innerHTML += '<th></th>';
+
+  // Add the 18 hole par values
+  parValues.forEach(par => {
+    const th = document.createElement('th');
+    th.textContent = par;
+    parRow.appendChild(th);
+  });
+
+  // Add "Par" label in the Total column
+  parRow.innerHTML += '<th>Par</th>';
+
+  // Empty +/- cell
+  parRow.innerHTML += '<th></th>';
+}
 
         function buildPlayerRow(name = '', rowIndex = 0, savedScores = []) {
           const row = document.createElement('tr');
