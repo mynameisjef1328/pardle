@@ -236,13 +236,6 @@ row.querySelector('.diff').textContent = total
 
         courseSelect.addEventListener('change', e => {
           loadScorecard(e.target.value);
-          db.collection('scorecards').doc('current')
-  .onSnapshot(doc => {
-    const data = doc.data();
-    if (data.course === courseSelect.value) {
-      loadScorecard(data.course);
-    }
-  });
           saveScores();
         });
 
@@ -250,6 +243,13 @@ row.querySelector('.diff').textContent = total
         const saved = JSON.parse(localStorage.getItem('scorecardData'));
         courseSelect.value = saved?.course || courseSelect.options[0].value;
         loadScorecard(courseSelect.value);
+        db.collection('scorecards').doc('current')
+  .onSnapshot(doc => {
+    const data = doc.data();
+    if (data.course === courseSelect.value) {
+      loadScorecard(data.course);
+    }
+  });
       </script>
     </tbody>
   </table>
