@@ -210,22 +210,20 @@ row.querySelector('.diff').textContent = total
 }
 
         async function loadScorecard(courseName) {
-  tbody.innerHTML = '';
-  currentPar = courses[courseName];
-  updateParRow(currentPar);
-
+  const statusDiv = document.getElementById("status");
   try {
     const doc = await db.collection("scorecards").doc("shared").get();
-    const saved = doc.exists ? doc.data() : null;
-    const players = saved?.course === courseName ? saved.players : [];
-
-    for (let i = 0; i < 4; i++) {
-      const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
-      const row = buildPlayerRow(p.name, i, p.scores);
-      tbody.appendChild(row);
+    if (doc.exists) {
+      const saved = doc.data();
+      statusDiv.textContent = `✅ Loaded scorecard for course: ${saved.course}`;
+      courseSelect.value = saved.course;
+      saved.players.forEach(player => addPlayerRow(player.name, player.scores));
+    } else {
+      statusDiv.textContent = `📭 No scorecard found. Starting fresh.`;
+      courseSelect.value = courseName;
     }
   } catch (error) {
-    console.error("Error loading scores:", error);
+    statusDiv.textContent = `🚨 Error loading scores: ${error.message}`;
   }
 }
 
