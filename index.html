@@ -241,30 +241,6 @@ row.querySelector('.diff').textContent = total
         const row = buildPlayerRow(p.name, i, p.scores);
         tbody.appendChild(row);
       }
-    } else {
-      statusDiv.textContent = `📭 No scorecard found. Starting fresh.`;
-      for (let i = 0; i < 4; i++) {
-        const row = buildPlayerRow(`Player ${i + 1}`, i);
-        tbody.appendChild(row);
-      }
-    }
-  } catch (error) {
-    console.error(error); // Log exact error
-    statusDiv.textContent = `🚨 Error loading scores: ${error.message}`;
-  }
-} 
-
-    } else {
-      statusDiv.textContent = `📭 No scorecard found. Starting fresh.`;
-      for (let i = 0; i < 4; i++) {
-        const row = buildPlayerRow(`Player ${i + 1}`, i);
-        tbody.appendChild(row);
-      }
-    }
-  } catch (error) {
-    statusDiv.textContent = `🚨 Error loading scores: ${error.message}`;
-  }
-}
         courseSelect.addEventListener('change', e => {
           loadScorecard(e.target.value);
           saveScores();
