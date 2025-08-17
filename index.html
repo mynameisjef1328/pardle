@@ -205,34 +205,60 @@ row.querySelector('.diff').textContent = total
         }
 
         function saveScores() {
-          const data = {
-            course: courseSelect.value,
-            players: []
-          };
+  const data = {
+    course: courseSelect.value,
+    players: []
+  };
 
-          tbody.querySelectorAll('tr').forEach(row => {
-            const name = row.querySelector('input[type="text"]')?.value || '';
-            const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
-            data.players.push({ name, scores });
-          });
+  tbody.querySelectorAll('tr').forEach(row => {
+    const name = row.querySelector('input[type="text"]')?.value || '';
+    const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
+    data.players.push({ name, scores });
+  });
 
-          localStorage.setItem('scorecardData', JSON.stringify(data));
-        }
+  // Save to Firestore
+  db.collection('scorecards').doc('current').set(data)
+    .then(() => console.log("Scores saved to Firestore"))
+    .catch(error => console.error("Error saving scores:", error));
+
+  // Optional: Save to localStorage for instant feel
+  localStorage.setItem('scorecardData', JSON.stringify(data));
+}
 
         function loadScorecard(courseName) {
-          tbody.innerHTML = '';
-          currentPar = courses[courseName];
-          updateParRow(currentPar);
+  tbody.innerHTML = '';
+  currentPar = courses[courseName];
+  updateParRow(currentPar);
 
-          const saved = JSON.parse(localStorage.getItem('scorecardData'));
-          const players = saved?.course === courseName ? saved.players : [];
-
-          for (let i = 0; i < 4; i++) {
-            const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
-            const row = buildPlayerRow(p.name, i, p.scores);
-            tbody.appendChild(row);
-          }
+  // Load from Firestore
+  db.collection('scorecards').doc('current').get()
+    .then(doc => {
+      const data = doc.data();
+      if (data?.course === courseName) {
+        data.players.forEach((p, i) => {
+          const row = buildPlayerRow(p.name, i, p.scores);
+          tbody.appendChild(row);
+        });
+      } else {
+        // No data for this course, fallback
+        for (let i = 0; i < 4; i++) {
+          const row = buildPlayerRow(`Player ${i + 1}`, i, []);
+          tbody.appendChild(row);
         }
+      }
+    })
+    .catch(error => {
+      console.error("Error loading scores:", error);
+      // Fallback to localStorage if Firestore fails
+      const saved = JSON.parse(localStorage.getItem('scorecardData'));
+      const players = saved?.course === courseName ? saved.players : [];
+      for (let i = 0; i < 4; i++) {
+        const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
+        const row = buildPlayerRow(p.name, i, p.scores);
+        tbody.appendChild(row);
+      }
+    });
+}
 
         courseSelect.addEventListener('change', e => {
           loadScorecard(e.target.value);
