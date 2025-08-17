@@ -1,219 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Wordle Golf Scorecard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+import React, { useEffect, useState } from "react";
+import { db } from "./firebase"; // Make sure this points to your Firebase config
+import "./App.css";
 
-  <!-- Firebase v8 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+const parValues = [4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5];
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 30px;
+function App() {
+  const [players, setPlayers] = useState([]);
+  const [scores, setScores] = useState({});
+  const gameId = "default"; // You can make this dynamic later
+
+  useEffect(() => {
+    const scoresRef = db.ref(`games/${gameId}`);
+    scoresRef.on("value", (snapshot) => {
+      const data = snapshot.val() || {};
+      setScores(data);
+      setPlayers(Object.keys(data));
+    });
+  }, []);
+
+  const handleScoreChange = (player, holeIndex, value) => {
+    const newScore = parseInt(value);
+    db.ref(`games/${gameId}/${player}/scores/${holeIndex}`).set(
+      isNaN(newScore) ? "" : newScore
+    );
+  };
+
+  const handleCommentChange = (player, holeIndex, comment) => {
+    db.ref(`games/${gameId}/${player}/comments/${holeIndex}`).set(comment);
+  };
+
+  const addPlayer = () => {
+    const name = prompt("Enter player name");
+    if (name && !players.includes(name)) {
+      db.ref(`games/${gameId}/${name}`).set({
+        scores: Array(18).fill(""),
+        comments: Array(18).fill(""),
+      });
     }
+  };
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+  const calculateTotal = (playerData) => {
+    const playerScores = playerData?.scores || [];
+    let playerTotal = 0;
 
-    .controls {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .controls button {
-      padding: 8px 14px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #666;
-      color: white;
-    }
-
-    input[type="number"], input[type="text"] {
-      width: 50px;
-      text-align: center;
-      font-size: 13px;
-    }
-
-    .submit-btn {
-      margin-top: 4px;
-      padding: 4px 6px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .saved-msg {
-      font-size: 12px;
-      color: green;
-      margin-top: 4px;
-      display: none;
-    }
-
-    .saved-msg.show {
-      display: block;
-      animation: fadeOut 2s forwards;
-    }
-
-    @keyframes fadeOut {
-      0% { opacity: 1; }
-      100% { opacity: 0; display: none; }
-    }
-  </style>
-</head>
-<body>
-  <h2>Wordle Golf Scorecard</h2>
-
-  <div class="controls">
-    <button onclick="promptAddPlayer()">+ Add Player</button>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Player</th>
-        <script>
-          document.write([...Array(18)].map((_, i) => `<th>H${i + 1}</th>`).join(''));
-        </script>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody id="scorecard-body"></tbody>
-  </table>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
-      authDomain: "wordle-golf-6c636.firebaseapp.com",
-      databaseURL: "https://wordle-golf-6c636-default-rtdb.firebaseio.com",
-      projectId: "wordle-golf-6c636",
-      storageBucket: "wordle-golf-6c636.appspot.com",
-      messagingSenderId: "672104265687",
-      appId: "1:672104265687:web:2c16b0539fcd52ca4d7d92"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const gameId = "wordle-default";
-    const scorecardBody = document.getElementById("scorecard-body");
-
-    const parValues = [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5];
-
-    function promptAddPlayer() {
-      const name = prompt("Enter player name:");
-      if (name && name.trim()) {
-        const playerRef = db.ref(`games/${gameId}/${name}`);
-        playerRef.once("value", (snapshot) => {
-          if (!snapshot.exists()) {
-            const emptyScores = Array(18).fill("");
-            const emptyComments = Array(18).fill("");
-            playerRef.set({ scores: emptyScores, comments: emptyComments });
-          }
-        });
+    for (let i = 0; i < parValues.length; i++) {
+      const score = parseInt(playerScores[i]);
+      if (!isNaN(score)) {
+        playerTotal += score;
       }
     }
 
-    function renderScorecard(players = {}) {
-      scorecardBody.innerHTML = "";
+    const parTotal = parValues.reduce((a, b) => a + b, 0);
+    if (playerTotal === 0) return "--";
 
-      Object.entries(players).forEach(([player, data]) => {
-        const row = scorecardBody.insertRow();
-        const nameCell = row.insertCell();
-        nameCell.textContent = player;
+    const diff = playerTotal - parTotal;
+    return diff === 0 ? "E" : (diff > 0 ? "+" : "") + diff;
+  };
 
-        let playerTotal = 0;
-        let parTotal = 0;
+  return (
+    <div className="App">
+      <h2>Wordle Golf Scorecard</h2>
+      <button onClick={addPlayer}>+ Add Player</button>
+      <table>
+        <thead>
+          <tr>
+            {Array.from({ length: 18 }, (_, i) => (
+              <th key={i}>H{i + 1}</th>
+            ))}
+            <th>+/-</th>
+          </tr>
+        </thead>
+        <tbody>
+          {players.map((player) => {
+            const playerData = scores[player] || {};
+            return (
+              <tr key={player}>
+                {Array.from({ length: 18 }, (_, i) => {
+                  const holeScore = playerData?.scores?.[i] ?? "";
+                  const holeComment = playerData?.comments?.[i] ?? "";
+                  return (
+                    <td key={i}>
+                      <input
+                        type="number"
+                        value={holeScore}
+                        placeholder="-"
+                        onChange={(e) =>
+                          handleScoreChange(player, i, e.target.value)
+                        }
+                        style={{ width: "40px", textAlign: "center" }}
+                      />
+                      <br />
+                      <input
+                        type="text"
+                        value={holeComment}
+                        placeholder="📝"
+                        onChange={(e) =>
+                          handleCommentChange(player, i, e.target.value)
+                        }
+                        style={{ width: "60px" }}
+                      />
+                    </td>
+                  );
+                })}
+                <td><strong>{calculateTotal(playerData)}</strong></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
-        for (let i = 0; i < 18; i++) {
-          const cell = row.insertCell();
-          const score = parseInt(data.scores?.[i]);
-          const comment = data.comments?.[i] ?? "";
-
-          const input = document.createElement("input");
-          input.type = "number";
-          input.min = 1;
-          input.max = 10;
-          input.value = isNaN(score) ? "" : score;
-          input.style.textAlign = "center";
-
-          const commentBox = document.createElement("input");
-          commentBox.type = "text";
-          commentBox.value = comment;
-          commentBox.placeholder = "📝";
-
-          const submitBtn = document.createElement("button");
-          submitBtn.className = "submit-btn";
-          submitBtn.textContent = "Submit";
-          submitBtn.style.display = "none";
-
-          const savedMsg = document.createElement("div");
-          savedMsg.className = "saved-msg";
-          savedMsg.textContent = "Saved ✅";
-
-          input.addEventListener("input", () => submitBtn.style.display = "inline-block");
-          commentBox.addEventListener("input", () => submitBtn.style.display = "inline-block");
-
-          submitBtn.onclick = () => {
-            const newScore = parseInt(input.value);
-            const newComment = commentBox.value;
-            db.ref(`games/${gameId}/${player}/scores/${i}`).set(!isNaN(newScore) ? newScore : "");
-            db.ref(`games/${gameId}/${player}/comments/${i}`).set(newComment);
-            submitBtn.style.display = "none";
-            savedMsg.classList.add("show");
-            setTimeout(() => savedMsg.classList.remove("show"), 2000);
-          };
-
-          // For calculating running +/- totals
-          if (!isNaN(score)) {
-            playerTotal += score;
-            parTotal += parValues[i];
-          }
-
-          cell.appendChild(input);
-          cell.appendChild(document.createElement("br"));
-          cell.appendChild(commentBox);
-          cell.appendChild(document.createElement("br"));
-          cell.appendChild(submitBtn);
-          cell.appendChild(savedMsg);
-        }
-
-        const totalCell = row.insertCell();
-        if (parTotal === 0) {
-          totalCell.textContent = "--";
-        } else {
-          const diff = playerTotal - parTotal;
-          totalCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" : "") + diff;
-        }
-
-        totalCell.style.textAlign = "center";
-      });
-    }
-
-    db.ref(`games/${gameId}`).on("value", (snapshot) => {
-      const data = snapshot.val() || {};
-      renderScorecard(data);
-    });
-  </script>
-</body>
-</html>
+export default App;
