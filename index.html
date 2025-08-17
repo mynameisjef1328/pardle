@@ -235,9 +235,9 @@ row.querySelector('.diff').textContent = total
         });
 
         // Load last selected course or default
-        const saved = JSON.parse(localStorage.getItem('scorecardData'));
-        courseSelect.value = saved?.course || courseSelect.options[0].value;
-        loadScorecard(courseSelect.value);
+        // Load from Firebase on first load
+courseSelect.value = courseSelect.options[0].value;
+loadScorecard(courseSelect.value);
       </script>
     </tbody>
   </table>
