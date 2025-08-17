@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db } from "./firebase"; // Make sure this points to your Firebase config
+import { db } from "./firebase";
 import "./App.css";
 
 const parValues = [4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5];
@@ -7,7 +7,7 @@ const parValues = [4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5];
 function App() {
   const [players, setPlayers] = useState([]);
   const [scores, setScores] = useState({});
-  const gameId = "default"; // You can make this dynamic later
+  const gameId = "default";
 
   useEffect(() => {
     const scoresRef = db.ref(`games/${gameId}`);
@@ -39,6 +39,12 @@ function App() {
     }
   };
 
+  const clearGame = () => {
+    if (window.confirm("Are you sure you want to clear all scores?")) {
+      db.ref(`games/${gameId}`).remove();
+    }
+  };
+
   const calculateTotal = (playerData) => {
     const playerScores = playerData?.scores || [];
     let playerTotal = 0;
@@ -57,10 +63,26 @@ function App() {
     return diff === 0 ? "E" : (diff > 0 ? "+" : "") + diff;
   };
 
+  const getCellStyle = (holeIndex, value) => {
+    const score = parseInt(value);
+    const par = parValues[holeIndex];
+
+    if (isNaN(score)) return {};
+    if (score < par) return { border: "2px solid green" };
+    if (score > par) return { border: "2px solid red" };
+    return { border: "2px solid #ccc" }; // par = neutral
+  };
+
   return (
     <div className="App">
       <h2>Wordle Golf Scorecard</h2>
-      <button onClick={addPlayer}>+ Add Player</button>
+      <div style={{ marginBottom: "10px" }}>
+        <button onClick={addPlayer}>+ Add Player</button>
+        <button onClick={clearGame} style={{ marginLeft: "10px", backgroundColor: "#ffdddd" }}>
+          🧹 Clear Game
+        </button>
+      </div>
+
       <table>
         <thead>
           <tr>
@@ -87,7 +109,11 @@ function App() {
                         onChange={(e) =>
                           handleScoreChange(player, i, e.target.value)
                         }
-                        style={{ width: "40px", textAlign: "center" }}
+                        style={{
+                          width: "40px",
+                          textAlign: "center",
+                          ...getCellStyle(i, holeScore),
+                        }}
                       />
                       <br />
                       <input
@@ -102,7 +128,9 @@ function App() {
                     </td>
                   );
                 })}
-                <td><strong>{calculateTotal(playerData)}</strong></td>
+                <td>
+                  <strong>{calculateTotal(playerData)}</strong>
+                </td>
               </tr>
             );
           })}
