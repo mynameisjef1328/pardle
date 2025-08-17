@@ -53,7 +53,6 @@
 
     input[type="number"] {
       width: 40px;
-      padding: 4px;
       text-align: center;
     }
 
@@ -121,9 +120,23 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const gameId = "wordle-default";
-    const parValues = [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5];
-    const parSum = parValues.reduce((a, b) => a + b, 0);
     const scorecardBody = document.getElementById("scorecard-body");
+
+    const parValues = [4,4,3,5,4,4,3,4,4,5,4,3,4,4,5,4,4,5];
+
+    function promptAddPlayer() {
+      const name = prompt("Enter player name:");
+      if (name && name.trim()) {
+        const playerRef = db.ref(`games/${gameId}/${name}`);
+        playerRef.once("value", (snapshot) => {
+          if (!snapshot.exists()) {
+            const emptyScores = Array(18).fill("");
+            const emptyComments = Array(18).fill("");
+            playerRef.set({ scores: emptyScores, comments: emptyComments });
+          }
+        });
+      }
+    }
 
     function renderScorecard(players = {}) {
       scorecardBody.innerHTML = "";
@@ -133,20 +146,20 @@
         const nameCell = row.insertCell();
         nameCell.textContent = player;
 
-        let totalScore = 0;
-        let validScores = 0;
+        let playerTotal = 0;
+        let parTotal = 0;
 
         for (let i = 0; i < 18; i++) {
-          const score = data?.scores?.[i] ?? "";
-          const comment = data?.comments?.[i] ?? "";
-
           const cell = row.insertCell();
+          const score = data.scores?.[i] ?? "";
+          const comment = data.comments?.[i] ?? "";
 
           const input = document.createElement("input");
           input.type = "number";
-          input.value = score;
           input.min = 1;
           input.max = 10;
+          input.value = score;
+          input.style.textAlign = "center";
 
           const commentBox = document.createElement("input");
           commentBox.type = "text";
@@ -162,29 +175,22 @@
           savedMsg.className = "saved-msg";
           savedMsg.textContent = "Saved ✅";
 
-          input.addEventListener("input", () => {
-            submitBtn.style.display = "inline-block";
-          });
-
-          commentBox.addEventListener("input", () => {
-            submitBtn.style.display = "inline-block";
-          });
+          input.addEventListener("input", () => submitBtn.style.display = "inline-block");
+          commentBox.addEventListener("input", () => submitBtn.style.display = "inline-block");
 
           submitBtn.onclick = () => {
-            const scoreValue = parseInt(input.value);
-            const commentValue = commentBox.value;
-
-            db.ref(`games/${gameId}/${player}/scores/${i}`).set(scoreValue);
-            db.ref(`games/${gameId}/${player}/comments/${i}`).set(commentValue);
-
+            const newScore = parseInt(input.value);
+            const newComment = commentBox.value;
+            db.ref(`games/${gameId}/${player}/scores/${i}`).set(newScore || "");
+            db.ref(`games/${gameId}/${player}/comments/${i}`).set(newComment || "");
             submitBtn.style.display = "none";
             savedMsg.classList.add("show");
             setTimeout(() => savedMsg.classList.remove("show"), 2000);
           };
 
           if (!isNaN(score)) {
-            totalScore += parseInt(score);
-            validScores++;
+            playerTotal += parseInt(score);
+            parTotal += parValues[i];
           }
 
           cell.appendChild(input);
@@ -195,33 +201,17 @@
           cell.appendChild(savedMsg);
         }
 
-    const totalCell = row.insertCell();
-if (validScores > 0) {
-  let currentPar = 0;
-  for (let j = 0; j < 18; j++) {
-    if (!isNaN(data?.scores?.[j])) {
-      currentPar += parValues[j];
-    }
-  }
+        const totalCell = row.insertCell();
+        const scoreDiff = playerTotal - parTotal;
 
-  const diff = totalScore - currentPar;
-  totalCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff);
-} else {
-  totalCell.textContent = "--";
-}
-
-    function promptAddPlayer() {
-      const name = prompt("Enter player name:");
-      if (name && name.trim()) {
-        const playerRef = db.ref(`games/${gameId}/${name}`);
-        playerRef.once("value", (snapshot) => {
-          if (!snapshot.exists()) {
-            const emptyScores = Array(18).fill("");
-            const emptyComments = Array(18).fill("");
-            playerRef.set({ scores: emptyScores, comments: emptyComments });
-          }
-        });
-      }
+        totalCell.textContent =
+          isNaN(scoreDiff)
+            ? "--"
+            : scoreDiff === 0
+            ? "E"
+            : (scoreDiff > 0 ? "+" : "") + scoreDiff;
+        totalCell.style.textAlign = "center";
+      });
     }
 
     db.ref(`games/${gameId}`).on("value", (snapshot) => {
