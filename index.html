@@ -195,15 +195,20 @@
           cell.appendChild(savedMsg);
         }
 
-        const totalCell = row.insertCell();
-        if (validScores === 18) {
-          const diff = totalScore - parSum;
-          totalCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff);
-        } else {
-          totalCell.textContent = "--";
-        }
-      });
+    const totalCell = row.insertCell();
+if (validScores > 0) {
+  let currentPar = 0;
+  for (let j = 0; j < 18; j++) {
+    if (!isNaN(data?.scores?.[j])) {
+      currentPar += parValues[j];
     }
+  }
+
+  const diff = totalScore - currentPar;
+  totalCell.textContent = diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff);
+} else {
+  totalCell.textContent = "--";
+}
 
     function promptAddPlayer() {
       const name = prompt("Enter player name:");
