@@ -191,22 +191,29 @@ row.querySelector('.diff').textContent = total
         }
 
         async function saveScores() {
+  const selectedCourse = courseSelect.value;
+  if (!selectedCourse) return; // Don't save unless a course is selected
+
   const data = {
-    course: courseSelect.value,
+    course: selectedCourse,
     players: []
   };
 
   tbody.querySelectorAll('tr').forEach(row => {
-    const name = row.querySelector('input[type="text"]')?.value || '';
-    const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
-    data.players.push({ name, scores });
+    const nameInput = row.querySelector('input[type="text"]');
+    const name = nameInput?.value.trim();
+
+    if (name) {
+      const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
+      data.players.push({ name, scores });
+    }
   });
 
   try {
     await db.collection("scorecards").doc("shared").set(data);
-    console.log("Scores saved to Firebase!");
+    console.log("✅ Scores saved to Firebase!");
   } catch (error) {
-    console.error("Error saving scores:", error);
+    console.error("❌ Error saving scores:", error);
   }
 }
 
