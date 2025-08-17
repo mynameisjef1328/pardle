@@ -189,35 +189,45 @@ row.querySelector('.diff').textContent = total
   : '0';
         }
 
-        function saveScores() {
-          const data = {
-            course: courseSelect.value,
-            players: []
-          };
+        async function saveScores() {
+  const data = {
+    course: courseSelect.value,
+    players: []
+  };
 
-          tbody.querySelectorAll('tr').forEach(row => {
-            const name = row.querySelector('input[type="text"]')?.value || '';
-            const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
-            data.players.push({ name, scores });
-          });
+  tbody.querySelectorAll('tr').forEach(row => {
+    const name = row.querySelector('input[type="text"]')?.value || '';
+    const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
+    data.players.push({ name, scores });
+  });
 
-          localStorage.setItem('scorecardData', JSON.stringify(data));
-        }
+  try {
+    await db.collection("scorecards").doc("shared").set(data);
+    console.log("Scores saved to Firebase!");
+  } catch (error) {
+    console.error("Error saving scores:", error);
+  }
+}
 
-        function loadScorecard(courseName) {
-          tbody.innerHTML = '';
-          currentPar = courses[courseName];
-          updateParRow(currentPar);
+        async function loadScorecard(courseName) {
+  tbody.innerHTML = '';
+  currentPar = courses[courseName];
+  updateParRow(currentPar);
 
-          const saved = JSON.parse(localStorage.getItem('scorecardData'));
-          const players = saved?.course === courseName ? saved.players : [];
+  try {
+    const doc = await db.collection("scorecards").doc("shared").get();
+    const saved = doc.exists ? doc.data() : null;
+    const players = saved?.course === courseName ? saved.players : [];
 
-          for (let i = 0; i < 4; i++) {
-            const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
-            const row = buildPlayerRow(p.name, i, p.scores);
-            tbody.appendChild(row);
-          }
-        }
+    for (let i = 0; i < 4; i++) {
+      const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
+      const row = buildPlayerRow(p.name, i, p.scores);
+      tbody.appendChild(row);
+    }
+  } catch (error) {
+    console.error("Error loading scores:", error);
+  }
+}
 
         courseSelect.addEventListener('change', e => {
           loadScorecard(e.target.value);
