@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Firebase App -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<!-- Firestore -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wordle Golf Scorecard</title>
@@ -189,45 +185,35 @@ row.querySelector('.diff').textContent = total
   : '0';
         }
 
-        async function saveScores() {
-  const data = {
-    course: courseSelect.value,
-    players: []
-  };
+        function saveScores() {
+          const data = {
+            course: courseSelect.value,
+            players: []
+          };
 
-  tbody.querySelectorAll('tr').forEach(row => {
-    const name = row.querySelector('input[type="text"]')?.value || '';
-    const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
-    data.players.push({ name, scores });
-  });
+          tbody.querySelectorAll('tr').forEach(row => {
+            const name = row.querySelector('input[type="text"]')?.value || '';
+            const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
+            data.players.push({ name, scores });
+          });
 
-  try {
-    await db.collection("scorecards").doc("shared").set(data);
-    console.log("Scores saved to Firebase!");
-  } catch (error) {
-    console.error("Error saving scores:", error);
-  }
-}
+          localStorage.setItem('scorecardData', JSON.stringify(data));
+        }
 
-        async function loadScorecard(courseName) {
-  tbody.innerHTML = '';
-  currentPar = courses[courseName];
-  updateParRow(currentPar);
+        function loadScorecard(courseName) {
+          tbody.innerHTML = '';
+          currentPar = courses[courseName];
+          updateParRow(currentPar);
 
-  try {
-    const doc = await db.collection("scorecards").doc("shared").get();
-    const saved = doc.exists ? doc.data() : null;
-    const players = saved?.course === courseName ? saved.players : [];
+          const saved = JSON.parse(localStorage.getItem('scorecardData'));
+          const players = saved?.course === courseName ? saved.players : [];
 
-    for (let i = 0; i < 4; i++) {
-      const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
-      const row = buildPlayerRow(p.name, i, p.scores);
-      tbody.appendChild(row);
-    }
-  } catch (error) {
-    console.error("Error loading scores:", error);
-  }
-}
+          for (let i = 0; i < 4; i++) {
+            const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
+            const row = buildPlayerRow(p.name, i, p.scores);
+            tbody.appendChild(row);
+          }
+        }
 
         courseSelect.addEventListener('change', e => {
           loadScorecard(e.target.value);
@@ -241,22 +227,5 @@ row.querySelector('.diff').textContent = total
       </script>
     </tbody>
   </table>
-  <!-- Firebase SDKs (use these for HTML sites like yours) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
-    authDomain: "wordle-golf-66366.firebaseapp.com",
-    projectId: "wordle-golf-66366",
-    storageBucket: "wordle-golf-66366.appspot.com",
-    messagingSenderId: "67210425687",
-    appId: "1:67210425687:web:2c16b539fcd52ca4d7d92"
-  };
-
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-</script>
 </body>
 </html>
