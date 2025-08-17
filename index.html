@@ -99,7 +99,7 @@
 
         let currentPar = [];
 
-        function updateParRow(parValues) {
+     function updateParRow(parValues) {
   // Clear the row
   parRow.innerHTML = '';
 
@@ -113,13 +113,13 @@
     parRow.appendChild(th);
   });
 
-  // Add "Par" label in the Total column
-  parRow.innerHTML += '<th>Par</th>';
+  // Calculate and insert total par in the Total column
+  const parTotal = parValues.reduce((sum, p) => sum + p, 0);
+  parRow.innerHTML += `<th>${parTotal}</th>`;
 
   // Empty +/- cell
   parRow.innerHTML += '<th></th>';
 }
-
         function buildPlayerRow(name = '', rowIndex = 0, savedScores = []) {
           const row = document.createElement('tr');
 
