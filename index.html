@@ -85,6 +85,7 @@
 
         const parRow = document.getElementById('parRow');
         const courseSelect = document.getElementById('courseSelect');
+        const tbody = document.querySelector('tbody');
 
         Object.keys(courses).forEach(course => {
           const option = document.createElement('option');
@@ -92,6 +93,8 @@
           option.textContent = course;
           courseSelect.appendChild(option);
         });
+
+        let currentPar = [];
 
         function updateParRow(parValues) {
           parRow.innerHTML = '<th>Par</th>';
@@ -103,13 +106,14 @@
           parRow.innerHTML += '<th></th><th></th>';
         }
 
-        function buildPlayerRow(name = '') {
+        function buildPlayerRow(name = '', rowIndex = 0, savedScores = []) {
           const row = document.createElement('tr');
 
           const nameCell = document.createElement('td');
           const nameInput = document.createElement('input');
           nameInput.type = 'text';
           nameInput.value = name;
+          nameInput.addEventListener('input', () => saveScores());
           nameCell.appendChild(nameInput);
           row.appendChild(nameCell);
 
@@ -118,7 +122,11 @@
             const input = document.createElement('input');
             input.type = 'number';
             input.min = 1;
-            input.addEventListener('input', () => calculate(row));
+            input.value = savedScores[i] || '';
+            input.addEventListener('input', () => {
+              calculate(row);
+              saveScores();
+            });
             cell.appendChild(input);
             row.appendChild(cell);
           }
@@ -133,6 +141,7 @@
           diffCell.textContent = '0';
           row.appendChild(diffCell);
 
+          setTimeout(() => calculate(row), 0);
           return row;
         }
 
@@ -159,21 +168,44 @@
           row.querySelector('.diff').textContent = total ? (total - parTotal) : '0';
         }
 
-        const tbody = document.querySelector('tbody');
-        let currentPar = courses[courseSelect.value];
+        function saveScores() {
+          const data = {
+            course: courseSelect.value,
+            players: []
+          };
+
+          tbody.querySelectorAll('tr').forEach(row => {
+            const name = row.querySelector('input[type="text"]')?.value || '';
+            const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
+            data.players.push({ name, scores });
+          });
+
+          localStorage.setItem('scorecardData', JSON.stringify(data));
+        }
 
         function loadScorecard(courseName) {
           tbody.innerHTML = '';
           currentPar = courses[courseName];
           updateParRow(currentPar);
-          for (let i = 1; i <= 4; i++) {
-            const row = buildPlayerRow(`Player ${i}`);
+
+          const saved = JSON.parse(localStorage.getItem('scorecardData'));
+          const players = saved?.course === courseName ? saved.players : [];
+
+          for (let i = 0; i < 4; i++) {
+            const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
+            const row = buildPlayerRow(p.name, i, p.scores);
             tbody.appendChild(row);
           }
         }
 
-        courseSelect.addEventListener('change', (e) => loadScorecard(e.target.value));
+        courseSelect.addEventListener('change', e => {
+          loadScorecard(e.target.value);
+          saveScores();
+        });
 
+        // Load last selected course or default
+        const saved = JSON.parse(localStorage.getItem('scorecardData'));
+        courseSelect.value = saved?.course || courseSelect.options[0].value;
         loadScorecard(courseSelect.value);
       </script>
     </tbody>
