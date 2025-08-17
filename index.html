@@ -224,11 +224,13 @@ row.querySelector('.diff').textContent = total
       courseSelect.value = saved.course;
 
       const players = saved.course === courseName ? saved.players : [];
-      for (let i = 0; i < 4; i++) {
-        const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
-        const row = buildPlayerRow(p.name, i, p.scores);
-        tbody.appendChild(row);
-      }
+for (let i = 0; i < 4; i++) {
+  const p = players[i] || { name: `Player ${i + 1}`, scores: [] };
+  const row = buildPlayerRow(p.name, i, p.scores);
+  tbody.appendChild(row);
+}
+      for (let i = 0; i < 4; i++)
+
     } else {
       statusDiv.textContent = `📭 No scorecard found. Starting fresh.`;
       for (let i = 0; i < 4; i++) {
