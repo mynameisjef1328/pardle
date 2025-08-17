@@ -1,143 +1,182 @@
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wordle Golf Scorecard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #999;
+      color: white;
+    }
+    .under-par {
+      background-color: lightgreen;
+    }
+    .over-par {
+      background-color: lightcoral;
+    }
+    .even-par {
+      background-color: white;
+    }
+    input[type="number"] {
+      width: 50px;
+    }
+    input[type="text"] {
+      width: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Wordle Golf Scorecard</h2>
 
-const courses = {
-  "Pebble Peach": [4, 5, 3, 4, 4, 4, 3, 4, 4, 4, 5, 3, 4, 4, 4, 3, 4, 5],
-  "August Alphabet": [4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 3, 4, 4, 5, 4, 4, 5],
-  "Bethpage Blackletter": [4, 4, 5, 4, 3, 4, 5, 4, 4, 5, 4, 3, 4, 4, 3, 5, 4, 5],
-  "TPC Swipeword": [4, 4, 3, 5, 4, 4, 3, 4, 4, 4, 5, 3, 4, 4, 4, 3, 4, 5],
-  "Pinehurst No. 2nd Letter": [4, 4, 5, 3, 4, 4, 3, 5, 4, 4, 5, 3, 4, 4, 3, 4, 4, 5],
-  "Torrey Tiles": [5, 4, 3, 4, 4, 5, 3, 4, 4, 4, 5, 3, 4, 4, 5, 4, 4, 5],
-  "St. Ampersands": [4, 4, 5, 4, 3, 4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 4, 4, 5],
-  "Chambers Brain": [4, 5, 3, 4, 4, 4, 3, 4, 4, 5, 4, 3, 4, 5, 4, 4, 3, 4],
-  "Whistling Swears": [5, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 3, 4, 5, 3, 4, 4, 5],
-  "Bully Big Words": [4, 5, 4, 3, 4, 5, 3, 4, 4, 5, 4, 3, 4, 4, 4, 3, 4, 5],
-};
+  <label for="courseSelect">Choose a course:</label>
+  <select id="courseSelect"></select>
 
-const NUM_HOLES = 18;
-const NUM_PLAYERS = 4;
+  <table id="scorecard">
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th colspan="18">Hole</th>
+        <th>Total</th>
+        <th>+/-</th>
+      </tr>
+      <tr>
+        <th></th>
+        <script>
+          for (let i = 1; i <= 18; i++) {
+            document.write(`<th>${i}</th>`);
+          }
+        </script>
+        <th></th>
+        <th></th>
+      </tr>
+      <tr id="parRow">
+        <th>Par</th>
+      </tr>
+    </thead>
+    <tbody>
+      <script>
+        const courses = {
+          'Pebble Beach': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
+          'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
+          'Augusta':      [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
+          'Pine Valley':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
+          'Torrey Pines': [4,4,5,3,4,5,4,3,4,4,4,5,3,4,4,5,3,4],
+          'TPC Sawgrass': [4,4,3,5,4,3,4,5,4,3,4,5,4,4,3,5,4,3],
+          'Bethpage Black': [4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,3,4,4],
+          'Whistling Straits': [4,3,5,4,4,5,3,4,4,5,4,3,4,4,5,4,3,4],
+          'Kiawah Island': [4,4,5,3,4,3,4,5,4,4,4,5,3,4,4,5,3,4],
+          'Bandon Dunes': [3,4,5,4,3,5,4,4,4,5,4,3,4,5,4,4,3,4]
+        };
 
-export default function Scorecard() {
-  const [selectedCourse, setSelectedCourse] = useState("Pebble Peach");
-  const [scores, setScores] = useState(
-    Array(NUM_PLAYERS)
-      .fill()
-      .map(() => Array(NUM_HOLES).fill(""))
-  );
+        const parRow = document.getElementById('parRow');
+        const courseSelect = document.getElementById('courseSelect');
 
-  const handleScoreChange = (playerIndex, holeIndex, value) => {
-    const newScores = [...scores];
-    newScores[playerIndex][holeIndex] = value;
-    setScores(newScores);
-  };
+        Object.keys(courses).forEach(course => {
+          const option = document.createElement('option');
+          option.value = course;
+          option.textContent = course;
+          courseSelect.appendChild(option);
+        });
 
-  const calculateTotal = (playerScores) => {
-    return playerScores.reduce((acc, val) => acc + (parseInt(val) || 0), 0);
-  };
+        function updateParRow(parValues) {
+          parRow.innerHTML = '<th>Par</th>';
+          parValues.forEach(par => {
+            const th = document.createElement('th');
+            th.textContent = par;
+            parRow.appendChild(th);
+          });
+          parRow.innerHTML += '<th></th><th></th>';
+        }
 
-  const calculateParDiff = (playerScores) => {
-    const par = courses[selectedCourse];
-    const diff = playerScores.reduce(
-      (acc, val, idx) => acc + ((parseInt(val) || 0) - par[idx]),
-      0
-    );
-    if (diff > 0) return "+" + diff;
-    if (diff < 0) return `${diff}`;
-    return "0";
-  };
+        function buildPlayerRow(name = '') {
+          const row = document.createElement('tr');
 
-  const par = courses[selectedCourse];
-  const parTotal = par.reduce((a, b) => a + b, 0);
+          const nameCell = document.createElement('td');
+          const nameInput = document.createElement('input');
+          nameInput.type = 'text';
+          nameInput.value = name;
+          nameCell.appendChild(nameInput);
+          row.appendChild(nameCell);
 
-  return (
-    <div className="overflow-x-auto p-4">
-      <Card className="w-full">
-        <CardContent className="p-4">
-          <div className="mb-4">
-            <Label htmlFor="course">Select Course</Label>
-            <Select onValueChange={(value) => setSelectedCourse(value)}>
-              <SelectTrigger id="course">
-                <SelectValue placeholder="Select a course" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(courses).map((course) => (
-                  <SelectItem key={course} value={course}>
-                    {course}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="overflow-auto">
-            <table className="min-w-full border-collapse border text-sm">
-              <thead>
-                <tr className="bg-gray-300">
-                  <th className="p-2 text-center">Hole</th>
-                  {Array.from({ length: NUM_HOLES }, (_, i) => (
-                    <th key={i} className="p-2 text-center">
-                      {i + 1}
-                    </th>
-                  ))}
-                  <th className="p-2 text-center">Par</th>
-                  <th className="p-2 text-center">Total</th>
-                  <th className="p-2 text-center">+/-</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="bg-gray-200">
-                  <td className="p-2 text-center font-bold">Par</td>
-                  {par.map((p, i) => (
-                    <td key={i} className="p-2 text-center">
-                      {p}
-                    </td>
-                  ))}
-                  <td className="p-2 text-center font-bold">{parTotal}</td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                {scores.map((playerScores, playerIndex) => (
-                  <tr key={playerIndex}>
-                    <td className="p-2 text-center font-bold">{String.fromCharCode(65 + playerIndex)}</td>
-                    {playerScores.map((score, holeIndex) => {
-                      const parValue = par[holeIndex];
-                      const intScore = parseInt(score);
-                      const diff = intScore - parValue;
-                      let className = "border p-1 text-center";
-                      if (!isNaN(intScore)) {
-                        if (diff < 0) className += " border-b-4 border-green-500";
-                        else if (diff > 0) className += " border-b-4 border-red-500";
-                      }
-                      return (
-                        <td key={holeIndex} className={className}>
-                          <Input
-                            type="number"
-                            value={score}
-                            onChange={(e) =>
-                              handleScoreChange(playerIndex, holeIndex, e.target.value)
-                            }
-                            className="text-center text-sm"
-                          />
-                        </td>
-                      );
-                    })}
-                    <td className="p-2 text-center font-bold">{calculateTotal(playerScores)}</td>
-                    <td className="p-2 text-center font-bold">{calculateParDiff(playerScores)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+          for (let i = 0; i < 18; i++) {
+            const cell = document.createElement('td');
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = 1;
+            input.addEventListener('input', () => calculate(row));
+            cell.appendChild(input);
+            row.appendChild(cell);
+          }
+
+          const totalCell = document.createElement('td');
+          totalCell.className = 'total';
+          totalCell.textContent = '0';
+          row.appendChild(totalCell);
+
+          const diffCell = document.createElement('td');
+          diffCell.className = 'diff';
+          diffCell.textContent = '0';
+          row.appendChild(diffCell);
+
+          return row;
+        }
+
+        function calculate(row) {
+          const inputs = row.querySelectorAll('input[type="number"]');
+          let total = 0;
+          let parTotal = 0;
+
+          inputs.forEach((input, index) => {
+            const val = parseInt(input.value);
+            const par = currentPar[index];
+            const cell = input.parentElement;
+            cell.className = '';
+            if (!isNaN(val)) {
+              total += val;
+              parTotal += par;
+              if (val < par) cell.className = 'under-par';
+              else if (val > par) cell.className = 'over-par';
+              else cell.className = 'even-par';
+            }
+          });
+
+          row.querySelector('.total').textContent = total || '0';
+          row.querySelector('.diff').textContent = total ? (total - parTotal) : '0';
+        }
+
+        const tbody = document.querySelector('tbody');
+        let currentPar = courses[courseSelect.value];
+
+        function loadScorecard(courseName) {
+          tbody.innerHTML = '';
+          currentPar = courses[courseName];
+          updateParRow(currentPar);
+          for (let i = 1; i <= 4; i++) {
+            const row = buildPlayerRow(`Player ${i}`);
+            tbody.appendChild(row);
+          }
+        }
+
+        courseSelect.addEventListener('change', (e) => loadScorecard(e.target.value));
+
+        loadScorecard(courseSelect.value);
+      </script>
+    </tbody>
+  </table>
+</body>
+</html>
