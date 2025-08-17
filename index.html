@@ -4,11 +4,8 @@
   <meta charset="UTF-8" />
   <title>Wordle Golf Scorecard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -100,7 +97,7 @@
         <script>
           document.write([...Array(18)].map((_, i) => `<th>H${i + 1}</th>`).join(''));
         </script>
-        <th>Total</th>
+        <th>+/-</th>
       </tr>
     </thead>
     <tbody id="scorecard-body"></tbody>
@@ -132,7 +129,12 @@
           if (!snapshot.exists()) {
             const emptyScores = Array(18).fill("");
             const emptyComments = Array(18).fill("");
-            playerRef.set({ scores: emptyScores, comments: emptyComments });
+            playerRef.set({ scores: emptyScores, comments: emptyComments }, () => {
+              // Force refresh UI after setting
+              db.ref(`games/${gameId}`).once("value", (snapshot) => {
+                renderScorecard(snapshot.val() || {});
+              });
+            });
           }
         });
       }
@@ -188,11 +190,13 @@
             setTimeout(() => savedMsg.classList.remove("show"), 2000);
           };
 
+          // Tally score if valid
           if (!isNaN(score)) {
             playerTotal += parseInt(score);
             parTotal += parValues[i];
           }
 
+          // Append to cell
           cell.appendChild(input);
           cell.appendChild(document.createElement("br"));
           cell.appendChild(commentBox);
@@ -202,14 +206,9 @@
         }
 
         const totalCell = row.insertCell();
-        const scoreDiff = playerTotal - parTotal;
-
-        totalCell.textContent =
-          isNaN(scoreDiff)
-            ? "--"
-            : scoreDiff === 0
-            ? "E"
-            : (scoreDiff > 0 ? "+" : "") + scoreDiff;
+        const diff = playerTotal - parTotal;
+        totalCell.textContent = isNaN(diff) ? "--" : (diff === 0 ? "E" : (diff > 0 ? "+" + diff : diff));
+        totalCell.style.fontWeight = "bold";
         totalCell.style.textAlign = "center";
       });
     }
