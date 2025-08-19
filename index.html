@@ -154,9 +154,13 @@ button:active{ transform: translateY(1px); }
 <body>
   <h2>Wordle Golf Scorecard</h2>
 
+<div class="toolbar">
   <label for="courseSelect">Choose a course:</label>
   <select id="courseSelect"></select>
-  <button id="clearNamesBtn" type="button" style="margin-left:8px;">Clear Names</button>
+
+  <button id="clearBtn" type="button">Clear Scores</button>
+  <button id="clearNamesBtn" type="button">Clear Names</button>
+</div>
 
   <table id="scorecard">
     <thead>
