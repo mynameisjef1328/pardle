@@ -64,8 +64,10 @@
 #rulesBox {
   position: fixed;
   bottom: max(12px, env(safe-area-inset-bottom));
-  left: 750px;                 /* shift to the right of wordBox */
-  max-width: 340px;
+  left: 1050px;              /* push farther right than before */
+  max-width: 300px;          /* a little narrower */
+  max-height: 180px;         /* keep it from covering the scorecard */
+  overflow-y: auto;          /* scroll if content is taller */
   background: #f9f9f9;
   border: 2px solid #ccc;
   border-radius: 8px;
@@ -73,7 +75,7 @@
   box-shadow: 0 2px 10px rgba(0,0,0,.15);
   color: #222;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.4;
   z-index: 4;
 }
 
