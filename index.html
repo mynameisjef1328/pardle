@@ -60,35 +60,31 @@
   line-height: 1.6;
   z-index: 4;
 
-  #rulesBox {
+  /* Rules of the Game box */
+#rulesBox {
   position: fixed;
   bottom: max(12px, env(safe-area-inset-bottom));
-  right: 12px;
+  left: 750px;                 /* shift to the right of wordBox */
   max-width: 340px;
-  background: #ffffff;
-  border: 2px solid #084d1a; /* same darker Masters green */
+  background: #f9f9f9;
+  border: 2px solid #ccc;
   border-radius: 8px;
-  padding: 14px 16px;
+  padding: 12px 16px;
   box-shadow: 0 2px 10px rgba(0,0,0,.15);
-  font: 15px/1.5 system-ui, -apple-system, Arial, sans-serif;
-  color: #111;
-  z-index: 5;
+  color: #222;
+  font-size: 14px;
+  line-height: 1.5;
+  z-index: 4;
 }
 
 #rulesBox h4 {
-  margin: 0 0 8px 0;
+  margin-top: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #084d1a; /* matches border */
 }
-
 #rulesBox ul {
-  margin: 0;
-  padding-left: 18px;
-}
-
-#rulesBox li {
-  margin-bottom: 6px;
+  padding-left: 20px;
+  margin: 8px 0 0 0;
 }
     
 @media (max-width: 700px){
