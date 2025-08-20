@@ -15,135 +15,75 @@
     input[type="number"] { width: 50px; text-align: center; display: inline-block; vertical-align: middle; }
     input[type="text"] { width: 100px; }
 
-    .player-label td {
-      font-weight: bold;
-      background: #eee;
-      text-align: left;
-    }
+    #playerHeader {
+  color: #111;   /* makes text dark */
+  font-weight: bold;
+}
 
     /* Mini scoreboard box */
-    #miniBoard {
-      position: fixed;
-      bottom: max(12px, env(safe-area-inset-bottom));
-      left: max(12px, env(safe-area-inset-left));
-      min-width: 180px;
-      max-width: 260px;
-      padding: 10px 12px;
-      background: #eee;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font: 14px/1.4 system-ui, -apple-system, Arial, sans-serif;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-      color: #111;
-      z-index: 4; /* above table sticky headers */
-    }
-    #miniBoard h4 { margin: 0 0 6px 0; font-size: 14px; font-weight: 700; }
-    #miniBoard .row { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
-    #miniBoard .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #miniBoard .score { font-variant-numeric: tabular-nums; }
+#miniBoard {
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: max(12px, env(safe-area-inset-left));
+  min-width: 180px;
+  max-width: 260px;
+  padding: 10px 12px;
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font: 14px/1.4 system-ui, -apple-system, Arial, sans-serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  color: #111;
+  z-index: 4; /* above table sticky headers */
+}
+#miniBoard h4 { margin: 0 0 6px 0; font-size: 14px; font-weight: 700; }
+#miniBoard .row { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
+#miniBoard .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#miniBoard .score { font-variant-numeric: tabular-nums; }
 
-    /* Word of the Day card */
-    #wordBox{
-      position: fixed;
-      bottom: max(12px, env(safe-area-inset-bottom));
-      left: 220px;
-      max-width: 700px;
-      background: #0B6623;      /* Masters green */
-      border: 1px solid #084d1a; /* darker green border */
-      border-radius: 8px;
-      padding: 10px 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.2);
-      color: #fff;              /* white text for contrast */
-      font-size: 23px;
-      font-weight: bold;
-      line-height: 1.6;
-      z-index: 4;
-    }
+@media (max-width: 600px){
+  #miniBoard {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: max(8px, env(safe-area-inset-left));
+    min-width: 150px;
+    padding: 8px 10px;
+  }
+}
 
-    /* Rules box */
-    #rulesBox {
-      position: fixed;
-      bottom: max(12px, env(safe-area-inset-bottom));
-      left: 1050px;              /* push farther right than before */
-      max-width: 300px;
-      max-height: 180px;
-      overflow-y: auto;
-      background: #f9f9f9;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      padding: 12px 16px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.15);
-      color: #222;
-      font-size: 14px;
-      line-height: 1.4;
-      z-index: 4;
-    }
-    #rulesBox h4 { margin-top: 0; font-size: 16px; font-weight: bold; }
-    #rulesBox ul { padding-left: 20px; margin: 8px 0 0 0; }
+/* keep sticky cells opaque over scrolled content */
+th:first-child, td:first-child { 
+  position: sticky;
+  left: 0;
+  background: #eee;            /* already set */
+  z-index: 2;
+  background-clip: padding-box; /* avoids odd borders on iOS */
+}
 
-    /* sticky bits */
-    th:first-child, td:first-child {
-      position: sticky;
-      left: 0;
-      background: #eee;
-      z-index: 2;
-      background-clip: padding-box;
-    }
-    thead th { position: sticky; top: 0; z-index: 3; background: #999; }
-    th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
+/* keep header row on top while scrolling */
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #999;            /* match your header color while sticky */
+}
 
-    /* Toolbar (course select + buttons) */
-    .toolbar{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 10px 0 12px;
-    }
-    select, button{
-      height: 36px;
-      border-radius: 8px;
-      border: 1px solid #d8d8dc;
-      padding: 0 12px;
-      background: #fff;
-      color: #111;
-      box-shadow: 0 2px 10px rgba(0,0,0,.06);
-    }
-    button{
-      cursor: pointer;
-      transition: transform .04s ease, box-shadow .2s ease, background .2s ease;
-    }
-    button:hover{ box-shadow: 0 6px 18px rgba(0,0,0,.08); }
-    button:active{ transform: translateY(1px); }
-
-    @media (max-width: 700px){
-      #wordBox{ width: calc(100% - 24px); left: 50%; transform: translateX(-50%); }
-    }
-    @media (max-width: 600px){
-      #miniBoard {
-        bottom: max(8px, env(safe-area-inset-bottom));
-        left: max(8px, env(safe-area-inset-left));
-        min-width: 150px;
-        padding: 8px 10px;
-      }
-    }
+/* optional: subtle divider where the sticky column meets the rest */
+th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
+    
   </style>
 </head>
 <body>
   <h2>Wordle Golf Scorecard</h2>
 
-  <div class="toolbar">
-    <label for="courseSelect">Choose a course:</label>
-    <select id="courseSelect"></select>
-
-    <button id="clearBtn" type="button">Clear Scores</button>
-    <button id="clearNamesBtn" type="button">Clear Names</button>
-  </div>
+  <label for="courseSelect">Choose a course:</label>
+  <select id="courseSelect"></select>
+  <button id="clearBtn" style="margin-left:12px;">Clear Scores</button>
+  <button id="clearNamesBtn" type="button" style="margin-left:8px;">Clear Names</button>
 
   <table id="scorecard">
     <thead>
       <tr>
-        <th></th>
+        <th id="playerHeader">Player</th>
         <th colspan="18">Hole</th>
         <th>Total</th>
         <th>+/-</th>
@@ -161,69 +101,60 @@
     <tbody></tbody>
   </table>
 
-  <!-- Floating boxes -->
-  <div id="miniBoard" aria-live="polite"></div>
-  <div id="wordBox" aria-live="polite"></div>
-
-  <div id="rulesBox" aria-live="polite">
-    <h4>🏌️ Wordle Golf Rules</h4>
-    <ul>
-      <li>Each hole = one Wordle puzzle (one per day).</li>
-      <li>Your score = number of guesses used to solve the Wordle.</li>
-      <li>Solve it in <strong>3 tries</strong> → you score <strong>3</strong> (like 3 strokes).</li>
-      <li>If you <strong>don’t solve in 6 tries</strong> or <strong>forget to play</strong>, your score = <strong>7</strong>.</li>
-      <li>Lowest total score wins, just like golf.</li>
-      <li>Track progress hole by hole, and compare live scores with friends!</li>
-    </ul>
-  </div>
-
-  <!-- App -->
+<!-- mini scoreboard goes right after the table closes -->
+<div id="miniBoard" aria-live="polite"></div>
+  
+  <!-- MOVE THE SCRIPT OUTSIDE TBODY -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
-      authDomain: "wordle-golf-6c636.firebaseapp.com",
-      projectId: "wordle-golf-6c636",
-      storageBucket: "wordle-golf-6c636.appspot.com",
-      messagingSenderId: "672104265687",
-      appId: "1:672104265687:web:2c16b0539fcd52ca4d7d92"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyC9-Z6E59grKoq_pD8acGTre2Jx-1NQ_Qc",
+    authDomain: "wordle-golf-6c636.firebaseapp.com",
+    projectId: "wordle-golf-6c636",
+    storageBucket: "wordle-golf-6c636.appspot.com",
+    messagingSenderId: "672104265687",
+    appId: "1:672104265687:web:2c16b0539fcd52ca4d7d92"
+  };
 
-    let app, db;
-    (async () => {
-      try {
-        app = initializeApp(firebaseConfig);
-        db  = getFirestore(app);
-        console.log("Firebase OK:", firebaseConfig.projectId);
+  let app, db;
+(async () => {
+  try {
+    app = initializeApp(firebaseConfig);
+    db  = getFirestore(app);
+    console.log("Firebase OK:", firebaseConfig.projectId);
 
-        // quick ping (optional)
-        await setDoc(doc(db, "diagnostics", "ping"),
-          { ok: true, ts: Date.now() }, { merge: true });
-      } catch (e) {
-        console.error("Firebase init/ping error:", e);
-      }
-    })();
+    // optional quick ping
+    await setDoc(doc(db, "diagnostics", "ping"),
+      { ok: true, ts: Date.now() }, { merge: true });
+    console.log("Ping wrote");
+  } catch (e) {
+    console.error("Firebase init/ping error:", e);
+  }
+})();
 
-    // Seed once if you like:
     async function testWriteCourse(course = "Bully Pulpit") {
-      try {
-        await setDoc(doc(db, "wordleScorecards", course), {
-          course,
-          players: [
-            { name: "Tester 1", scores: ["3","4","","","","","","","","","","","","","","","",""] },
-            { name: "Tester 2", scores: [] },
-            { name: "Player 3", scores: [] },
-            { name: "Player 4", scores: [] }
-          ],
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-      } catch (e) {
-        console.error("testWriteCourse error:", e);
-      }
-    }
-    // testWriteCourse(); // optional
+  try {
+    await setDoc(doc(db, "wordleScorecards", course), {
+      course,
+      players: [
+        { name: "Tester 1", scores: ["3","4","","","","","","","","","","","","","","","",""] },
+        { name: "Tester 2", scores: [] },
+        { name: "Player 3", scores: [] },
+        { name: "Player 4", scores: [] }
+      ],
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    console.log("testWriteCourse OK");
+  } catch (e) {
+    console.error("testWriteCourse error:", e);
+  }
+}
+
+testWriteCourse(); // runs once on load
+
+  // ...keep the rest of your scorecard code here (courses, updateParRow, buildPlayerRow, saveScoresToFirestore, etc.)
 
     // ---------- Data ----------
     const courses = {
@@ -275,7 +206,6 @@
       const nameInput = document.createElement('input');
       nameInput.type = 'text';
       nameInput.value = name;
-      nameInput.placeholder = `Player ${rowIndex + 1}`;
       nameInput.addEventListener('input', () => saveScoresToFirestore());
       nameCell.appendChild(nameInput);
       row.appendChild(nameCell);
@@ -285,7 +215,6 @@
         const input = document.createElement('input');
         input.type = 'number';
         input.min = 1;
-        input.step = 1;
         input.value = savedScores[i] || '';
         input.addEventListener('input', () => {
           calculate(row);
@@ -310,79 +239,80 @@
     }
 
     function calculate(row) {
-      const inputs = row.querySelectorAll('input[type="number"]');
-      let total = 0;
-      let parTotal = 0;
+  const inputs = row.querySelectorAll('input[type="number"]');
+  let total = 0;
+  let parTotal = 0;
 
-      inputs.forEach((input, index) => {
-        const val = parseInt(input.value);
-        const par = currentPar[index];
-        const cell = input.parentElement;
-        cell.className = '';
-        if (!isNaN(val)) {
-          total += val;
-          parTotal += par;
-          if (val < par) cell.className = 'under-par';
-          else if (val > par) cell.className = 'over-par';
-          else cell.className = 'even-par';
-        }
-      });
-
-      row.querySelector('.total').textContent = total || '0';
-      const diff = total - parTotal;
-      row.querySelector('.diff').textContent = total
-        ? (diff > 0 ? `+${diff}` : `${diff}`)
-        : '0';
-
-      updateMiniBoard();
+  inputs.forEach((input, index) => {
+    const val = parseInt(input.value);
+    const par = currentPar[index];
+    const cell = input.parentElement;
+    cell.className = '';
+    if (!isNaN(val)) {
+      total += val;
+      parTotal += par;
+      if (val < par) cell.className = 'under-par';
+      else if (val > par) cell.className = 'over-par';
+      else cell.className = 'even-par';
     }
+  });
 
-    function updateMiniBoard() {
-      const box = document.getElementById('miniBoard');
-      if (!box) return;
+  row.querySelector('.total').textContent = total || '0';
+  const diff = total - parTotal;
+  row.querySelector('.diff').textContent = total
+    ? (diff > 0 ? `+${diff}` : `${diff}`)
+    : '0';
 
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      const items = rows
-        .map(r => {
-          const name = r.querySelector('input[type="text"]')?.value?.trim() || '';
-          const total = parseInt(r.querySelector('.total')?.textContent || '0', 10) || 0;
-          const diffTxt = (r.querySelector('.diff')?.textContent || '0').toString();
-          return { name, total, diffTxt };
-        })
-        .filter(p => p.name);
+  // keep the mini board in sync
+  updateMiniBoard();
+}
 
-      if (!items.length) {
-        box.innerHTML = `<h4>Live Scores</h4>
-          <div class="row"><span class="name">Enter scores to begin</span></div>`;
-        return;
-      }
+function updateMiniBoard() {
+  const box = document.getElementById('miniBoard');
+  if (!box) return;
 
-      items.sort((a, b) => (a.total || 9999) - (b.total || 9999));
-      box.innerHTML =
-        `<h4>Live Scores</h4>` +
-        items.map(
-          p => `<div class="row">
-                  <span class="name">${p.name}</span>
-                  <span class="score">${p.total} (${p.diffTxt})</span>
-                </div>`
-        ).join('');
-    }
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const items = rows
+    .map(r => {
+      const name = r.querySelector('input[type="text"]')?.value?.trim() || '';
+      const total = parseInt(r.querySelector('.total')?.textContent || '0', 10) || 0;
+      const diffTxt = (r.querySelector('.diff')?.textContent || '0').toString();
+      return { name, total, diffTxt };
+    })
+    .filter(p => p.name);
 
+  if (!items.length) {
+    box.innerHTML = `<h4>Live Scores</h4>
+      <div class="row"><span class="name">Enter scores to begin</span></div>`;
+    return;
+  }
+
+  // sort by best total
+  items.sort((a, b) => (a.total || 9999) - (b.total || 9999));
+
+  box.innerHTML =
+    `<h4>Live Scores</h4>` +
+    items
+      .map(
+        p => `<div class="row">
+                <span class="name">${p.name}</span>
+                <span class="score">${p.total} (${p.diffTxt})</span>
+              </div>`
+      )
+      .join('');
+}
+
+    // ---------- Firestore helpers ----------
     const buildDefaultPlayers = () =>
       Array.from({ length: 4 }, (_, i) => ({ name: `Player ${i + 1}`, scores: [] }));
 
     function readTableData() {
       const data = { course: courseSelect.value, players: [] };
-
       tbody.querySelectorAll('tr').forEach(row => {
-        const scoreInputs = row.querySelectorAll('input[type="number"]');
-        if (!scoreInputs.length) return; // skip the Player label row (and any non-player rows)
-
         const name = row.querySelector('input[type="text"]')?.value || '';
-        const scores = Array.from(scoreInputs).map(i => i.value);
+        const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
         data.players.push({ name, scores });
       });
-
       return data;
     }
 
@@ -397,35 +327,12 @@
       try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
     }
 
-    // Remove unnecessary empty player rows but keep at least 4 slots
-    function prunePlayers(players) {
-      const keep = (players || []).filter(p =>
-        (p?.name && p.name.trim()) ||
-        (p?.scores && p.scores.some(s => s && s !== ''))
-      );
-      while (keep.length < 4) keep.push({ name: `Player ${keep.length + 1}`, scores: [] });
-      return keep;
-    }
-
     function renderFromData(docData) {
-      tbody.innerHTML = '';
-
-      // "Player" label row
-      const labelRow = document.createElement('tr');
-      labelRow.classList.add('player-label');
-      const labelCell = document.createElement('td');
-      labelCell.textContent = 'Player';
-      labelRow.appendChild(labelCell);
-      for (let i = 0; i < 20; i++) labelRow.appendChild(document.createElement('td'));
-      tbody.appendChild(labelRow);
-
-      // Player rows (pruned)
-      const rawPlayers = Array.isArray(docData?.players) ? docData.players : [];
-      const players = prunePlayers(rawPlayers);
-      players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || [])));
-
-      updateMiniBoard();
-    }
+  tbody.innerHTML = '';
+  const players = docData?.players?.length ? docData.players : buildDefaultPlayers();
+  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name, i, p.scores || [])));
+  updateMiniBoard(); // <— keep the floating box in sync after re-render
+}
 
     async function ensureDocExists(courseName) {
       if (!db) return;
@@ -438,7 +345,7 @@
 
     async function attachListenerForCourse(courseName) {
       if (unsubscribe) { unsubscribe(); unsubscribe = null; }
-      if (!db) return;
+      if (!db) return; // offline or config missing
 
       await ensureDocExists(courseName);
       const ref = doc(db, 'wordleScorecards', courseName);
@@ -465,7 +372,7 @@
       currentPar = courses[courseName];
       updateParRow(currentPar);
 
-      // Render immediately so the table never looks empty
+      // Render something immediately so the table never looks empty
       renderFromData({ players: buildDefaultPlayers() });
 
       // Then attach realtime sync
@@ -476,6 +383,7 @@
     const last = localStorage.getItem('lastCourse');
     courseSelect.value = last && courses[last] ? last : Object.keys(courses)[0];
     loadScorecard(courseSelect.value);
+
     updateMiniBoard();
 
     courseSelect.addEventListener('change', e => {
@@ -483,137 +391,36 @@
       loadScorecard(e.target.value);
     });
 
-    // ---------- Clear Scores ----------
-    document.getElementById('clearBtn').addEventListener('click', async () => {
-      if (!confirm("Clear all player scores for this course?")) return;
+// ---------- Clear Scores Button ----------
+document.getElementById('clearBtn').addEventListener('click', async () => {
+  if (!confirm("Clear all player scores for this course?")) return;
 
-      const playersNow = Array.from(tbody.querySelectorAll('tr'))
-        .filter(row => row.querySelectorAll('input[type="number"]').length) // only player rows
-        .map(row => ({
-          name: row.querySelector('input[type="text"]')?.value?.trim() || '',
-          scores: []
-        }));
+  const playersCleared = Array.from(tbody.querySelectorAll('tr')).map((row, i) => {
+    const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
+    return { name, scores: [] };
+  });
 
-      const cleaned = prunePlayers(playersNow);
+  // Update the table immediately
+  renderFromData({ players: playersCleared });
+  updateParRow(currentPar);
 
-      renderFromData({ players: cleaned });
-      updateParRow(currentPar);
-      updateMiniBoard();
+  updateMiniBoard();
 
-      try {
-        const ref = doc(db, 'wordleScorecards', courseSelect.value);
-        await setDoc(ref, {
-          course: courseSelect.value,
-          players: cleaned,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-        console.log("Scores cleared & rows pruned");
-      } catch (err) {
-        console.error("Clear scores failed:", err);
-        alert("Clear failed. Check console.");
-      }
-    });
-
-    // ---------- Clear Names ----------
-    document.getElementById('clearNamesBtn').addEventListener('click', async () => {
-      if (!confirm("Clear player names (scores will remain)?")) return;
-
-      const playersNow = Array.from(tbody.querySelectorAll('tr'))
-        .filter(row => row.querySelectorAll('input[type="number"]').length)
-        .map(row => ({
-          name: '',
-          scores: Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value)
-        }));
-
-      const cleaned = prunePlayers(playersNow);
-
-      renderFromData({ players: cleaned });
-      updateMiniBoard();
-
-      try {
-        const ref = doc(db, 'wordleScorecards', courseSelect.value);
-        await setDoc(ref, {
-          course: courseSelect.value,
-          players: cleaned,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-        console.log("Names cleared");
-      } catch (err) {
-        console.error("Clear names failed:", err);
-        alert("Clear failed. Check console.");
-      }
-    });
-  </script>
-
-  <!-- Word of the Day -->
-  <script>
-    (function () {
-      const box = document.getElementById('wordBox');
-      if (!box) return;
-
-      const words = [
-        { word: "Aphelion", def: "The point in the orbit of a planet where it is farthest from the sun." },
-        { word: "Bruxism", def: "The involuntary grinding of teeth, especially while sleeping." },
-        { word: "Cacophony", def: "A harsh, discordant mixture of sounds." },
-        { word: "Defenestration", def: "The act of throwing someone or something out of a window." },
-        { word: "Ephemeral", def: "Lasting for a very short time." },
-        { word: "Fugacious", def: "Tending to disappear; fleeting." },
-        { word: "Grawlix", def: "A string of typographical symbols used to represent profanity." },
-        { word: "Halcyon", def: "Denoting a period of time in the past that was idyllically happy and peaceful." },
-        { word: "Ichthyology", def: "The branch of zoology that deals with fish." },
-        { word: "Jentacular", def: "Pertaining to breakfast." },
-        { word: "Kerfuffle", def: "A commotion or fuss." },
-        { word: "Limerence", def: "The state of being infatuated or obsessed with another person." },
-        { word: "Mumpsimus", def: "A stubborn person who insists on making an error in spite of being shown it's wrong." },
-        { word: "Noisome", def: "Having an extremely offensive smell." },
-        { word: "Ostentatious", def: "Characterized by vulgar or pretentious display." },
-        { word: "Peregrinate", def: "To travel or wander around from place to place." },
-        { word: "Quixotic", def: "Exceedingly idealistic; unrealistic and impractical." },
-        { word: "Recumbent", def: "Lying down." },
-        { word: "Susurrus", def: "Whispering, murmuring, or rustling." },
-        { word: "Tmesis", def: "The insertion of a word into another word, like 'abso-bloody-lutely'." },
-        { word: "Ululate", def: "To howl or wail as an expression of strong emotion." },
-        { word: "Vicissitude", def: "A change of circumstances or fortune, typically one that is unwelcome or unpleasant." },
-        { word: "Weltschmerz", def: "A feeling of melancholy and world-weariness." },
-        { word: "Xanthic", def: "Relating to a yellow color." },
-        { word: "Ylem", def: "In Big Bang theory, the primordial matter from which elements are formed." },
-        { word: "Zugzwang", def: "A situation in chess where any move worsens the player's position." },
-        { word: "Agog", def: "Very eager or curious to hear or see something." },
-        { word: "Borborygmus", def: "The rumbling noise produced by the movement of gas in the intestines." },
-        { word: "Catachresis", def: "The incorrect use of a word or phrase." },
-        { word: "Dysania", def: "The state of finding it hard to get out of bed in the morning." },
-        { word: "Eucatastrophe", def: "A sudden and favorable resolution of events in a story." },
-        { word: "Floccinaucinihilipilification", def: "The action of estimating something as worthless." },
-        { word: "Gobbledygook", def: "Language that is meaningless or hard to understand; jargon." },
-        { word: "Hiraeth", def: "A homesickness for a home you can't return to or never had." },
-        { word: "Insouciant", def: "Showing a casual lack of concern; indifferent." },
-        { word: "Jargogle", def: "To confuse or jumble." },
-        { word: "Kakistocracy", def: "Government run by the worst, least qualified, or most unscrupulous citizens." },
-        { word: "Lethologica", def: "The inability to remember the right word." },
-        { word: "Montivagant", def: "Wandering over hills and mountains." },
-        { word: "Nudiustertian", def: "Relating to the day before yesterday." },
-        { word: "Opsimath", def: "A person who begins to learn or study late in life." },
-        { word: "Psithurism", def: "The sound of wind through trees or rustling leaves." },
-        { word: "Quomodocunquize", def: "To make money in any way possible." },
-        { word: "Raconteur", def: "A person who tells anecdotes in a skillful and amusing way." },
-        { word: "Scripturient", def: "Having a strong urge to write." },
-        { word: "Tittynope", def: "A small quantity of something left over." },
-        { word: "Uhtceare", def: "Lying awake before dawn and worrying." },
-        { word: "Vorfreude", def: "The joyful, intense anticipation that comes from imagining future pleasures." },
-        { word: "Wamble", def: "Stomach rumbling or uneasiness." },
-        { word: "Xenization", def: "The act of traveling as a stranger." }
-      ];
-
-      const seed = new Date().toDateString();
-      let hash = 0; for (let i = 0; i < seed.length; i++) hash = (hash*31 + seed.charCodeAt(i)) >>> 0;
-      const pick = words[hash % words.length];
-
-      box.innerHTML = `
-        <h4>Word of the Day</h4>
-        <span class="w">${pick.word}</span>
-        <span class="d"> — ${pick.def}</span>
-      `;
-    })();
+  // Push to Firestore
+  try {
+    const ref = doc(db, 'wordleScorecards', courseSelect.value);
+    await setDoc(ref, {
+      course: courseSelect.value,
+      players: playersCleared,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    console.log("Scores cleared");
+  } catch (err) {
+    console.error("Clear scores failed:", err);
+    alert("Clear failed. Check console.");
+  }
+});
+    
   </script>
 </body>
 </html>
