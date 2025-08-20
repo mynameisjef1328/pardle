@@ -405,14 +405,19 @@ function updateMiniBoard() {
       Array.from({ length: 4 }, (_, i) => ({ name: `Player ${i + 1}`, scores: [] }));
 
     function readTableData() {
-      const data = { course: courseSelect.value, players: [] };
-      tbody.querySelectorAll('tr').forEach(row => {
-        const name = row.querySelector('input[type="text"]')?.value || '';
-        const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
-        data.players.push({ name, scores });
-      });
-      return data;
-    }
+  const data = { course: courseSelect.value, players: [] };
+
+  tbody.querySelectorAll('tr').forEach(row => {
+    const scoreInputs = row.querySelectorAll('input[type="number"]');
+    if (!scoreInputs.length) return; // skip the Player label row (and any non-player rows)
+
+    const name = row.querySelector('input[type="text"]')?.value || '';
+    const scores = Array.from(scoreInputs).map(i => i.value);
+    data.players.push({ name, scores });
+  });
+
+  return data;
+}
 
     async function saveScoresToFirestore() {
       if (applyingRemote || !db) return;
@@ -509,7 +514,9 @@ function updateMiniBoard() {
 document.getElementById('clearBtn').addEventListener('click', async () => {
   if (!confirm("Clear all player scores for this course?")) return;
 
-  const playersCleared = Array.from(tbody.querySelectorAll('tr')).map((row, i) => {
+  const playersCleared = Array.from(tbody.querySelectorAll('tr'))
+  .filter(row => row.querySelectorAll('input[type="number"]').length) // only player rows
+  .map((row, i) => {
     const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
     return { name, scores: [] };
   });
