@@ -9,6 +9,13 @@
   font-family: Arial, sans-serif;
   margin: 20px;
   background: #f9f9f9;
+  padding-bottom: 220px; /* space so fixed boxes don't cover inputs */
+}
+table { border-collapse: collapse; width: 100%; }
+/* ...rest of your CSS... */
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background: #f9f9f9;
   padding-bottom: 220px; /* <-- ADD THIS LINE */
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
@@ -348,14 +355,19 @@ function updateMiniBoard() {
       Array.from({ length: 4 }, (_, i) => ({ name: `Player ${i + 1}`, scores: [] }));
 
     function readTableData() {
-      const data = { course: courseSelect.value, players: [] };
-      tbody.querySelectorAll('tr').forEach(row => {
-        const name = row.querySelector('input[type="text"]')?.value || '';
-        const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
-        data.players.push({ name, scores });
-      });
-      return data;
-    }
+  const data = { course: courseSelect.value, players: [] };
+
+  tbody.querySelectorAll('tr').forEach(row => {
+    const scoreInputs = row.querySelectorAll('input[type="number"]');
+    if (!scoreInputs.length) return; // <-- skip label row / non-player rows
+
+    const name = row.querySelector('input[type="text"]')?.value || '';
+    const scores = Array.from(scoreInputs).map(i => i.value);
+    data.players.push({ name, scores });
+  });
+
+  return data;
+}
 
     async function saveScoresToFirestore() {
       if (applyingRemote || !db) return;
@@ -452,18 +464,17 @@ function updateMiniBoard() {
 document.getElementById('clearBtn').addEventListener('click', async () => {
   if (!confirm("Clear all player scores for this course?")) return;
 
-  const playersCleared = Array.from(tbody.querySelectorAll('tr')).map((row, i) => {
-    const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
-    return { name, scores: [] };
-  });
+  const playersCleared = Array.from(tbody.querySelectorAll('tr'))
+    .filter(row => row.querySelectorAll('input[type="number"]').length) // <-- only player rows
+    .map((row, i) => {
+      const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
+      return { name, scores: [] };
+    });
 
-  // Update the table immediately
   renderFromData({ players: playersCleared });
   updateParRow(currentPar);
-
   updateMiniBoard();
 
-  // Push to Firestore
   try {
     const ref = doc(db, 'wordleScorecards', courseSelect.value);
     await setDoc(ref, {
