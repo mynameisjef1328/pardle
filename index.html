@@ -430,20 +430,56 @@ function updateMiniBoard() {
       try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
     }
 
-    function renderFromData(docData) {
+    // Helper: remove unnecessary empty player rows but keep at least 4 slots
+function prunePlayers(players) {
+  // Keep only players with names OR scores filled in
+  const activePlayers = players.filter(p => 
+    (p.name && p.name.trim() !== '') || p.scores.some(s => s && s.trim() !== '')
+  );
+
+  // Always keep at least 4 blank slots
+  const needed = Math.max(4 - activePlayers.length, 0);
+  const blanks = Array.from({ length: needed }, (_, i) => ({
+    name: `Player ${activePlayers.length + i + 1}`,
+    scores: []
+  }));
+
+  return [...activePlayers, ...blanks];
+}
+
+    function prunePlayers(players) {
+  // keep rows that have a name OR any score filled
+  const keep = (players || []).filter(p =>
+    (p?.name && p.name.trim()) ||
+    (p?.scores && p.scores.some(s => s && s !== ''))
+  );
+
+  // ensure at least 4 rows exist
+  while (keep.length < 4) {
+    keep.push({ name: `Player ${keep.length + 1}`, scores: [] });
+  }
+  return keep;
+}
+
+function renderFromData(docData) {
   tbody.innerHTML = '';
 
-  // Add the Player label row at the very top
   const labelRow = document.createElement('tr');
   labelRow.classList.add('player-label');
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Player';
   labelRow.appendChild(labelCell);
+  for (let i = 0; i < 20; i++) labelRow.appendChild(document.createElement('td'));
+  tbody.appendChild(labelRow);
 
-  // Fill the rest of that row with empty cells to keep alignment
-  for (let i = 0; i < 20; i++) {  // 18 holes + Total + Diff
-    labelRow.appendChild(document.createElement('td'));
-  }
+  // PRUNE here
+  const rawPlayers = Array.isArray(docData?.players) ? docData.players : [];
+  const players = prunePlayers(rawPlayers);
+
+  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || [])));
+  updateMiniBoard();
+}
+    
   tbody.appendChild(labelRow);
 
   // Then build actual player rows
@@ -514,28 +550,30 @@ function updateMiniBoard() {
 document.getElementById('clearBtn').addEventListener('click', async () => {
   if (!confirm("Clear all player scores for this course?")) return;
 
-  const playersCleared = Array.from(tbody.querySelectorAll('tr'))
-  .filter(row => row.querySelectorAll('input[type="number"]').length) // only player rows
-  .map((row, i) => {
-    const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
-    return { name, scores: [] };
-  });
+  // read current rows, keep names, wipe scores
+  const playersNow = Array.from(tbody.querySelectorAll('tr'))
+    .filter(row => row.querySelectorAll('input[type="number"]').length) // only player rows
+    .map((row, i) => ({
+      name: row.querySelector('input[type="text"]')?.value?.trim() || '',
+      scores: []
+    }));
 
-  // Update the table immediately
-  renderFromData({ players: playersCleared });
+  const cleaned = prunePlayers(playersNow);
+
+  // Update UI
+  renderFromData({ players: cleaned });
   updateParRow(currentPar);
-
   updateMiniBoard();
 
-  // Push to Firestore
+  // Persist
   try {
     const ref = doc(db, 'wordleScorecards', courseSelect.value);
     await setDoc(ref, {
       course: courseSelect.value,
-      players: playersCleared,
+      players: cleaned,
       updatedAt: serverTimestamp()
     }, { merge: true });
-    console.log("Scores cleared");
+    console.log("Scores cleared & rows pruned");
   } catch (err) {
     console.error("Clear scores failed:", err);
     alert("Clear failed. Check console.");
