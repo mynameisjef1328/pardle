@@ -5,33 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wordle Golf Scorecard</title>
   <style>
-    body {
+body{
   font-family: Arial, sans-serif;
   margin: 20px;
   background: #f9f9f9;
   padding-bottom: 220px; /* space so fixed boxes don't cover inputs */
 }
 table { border-collapse: collapse; width: 100%; }
-/* ...rest of your CSS... */
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  background: #f9f9f9;
-  padding-bottom: 220px; /* <-- ADD THIS LINE */
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #999; color: white; }
-    .under-par { background-color: lightgreen; }
-    .over-par  { background-color: lightcoral; }
-    .even-par  { background-color: white; }
-    input[type="number"] { width: 50px; text-align: center; display: inline-block; vertical-align: middle; }
-    input[type="text"] { width: 100px; }
-    
-    .player-label td {
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+th { background-color: #999; color: white; }
+.under-par { background-color: lightgreen; }
+.over-par  { background-color: lightcoral; }
+.even-par  { background-color: white; }
+input[type="number"] { width: 50px; text-align: center; display: inline-block; vertical-align: middle; }
+input[type="text"]   { width: 100px; }
+
+.player-label td {
   font-weight: bold;
   background: #eee;
   text-align: left;
-      
 }
+
+/* …rest of your existing CSS (wordBox, rulesBox, sticky headers, media query) … */
+</style>
     /* Word of the Day box */
 /* Word of the Day card */
 #wordBox{
@@ -423,17 +419,6 @@ function renderFromData(docData) {
     tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || []))
   );
 
-  updateMiniBoard();
-}
-    
-  tbody.appendChild(labelRow);
-
-  // Then build actual player rows
-  const players = docData?.players?.length ? docData.players : buildDefaultPlayers();
-  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name, i, p.scores || [])));
-
-  updateMiniBoard(); // keep floating box in sync
-}
 
     async function ensureDocExists(courseName) {
       if (!db) return;
