@@ -26,25 +26,27 @@
 #wordBox{
   position: fixed;
   bottom: max(12px, env(safe-area-inset-bottom));
-  left: 220px;
+  left: 380px;                 /* moved right (was 220px) */
   max-width: 700px;
-  background: #0B6623;      /* Masters green */
-  border: 1px solid #084d1a; /* darker green border */
+  background: #0B6623;         /* Masters green */
+  border: 1px solid #084d1a;   /* darker green border */
   border-radius: 8px;
   padding: 10px 12px;
   box-shadow: 0 2px 10px rgba(0,0,0,.2);
-  color: #fff;              /* white text for contrast */
+  color: #fff;
   font-size: 23px;
-  font-weight: bold;        /* bold text */
+  font-weight: bold;
   line-height: 1.6;
   z-index: 4;
+}
 
-  /* Rules of the Game box */
+/* Rules of the Game box */
 #rulesBox {
   position: fixed;
   bottom: max(12px, env(safe-area-inset-bottom));
-  left: 750px;                 /* shift to the right of wordBox */
-  max-width: 340px;
+  right: max(12px, env(safe-area-inset-right)); /* stick to right edge */
+  left: auto;                  /* ensure it's not left-anchored */
+  max-width: 320px;
   background: #f9f9f9;
   border: 2px solid #ccc;
   border-radius: 8px;
@@ -55,20 +57,20 @@
   line-height: 1.5;
   z-index: 4;
 }
+#rulesBox h4 { margin-top: 0; font-size: 16px; font-weight: bold; }
+#rulesBox ul { padding-left: 20px; margin: 8px 0 0 0; }
 
-#rulesBox h4 {
-  margin-top: 0;
-  font-size: 16px;
-  font-weight: bold;
-}
-#rulesBox ul {
-  padding-left: 20px;
-  margin: 8px 0 0 0;
-}
-    
-@media (max-width: 700px){
-  #wordBox{ width: calc(100% - 24px); left: 50%; transform: translateX(-50%); }
-
+/* Responsive: on narrow screens, center the word box and let rules stack */
+@media (max-width: 900px){
+  #wordBox{
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 24px);
+    max-width: none;
+  }
+  #rulesBox{
+    position: static;          /* take it out of fixed flow */
+    margin-top: 12px;
   }
 }
 
