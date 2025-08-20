@@ -367,31 +367,65 @@ function updateMiniBoard() {
   return data;
 }
 
+// Keep only players that have a name or at least one score filled.
+function normalizePlayers(players) {
+  return (players || []).filter(p => {
+    const hasName = !!p?.name?.trim();
+    const hasAnyScore = !!p?.scores?.some(s => (s ?? '').toString().trim() !== '');
+    return hasName || hasAnyScore;
+  });
+}
+    
     async function saveScoresToFirestore() {
-      if (applyingRemote || !db) return;
-      const data = readTableData();
-      const ref = doc(db, 'wordleScorecards', data.course);
-      await setDoc(ref, { course: data.course, players: data.players, updatedAt: serverTimestamp() }, { merge: true });
-    }
+  if (applyingRemote || !db) return;
+  const data = readTableData();
+
+  // Drop any empty rows before writing
+  const cleanPlayers = normalizePlayers(data.players);
+
+  const ref = doc(db, 'wordleScorecards', data.course);
+  await setDoc(
+    ref,
+    { course: data.course, players: cleanPlayers, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
+}
 
     function sameData(a, b) {
       try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
     }
 
-    function renderFromData(docData) {
+function renderFromData(docData) {
   tbody.innerHTML = '';
 
-  // Add the Player label row at the very top
+  // Player label row (header for the first column)
   const labelRow = document.createElement('tr');
   labelRow.classList.add('player-label');
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Player';
   labelRow.appendChild(labelCell);
 
-  // Fill the rest of that row with empty cells to keep alignment
-  for (let i = 0; i < 20; i++) {  // 18 holes + Total + Diff
+  // Fill remaining header cells so columns line up (18 holes + Total + +/- = 20)
+  for (let i = 0; i < 20; i++) {
     labelRow.appendChild(document.createElement('td'));
   }
+  tbody.appendChild(labelRow);
+
+  // Use normalized/pruned players and ensure at least 4 rows
+  const rawPlayers = Array.isArray(docData?.players) ? docData.players : [];
+  const players = normalizePlayers(rawPlayers);
+  while (players.length < 4) {
+    players.push({ name: `Player ${players.length + 1}`, scores: [] });
+  }
+
+  // Build rows
+  players.forEach((p, i) =>
+    tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || []))
+  );
+
+  updateMiniBoard();
+}
+    
   tbody.appendChild(labelRow);
 
   // Then build actual player rows
