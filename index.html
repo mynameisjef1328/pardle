@@ -5,29 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wordle Golf Scorecard</title>
   <style>
-body{
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  background: #f9f9f9;
-  padding-bottom: 220px; /* space so fixed boxes don't cover inputs */
-}
-table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-th { background-color: #999; color: white; }
-.under-par { background-color: lightgreen; }
-.over-par  { background-color: lightcoral; }
-.even-par  { background-color: white; }
-input[type="number"] { width: 50px; text-align: center; display: inline-block; vertical-align: middle; }
-input[type="text"]   { width: 100px; }
-
-.player-label td {
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #999; color: white; }
+    .under-par { background-color: lightgreen; }
+    .over-par  { background-color: lightcoral; }
+    .even-par  { background-color: white; }
+    input[type="number"] { width: 50px; text-align: center; display: inline-block; vertical-align: middle; }
+    input[type="text"] { width: 100px; }
+    
+    .player-label td {
   font-weight: bold;
   background: #eee;
   text-align: left;
+      
 }
-
-/* …rest of your existing CSS (wordBox, rulesBox, sticky headers, media query) … */
-</style>
     /* Word of the Day box */
 /* Word of the Day card */
 #wordBox{
@@ -202,6 +195,7 @@ testWriteCourse(); // runs once on load
 
     // ---------- Data ----------
     const courses = {
+      'Sweetwater Creek': [4,4,3,4,5,4,4,3,5,4,3,4,5,4,4,3,4,5],
       'St. Andrews':  [4,5,4,3,4,4,5,3,4,4,3,5,4,4,3,4,5,4],
       'Augusta':      [5,4,3,4,5,3,4,4,4,3,5,4,4,3,4,5,4,3],
       'Bully Pulpit':  [4,3,5,4,4,3,4,5,4,4,3,4,4,5,3,4,5,4],
@@ -349,76 +343,48 @@ function updateMiniBoard() {
       Array.from({ length: 4 }, (_, i) => ({ name: `Player ${i + 1}`, scores: [] }));
 
     function readTableData() {
-  const data = { course: courseSelect.value, players: [] };
+      const data = { course: courseSelect.value, players: [] };
+      tbody.querySelectorAll('tr').forEach(row => {
+        const name = row.querySelector('input[type="text"]')?.value || '';
+        const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
+        data.players.push({ name, scores });
+      });
+      return data;
+    }
 
-  tbody.querySelectorAll('tr').forEach(row => {
-    const scoreInputs = row.querySelectorAll('input[type="number"]');
-    if (!scoreInputs.length) return; // <-- skip label row / non-player rows
-
-    const name = row.querySelector('input[type="text"]')?.value || '';
-    const scores = Array.from(scoreInputs).map(i => i.value);
-    data.players.push({ name, scores });
-  });
-
-  return data;
-}
-
-// Keep only players that have a name or at least one score filled.
-function normalizePlayers(players) {
-  return (players || []).filter(p => {
-    const hasName = !!p?.name?.trim();
-    const hasAnyScore = !!p?.scores?.some(s => (s ?? '').toString().trim() !== '');
-    return hasName || hasAnyScore;
-  });
-}
-    
     async function saveScoresToFirestore() {
-  if (applyingRemote || !db) return;
-  const data = readTableData();
-
-  // Drop any empty rows before writing
-  const cleanPlayers = normalizePlayers(data.players);
-
-  const ref = doc(db, 'wordleScorecards', data.course);
-  await setDoc(
-    ref,
-    { course: data.course, players: cleanPlayers, updatedAt: serverTimestamp() },
-    { merge: true }
-  );
-}
+      if (applyingRemote || !db) return;
+      const data = readTableData();
+      const ref = doc(db, 'wordleScorecards', data.course);
+      await setDoc(ref, { course: data.course, players: data.players, updatedAt: serverTimestamp() }, { merge: true });
+    }
 
     function sameData(a, b) {
       try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
     }
 
-function renderFromData(docData) {
+    function renderFromData(docData) {
   tbody.innerHTML = '';
 
-  // Player label row (header for the first column)
+  // Add the Player label row at the very top
   const labelRow = document.createElement('tr');
   labelRow.classList.add('player-label');
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Player';
   labelRow.appendChild(labelCell);
 
-  // Fill remaining header cells so columns line up (18 holes + Total + +/- = 20)
-  for (let i = 0; i < 20; i++) {
+  // Fill the rest of that row with empty cells to keep alignment
+  for (let i = 0; i < 20; i++) {  // 18 holes + Total + Diff
     labelRow.appendChild(document.createElement('td'));
   }
   tbody.appendChild(labelRow);
 
-  // Use normalized/pruned players and ensure at least 4 rows
-  const rawPlayers = Array.isArray(docData?.players) ? docData.players : [];
-  const players = normalizePlayers(rawPlayers);
-  while (players.length < 4) {
-    players.push({ name: `Player ${players.length + 1}`, scores: [] });
-  }
+  // Then build actual player rows
+  const players = docData?.players?.length ? docData.players : buildDefaultPlayers();
+  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name, i, p.scores || [])));
 
-  // Build rows
-  players.forEach((p, i) =>
-    tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || []))
-  );
-
+  updateMiniBoard(); // keep floating box in sync
+}
 
     async function ensureDocExists(courseName) {
       if (!db) return;
@@ -481,17 +447,18 @@ function renderFromData(docData) {
 document.getElementById('clearBtn').addEventListener('click', async () => {
   if (!confirm("Clear all player scores for this course?")) return;
 
-  const playersCleared = Array.from(tbody.querySelectorAll('tr'))
-    .filter(row => row.querySelectorAll('input[type="number"]').length) // <-- only player rows
-    .map((row, i) => {
-      const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
-      return { name, scores: [] };
-    });
+  const playersCleared = Array.from(tbody.querySelectorAll('tr')).map((row, i) => {
+    const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
+    return { name, scores: [] };
+  });
 
+  // Update the table immediately
   renderFromData({ players: playersCleared });
   updateParRow(currentPar);
+
   updateMiniBoard();
 
+  // Push to Firestore
   try {
     const ref = doc(db, 'wordleScorecards', courseSelect.value);
     await setDoc(ref, {
