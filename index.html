@@ -237,6 +237,7 @@ testWriteCourse(); // runs once on load
 
     function buildPlayerRow(name = '', rowIndex = 0, savedScores = []) {
       const row = document.createElement('tr');
+      row.classList.add('player-row'); 
 
       const nameCell = document.createElement('td');
       const nameInput = document.createElement('input');
@@ -342,15 +343,18 @@ function updateMiniBoard() {
     const buildDefaultPlayers = () =>
       Array.from({ length: 4 }, (_, i) => ({ name: `Player ${i + 1}`, scores: [] }));
 
-    function readTableData() {
-      const data = { course: courseSelect.value, players: [] };
-      tbody.querySelectorAll('tr').forEach(row => {
-        const name = row.querySelector('input[type="text"]')?.value || '';
-        const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
-        data.players.push({ name, scores });
-      });
-      return data;
-    }
+   function readTableData() {
+  const data = { course: courseSelect.value, players: [] };
+
+  document.querySelectorAll('#scorecard tbody tr.player-row').forEach(row => {
+    const name = row.querySelector('input[type="text"]')?.value || '';
+    const scores = Array.from(row.querySelectorAll('input[type="number"]')).map(i => i.value);
+    data.players.push({ name, scores });
+  });
+
+  return data;
+}
+
 
     async function saveScoresToFirestore() {
       if (applyingRemote || !db) return;
@@ -366,24 +370,23 @@ function updateMiniBoard() {
     function renderFromData(docData) {
   tbody.innerHTML = '';
 
-  // Add the Player label row at the very top
+  // label row
   const labelRow = document.createElement('tr');
   labelRow.classList.add('player-label');
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Player';
   labelRow.appendChild(labelCell);
-
-  // Fill the rest of that row with empty cells to keep alignment
-  for (let i = 0; i < 20; i++) {  // 18 holes + Total + Diff
-    labelRow.appendChild(document.createElement('td'));
-  }
+  for (let i = 0; i < 20; i++) labelRow.appendChild(document.createElement('td'));
   tbody.appendChild(labelRow);
 
-  // Then build actual player rows
-  const players = docData?.players?.length ? docData.players : buildDefaultPlayers();
-  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name, i, p.scores || [])));
+  // players (optionally normalized)
+  const rawPlayers = Array.isArray(docData?.players) ? docData.players : [];
+  const players = normalizePlayers ? normalizePlayers(rawPlayers) : rawPlayers;
+  while (players.length < 4) players.push({ name: `Player ${players.length + 1}`, scores: [] });
 
-  updateMiniBoard(); // keep floating box in sync
+  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || [])));
+
+  updateMiniBoard();
 }
 
     async function ensureDocExists(courseName) {
@@ -447,10 +450,13 @@ function updateMiniBoard() {
 document.getElementById('clearBtn').addEventListener('click', async () => {
   if (!confirm("Clear all player scores for this course?")) return;
 
-  const playersCleared = Array.from(tbody.querySelectorAll('tr')).map((row, i) => {
-    const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
-    return { name, scores: [] };
-  });
+const playersCleared = Array.from(
+  document.querySelectorAll('#scorecard tbody tr.player-row')
+).map((row, i) => {
+  const name = row.querySelector('input[type="text"]')?.value || `Player ${i+1}`;
+  return { name, scores: [] };
+});
+
 
   // Update the table immediately
   renderFromData({ players: playersCleared });
