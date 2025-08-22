@@ -364,27 +364,42 @@ function updateMiniBoard() {
       try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
     }
 
-    function renderFromData(docData) {
+   function renderFromData(docData) {
   tbody.innerHTML = '';
 
-  // label row
+  // "Player" header cell in first column
   const labelRow = document.createElement('tr');
   labelRow.classList.add('player-label');
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Player';
   labelRow.appendChild(labelCell);
-  for (let i = 0; i < 20; i++) labelRow.appendChild(document.createElement('td'));
+  // pad out the header row (18 holes + Total + +/- = 20)
+  for (let i = 0; i < 20; i++) {
+    labelRow.appendChild(document.createElement('td'));
+  }
   tbody.appendChild(labelRow);
 
-  // players (optionally normalized)
-  const rawPlayers = Array.isArray(docData?.players) ? docData.players : [];
-  const players = normalizePlayers ? normalizePlayers(rawPlayers) : rawPlayers;
-  while (players.length < 4) players.push({ name: `Player ${players.length + 1}`, scores: [] });
+  // normalize incoming players (remove truly empty rows)
+  const raw = Array.isArray(docData?.players) ? docData.players : [];
+  const players = raw.filter(p => {
+    const hasName = !!(p?.name || '').trim();
+    const hasScore = (p?.scores || []).some(s => (s ?? '').toString().trim() !== '');
+    return hasName || hasScore;
+  });
 
-  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || [])));
+  // ensure at least 4 rows show up
+  while (players.length < 4) {
+    players.push({ name: `Player ${players.length + 1}`, scores: [] });
+  }
+
+  // build rows
+  players.forEach((p, i) => {
+    tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || []));
+  });
 
   updateMiniBoard();
 }
+
 
     async function ensureDocExists(courseName) {
       if (!db) return;
