@@ -299,9 +299,6 @@ testWriteCourse(); // runs once on load
   row.querySelector('.diff').textContent = total
     ? (diff > 0 ? `+${diff}` : `${diff}`)
     : '0';
-
-  // keep the mini board in sync
-  updateMiniBoard();
 }
 
 function updateMiniBoard() {
