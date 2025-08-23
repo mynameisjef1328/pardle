@@ -21,7 +21,7 @@
   text-align: left;
       
 }
-
+    /* Word of the Day box */
 /* Word of the Day card */
 #wordBox{
   position: fixed;
@@ -43,8 +43,9 @@
 /* Rules of the Game box */
 #rulesBox {
   position: fixed;
-  bottom: 12px;  /* ⬅ stick to bottom */
-  right: 12px;   /* ⬅ stick to right */
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: max(12px, env(safe-area-inset-right)); /* stick to right edge */
+  left: auto;                  /* ensure it's not left-anchored */
   max-width: 320px;
   background: #f9f9f9;
   border: 2px solid #ccc;
@@ -54,26 +55,22 @@
   color: #222;
   font-size: 14px;
   line-height: 1.5;
-  z-index: 100; /* ensure it's above table */
+  z-index: 4;
 }
-    
 #rulesBox h4 { margin-top: 0; font-size: 16px; font-weight: bold; }
 #rulesBox ul { padding-left: 20px; margin: 8px 0 0 0; }
 
 /* Responsive: on narrow screens, center the word box and let rules stack */
 @media (max-width: 900px){
-  #wordBox {
-    position: static;
-    margin: 12px auto;
-    transform: none;
+  #wordBox{
+    left: 50%;
+    transform: translateX(-50%);
     width: calc(100% - 24px);
     max-width: none;
   }
-  #rulesBox {
-    position: static;
+  #rulesBox{
+    position: static;          /* take it out of fixed flow */
     margin-top: 12px;
-    width: calc(100% - 24px);
-    max-width: none;
   }
 }
 
@@ -96,20 +93,6 @@ thead th {
 
 /* optional: subtle divider where the sticky column meets the rest */
 th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
-
-    th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
-
-/* Dark mode styles */
-@media (prefers-color-scheme: dark) {
-  body { background: #111; color: #eee; }
-  th { background-color: #555; color: #fff; }
-  td, th { border-color: #333; }
-  .player-label td { background: #1b1b1b; }
-  #wordBox { background:#0b5a1f; border-color:#064216; }
-  #rulesBox { background:#1a1a1a; border-color:#333; color:#eee; }
-  .under-par { background: #0c4; color:#002a00; }
-  .over-par  { background: #d66; }
-}
     
   </style>
 </head>
@@ -177,7 +160,6 @@ th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
   try {
     app = initializeApp(firebaseConfig);
     db  = getFirestore(app);
-    window.db = db;
     console.log("Firebase OK:", firebaseConfig.projectId);
 
     // optional quick ping
@@ -374,7 +356,6 @@ function updateMiniBoard() {
     async function saveScoresToFirestore() {
       if (applyingRemote || !db) return;
       const data = readTableData();
-      const cleanPlayers = normalizePlayers(data.players).slice(0, 4);
       const ref = doc(db, 'wordleScorecards', data.course);
       await setDoc(ref, { course: data.course, players: data.players, updatedAt: serverTimestamp() }, { merge: true });
     }
@@ -386,23 +367,35 @@ function updateMiniBoard() {
    function renderFromData(docData) {
   tbody.innerHTML = '';
 
-  // header “Player” row
+  // "Player" header cell in first column
   const labelRow = document.createElement('tr');
   labelRow.classList.add('player-label');
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Player';
   labelRow.appendChild(labelCell);
-  for (let i = 0; i < 20; i++) labelRow.appendChild(document.createElement('td'));
+  // pad out the header row (18 holes + Total + +/- = 20)
+  for (let i = 0; i < 20; i++) {
+    labelRow.appendChild(document.createElement('td'));
+  }
   tbody.appendChild(labelRow);
 
-  // only keep real players, then take the first 4
-  const rawPlayers = Array.isArray(docData?.players) ? docData.players : [];
-  const players = normalizePlayers(rawPlayers).slice(0, 4);
+  // normalize incoming players (remove truly empty rows)
+  const raw = Array.isArray(docData?.players) ? docData.players : [];
+  const players = raw.filter(p => {
+    const hasName = !!(p?.name || '').trim();
+    const hasScore = (p?.scores || []).some(s => (s ?? '').toString().trim() !== '');
+    return hasName || hasScore;
+  });
 
-  // pad to 4 if fewer
-  while (players.length < 4) players.push({ name: `Player ${players.length + 1}`, scores: [] });
+  // ensure at least 4 rows show up
+  while (players.length < 4) {
+    players.push({ name: `Player ${players.length + 1}`, scores: [] });
+  }
 
-  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || [])));
+  // build rows
+  players.forEach((p, i) => {
+    tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || []));
+  });
 
   updateMiniBoard();
 }
