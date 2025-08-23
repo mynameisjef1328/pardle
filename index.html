@@ -395,26 +395,6 @@ function addNavKeys(input) {
     : '0';
 }
 
-function updateMiniBoard() {
-  const box = document.getElementById('miniBoard');
-  if (!box) return;
-
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-  const items = rows
-    .map(r => {
-      const name = r.querySelector('input[type="text"]')?.value?.trim() || '';
-      const total = parseInt(r.querySelector('.total')?.textContent || '0', 10) || 0;
-      const diffTxt = (r.querySelector('.diff')?.textContent || '0').toString();
-      return { name, total, diffTxt };
-    })
-    .filter(p => p.name);
-
-  if (!items.length) {
-    box.innerHTML = `<h4>Live Scores</h4>
-      <div class="row"><span class="name">Enter scores to begin</span></div>`;
-    return;
-  }
-
   // sort by best total
   items.sort((a, b) => (a.total || 9999) - (b.total || 9999));
 
@@ -491,7 +471,6 @@ function updateMiniBoard() {
     tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || []));
   });
 
-  updateMiniBoard();
 }
 
 
@@ -544,8 +523,6 @@ function updateMiniBoard() {
     const last = localStorage.getItem('lastCourse');
     courseSelect.value = last && courses[last] ? last : Object.keys(courses)[0];
     loadScorecard(courseSelect.value);
-
-    updateMiniBoard();
 
     courseSelect.addEventListener('change', e => {
       localStorage.setItem('lastCourse', e.target.value);
