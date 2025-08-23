@@ -363,37 +363,32 @@ courseSelect.addEventListener('change', e => {
     }
   });
 
-      // put this right after the calculate() function (but not inside it)
-function addNavKeys(input) {
-  input.addEventListener('keydown', e => {
-    const td  = input.parentElement;
-    const row = td?.parentElement;
-    if (!row) return;
-
-    const cells = Array.from(row.querySelectorAll('td input[type="number"]'));
-    const idx   = cells.indexOf(input);
-
-    let next = null;
-    if (e.key === 'Enter' || e.key === 'ArrowRight') {
-      next = cells[idx + 1] || cells[idx];     // stay if at end
-    } else if (e.key === 'ArrowLeft') {
-      next = cells[idx - 1] || cells[idx];     // stay if at start
-    }
-
-    if (next && next !== input) {
-      e.preventDefault();
-      next.focus();
-      next.select?.();
-    }
-  });
-}
-
   row.querySelector('.total').textContent = total || '0';
   const diff = total - parTotal;
   row.querySelector('.diff').textContent = total
     ? (diff > 0 ? `+${diff}` : `${diff}`)
     : '0';
 }
+
+function updateMiniBoard() {
+  const box = document.getElementById('miniBoard');
+  if (!box) return;
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const items = rows
+    .map(r => {
+      const name = r.querySelector('input[type="text"]')?.value?.trim() || '';
+      const total = parseInt(r.querySelector('.total')?.textContent || '0', 10) || 0;
+      const diffTxt = (r.querySelector('.diff')?.textContent || '0').toString();
+      return { name, total, diffTxt };
+    })
+    .filter(p => p.name);
+
+  if (!items.length) {
+    box.innerHTML = `<h4>Live Scores</h4>
+      <div class="row"><span class="name">Enter scores to begin</span></div>`;
+    return;
+  }
 
   // sort by best total
   items.sort((a, b) => (a.total || 9999) - (b.total || 9999));
@@ -471,6 +466,7 @@ function addNavKeys(input) {
     tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || []));
   });
 
+  updateMiniBoard();
 }
 
 
@@ -523,6 +519,8 @@ function addNavKeys(input) {
     const last = localStorage.getItem('lastCourse');
     courseSelect.value = last && courses[last] ? last : Object.keys(courses)[0];
     loadScorecard(courseSelect.value);
+
+    updateMiniBoard();
 
     courseSelect.addEventListener('change', e => {
       localStorage.setItem('lastCourse', e.target.value);
