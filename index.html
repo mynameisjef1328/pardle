@@ -191,29 +191,30 @@ thead th.current-hole {
   <button id="clearNamesBtn" type="button" style="margin-left:8px;">Clear Names</button>
 
   <table id="scorecard">
-    <thead>
-  <tr>
-  <th id="courseLabel">Course</th>
-  <th id="courseName" colspan="18">Torrey Pines</th>
-  <th>Total</th>
-  <th>+/-</th>
-</tr>
-<tr>
-  <th id="holeLabel">Hole</th>
-</tr>
-<tr>
-<th id="parLabel">Par</th>
-  <th></th>
-</tr>
-<tr id="parRow"><th>Par</th></tr>
-  
-  <script>
-    for (let i = 1; i <= 18; i++) document.write(`<th>${i}</th>`);
-  </script>
+  <thead>
+    <!-- Row 1: Course name / totals -->
+    <tr>
+      <th id="courseLabel">Course</th>
+      <th id="courseName" colspan="18">Torrey Pines</th>
+      <th>Total</th>
+      <th>+/-</th>
+    </tr>
 
-    </thead>
-    <tbody></tbody>
-  </table>
+    <!-- Row 2: Hole numbers -->
+    <tr>
+      <th>Hole</th>
+      <script>
+        for (let i = 1; i <= 18; i++) document.write(`<th>${i}</th>`);
+      </script>
+      <th>Par</th>
+      <th></th>
+    </tr>
+
+    <!-- Row 3: Par values (first cell is the "Par" label) -->
+    <tr id="parRow"><th>Par</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
 <!-- Word of the Day box -->
 <div id="wordBox" aria-live="polite"></div>
