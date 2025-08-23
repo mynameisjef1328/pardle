@@ -551,6 +551,7 @@ function markCurrentHole() {
     const last = localStorage.getItem('lastCourse');
     courseSelect.value = last && courses[last] ? last : Object.keys(courses)[0];
     loadScorecard(courseSelect.value);
+    markCurrentHole();
 
     updateMiniBoard();
 
