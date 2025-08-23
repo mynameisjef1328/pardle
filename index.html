@@ -11,7 +11,7 @@
     th { background-color: #999; color: white; }
     .under-par { background-color: lightgreen; }
     .over-par  { background-color: lightcoral; }
-    .even-par  { background-color: white; }
+    .even-par  { background-color: black; }
     input[type="number"] { width: 50px; text-align: center; display: inline-block; vertical-align: middle; }
     input[type="text"] { width: 100px; }
     
@@ -46,7 +46,7 @@
   bottom: max(12px, env(safe-area-inset-bottom));
   right: max(12px, env(safe-area-inset-right)); /* stick to right edge */
   left: auto;                  /* ensure it's not left-anchored */
-  max-width: 320px;
+  max-width: 500px;
   background: #f9f9f9;
   border: 2px solid #ccc;
   border-radius: 8px;
@@ -104,6 +104,55 @@ th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
   .under-par { background: #0c4; color:#002a00; }
   .over-par  { background: #d66; }
 }
+
+/* Make buttons and dropdown uniform size & style */
+#clearBtn,
+#clearNamesBtn,
+#courseSelect {
+  height: 40px;              /* uniform height */
+  padding: 6px 14px;         /* same padding */
+  font-size: 16px;           /* larger, easy-to-read text */
+  border-radius: 6px;        /* smooth rounded edges */
+  border: 1px solid #888;    /* subtle border */
+  background-color: #fff;    /* clean background */
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* subtle lift */
+}
+
+/* Hover effects for buttons only */
+#clearBtn:hover,
+#clearNamesBtn:hover {
+  background-color: #4CAF50;  /* Masters green hover */
+  color: #fff;
+  border-color: #3e8e41;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Optional: improve dropdown arrow visibility */
+#courseSelect {
+  appearance: none;             /* remove default browser style */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  padding-right: 30px;          /* room for custom arrow */
+}
+
+#courseLabel {
+  font-weight: bold;
+  background: #eee;
+  text-align: left;
+  padding-left: 8px;
+}
+
+#courseName {
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+  background-color: #999;
+  color: white;
+}
     
   </style>
 </head>
@@ -117,12 +166,12 @@ th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
 
   <table id="scorecard">
     <thead>
-      <tr>
-        <th></th>
-        <th colspan="18">Hole</th>
-        <th>Total</th>
-        <th>+/-</th>
-      </tr>
+  <tr>
+    <th id="courseLabel">Course</th>
+    <th id="courseName" colspan="18">Torrey Pines</th>
+    <th>Total</th>
+    <th>+/-</th>
+  </tr>
       <tr>
         <th></th>
         <script>
@@ -228,6 +277,16 @@ testWriteCourse(); // runs once on load
       courseSelect.appendChild(option);
     });
 
+const courseNameHeader = document.getElementById('courseName');
+
+// Update course name on load
+courseNameHeader.textContent = courseSelect.value;
+
+// Update course name whenever a new course is selected
+courseSelect.addEventListener('change', e => {
+  courseNameHeader.textContent = e.target.value;
+});
+    
     let currentPar = [];
     let unsubscribe = null;
     let applyingRemote = false;
@@ -303,6 +362,31 @@ testWriteCourse(); // runs once on load
       else cell.className = 'even-par';
     }
   });
+
+      // put this right after the calculate() function (but not inside it)
+function addNavKeys(input) {
+  input.addEventListener('keydown', e => {
+    const td  = input.parentElement;
+    const row = td?.parentElement;
+    if (!row) return;
+
+    const cells = Array.from(row.querySelectorAll('td input[type="number"]'));
+    const idx   = cells.indexOf(input);
+
+    let next = null;
+    if (e.key === 'Enter' || e.key === 'ArrowRight') {
+      next = cells[idx + 1] || cells[idx];     // stay if at end
+    } else if (e.key === 'ArrowLeft') {
+      next = cells[idx - 1] || cells[idx];     // stay if at start
+    }
+
+    if (next && next !== input) {
+      e.preventDefault();
+      next.focus();
+      next.select?.();
+    }
+  });
+}
 
   row.querySelector('.total').textContent = total || '0';
   const diff = total - parTotal;
