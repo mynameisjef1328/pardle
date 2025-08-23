@@ -177,6 +177,7 @@ th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
   try {
     app = initializeApp(firebaseConfig);
     db  = getFirestore(app);
+    window.db = db;
     console.log("Firebase OK:", firebaseConfig.projectId);
 
     // optional quick ping
@@ -373,6 +374,7 @@ function updateMiniBoard() {
     async function saveScoresToFirestore() {
       if (applyingRemote || !db) return;
       const data = readTableData();
+      const cleanPlayers = normalizePlayers(data.players).slice(0, 4);
       const ref = doc(db, 'wordleScorecards', data.course);
       await setDoc(ref, { course: data.course, players: data.players, updatedAt: serverTimestamp() }, { merge: true });
     }
@@ -384,35 +386,23 @@ function updateMiniBoard() {
    function renderFromData(docData) {
   tbody.innerHTML = '';
 
-  // "Player" header cell in first column
+  // header “Player” row
   const labelRow = document.createElement('tr');
   labelRow.classList.add('player-label');
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Player';
   labelRow.appendChild(labelCell);
-  // pad out the header row (18 holes + Total + +/- = 20)
-  for (let i = 0; i < 20; i++) {
-    labelRow.appendChild(document.createElement('td'));
-  }
+  for (let i = 0; i < 20; i++) labelRow.appendChild(document.createElement('td'));
   tbody.appendChild(labelRow);
 
-  // normalize incoming players (remove truly empty rows)
-  const raw = Array.isArray(docData?.players) ? docData.players : [];
-  const players = raw.filter(p => {
-    const hasName = !!(p?.name || '').trim();
-    const hasScore = (p?.scores || []).some(s => (s ?? '').toString().trim() !== '');
-    return hasName || hasScore;
-  });
+  // only keep real players, then take the first 4
+  const rawPlayers = Array.isArray(docData?.players) ? docData.players : [];
+  const players = normalizePlayers(rawPlayers).slice(0, 4);
 
-  // ensure at least 4 rows show up
-  while (players.length < 4) {
-    players.push({ name: `Player ${players.length + 1}`, scores: [] });
-  }
+  // pad to 4 if fewer
+  while (players.length < 4) players.push({ name: `Player ${players.length + 1}`, scores: [] });
 
-  // build rows
-  players.forEach((p, i) => {
-    tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || []));
-  });
+  players.forEach((p, i) => tbody.appendChild(buildPlayerRow(p.name || '', i, p.scores || [])));
 
   updateMiniBoard();
 }
