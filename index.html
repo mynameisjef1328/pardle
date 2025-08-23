@@ -192,27 +192,27 @@ thead th.current-hole {
 
   <table id="scorecard">
   <thead>
-    <!-- Row 1: Course name / totals -->
-    <tr>
-      <th id="courseLabel">Course</th>
-      <th id="courseName" colspan="18">Torrey Pines</th>
-      <th>Total</th>
-      <th>+/-</th>
-    </tr>
+  <!-- Row 1: Course / Course Name / Total / +/- -->
+  <tr>
+    <th id="courseLabel">Course</th>
+    <th id="courseName" colspan="18">Torrey Pines</th>
+    <th>Total</th>
+    <th>+/-</th>
+  </tr>
 
-    <!-- Row 2: Hole numbers -->
-    <tr>
-      <th>Hole</th>
-      <script>
-        for (let i = 1; i <= 18; i++) document.write(`<th>${i}</th>`);
-      </script>
-      <th>Par</th>
-      <th></th>
-    </tr>
+  <!-- Row 2: Hole numbers -->
+  <tr>
+    <th>Hole</th>
+    <script>
+      for (let i = 1; i <= 18; i++) document.write(`<th>${i}</th>`);
+    </script>
+    <th>Par</th>
+    <th></th>
+  </tr>
 
-    <!-- Row 3: Par values (first cell is the "Par" label) -->
-    <tr id="parRow"><th>Par</th></tr>
-  </thead>
+  <!-- Row 3: Par values (filled by updateParRow) -->
+  <tr id="parRow"><th>Par</th></tr>
+</thead>
   <tbody></tbody>
 </table>
 
@@ -323,17 +323,21 @@ courseSelect.addEventListener('change', e => {
     let applyingRemote = false;
 
     function updateParRow(parValues) {
-      parRow.innerHTML = '';
-      parRow.innerHTML += '<th></th>';
-      parValues.forEach(par => {
-        const th = document.createElement('th');
-        th.textContent = par;
-        parRow.appendChild(th);
-      });
-      const parTotal = parValues.reduce((sum, p) => sum + p, 0);
-      parRow.innerHTML += `<th>${parTotal}</th>`;
-      parRow.innerHTML += '<th></th>';
-    }
+  // FIRST cell is the label "Par"
+  parRow.innerHTML = '<th>Par</th>';
+
+  // 18 par values
+  parValues.forEach(par => {
+    const th = document.createElement('th');
+    th.textContent = par;
+    parRow.appendChild(th);
+  });
+
+  // Par total, then blank +/- header
+  const parTotal = parValues.reduce((sum, p) => sum + p, 0);
+  parRow.innerHTML += `<th>${parTotal}</th>`;
+  parRow.innerHTML += '<th></th>';
+}
 
     function buildPlayerRow(name = '', rowIndex = 0, savedScores = []) {
       const row = document.createElement('tr');
