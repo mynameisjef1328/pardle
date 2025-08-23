@@ -145,21 +145,13 @@ th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
   color: black;
 }
 
-  #holeLabel {
+#holeLabel,
+#parLabel {
   font-weight: bold;
   background: #eee;
-  text-align: left;
+  text-align: left !important;   /* ← Force left alignment */
   padding-left: 8px;
-  color: black;  
- 
-}
-
-  #parLabel {
-  font-weight: bold;
-  background: #eee;
-  text-align: left;
-  padding-left: 8px;
-  color: black;
+  color: black !important;       /* ← Ensure black text */
 }
 
 #courseName {
