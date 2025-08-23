@@ -21,7 +21,7 @@
   text-align: left;
       
 }
-    /* Word of the Day box */
+
 /* Word of the Day card */
 #wordBox{
   position: fixed;
@@ -43,9 +43,8 @@
 /* Rules of the Game box */
 #rulesBox {
   position: fixed;
-  bottom: max(12px, env(safe-area-inset-bottom));
-  right: max(12px, env(safe-area-inset-right)); /* stick to right edge */
-  left: auto;                  /* ensure it's not left-anchored */
+  bottom: 12px;  /* ⬅ stick to bottom */
+  right: 12px;   /* ⬅ stick to right */
   max-width: 320px;
   background: #f9f9f9;
   border: 2px solid #ccc;
@@ -55,22 +54,26 @@
   color: #222;
   font-size: 14px;
   line-height: 1.5;
-  z-index: 4;
+  z-index: 100; /* ensure it's above table */
 }
+    
 #rulesBox h4 { margin-top: 0; font-size: 16px; font-weight: bold; }
 #rulesBox ul { padding-left: 20px; margin: 8px 0 0 0; }
 
 /* Responsive: on narrow screens, center the word box and let rules stack */
 @media (max-width: 900px){
-  #wordBox{
-    left: 50%;
-    transform: translateX(-50%);
+  #wordBox {
+    position: static;
+    margin: 12px auto;
+    transform: none;
     width: calc(100% - 24px);
     max-width: none;
   }
-  #rulesBox{
-    position: static;          /* take it out of fixed flow */
+  #rulesBox {
+    position: static;
     margin-top: 12px;
+    width: calc(100% - 24px);
+    max-width: none;
   }
 }
 
