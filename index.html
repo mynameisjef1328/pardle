@@ -153,6 +153,15 @@ th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
   background-color: #999;
   color: white;
 }
+
+    /* highlight for current hole column */
+.current-hole { 
+  outline: 2px solid rgba(0,120,255,0.25); 
+  box-shadow: inset 0 0 8px rgba(0,120,255,0.25); 
+}
+thead th.current-hole { 
+  outline: 2px solid rgba(0,120,255,0.35); 
+}
     
   </style>
 </head>
@@ -514,6 +523,29 @@ function updateMiniBoard() {
       // Then attach realtime sync
       await attachListenerForCourse(courseName);
     }
+
+    // Highlight today's hole
+function markCurrentHole() {
+  // Pick hole 1-18 based on day-of-year (simple & deterministic)
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const doy = Math.floor((now - start) / 86400000);
+  const holeIdx = ((doy % 18) + 1); // 1..18
+
+  // Clear previous marks
+  document.querySelectorAll('#scorecard .current-hole')
+    .forEach(el => el.classList.remove('current-hole'));
+
+  // Mark header
+  const headerTh = document.querySelectorAll('#scorecard thead tr:nth-child(2) th')[holeIdx];
+  if (headerTh) headerTh.classList.add('current-hole');
+
+  // Mark body cells for that hole
+  document.querySelectorAll('#scorecard tbody tr.player-row').forEach(row => {
+    const td = row.querySelectorAll('td')[holeIdx];
+    if (td) td.classList.add('current-hole');
+  });
+}
 
     // ---------- Boot ----------
     const last = localStorage.getItem('lastCourse');
