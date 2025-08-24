@@ -1,64 +1,14 @@
+CODE (MOBILE):
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jef's Wonderful Wordle Golf Scorecard</title>
-  <style>j
-    /* Global font + background normalization */
-
-    body { 
-  font-family: Arial, sans-serif; 
-  margin: 20px; 
-  background: #f9f9f9; 
-}
-
-/* Force all elements to inherit the body font */
-h1, h2, h3, h4, h5, h6,
-button,
-label,
-select,
-#wordBox,
-#rulesBox,
-table,
-th,
-td,
-input,
-span,
-div {
-  font-family: inherit;
-}
-
-/* Upgrade scorecard title for consistency and readability */
-h2 {
-  font-size: 28px;            /* slightly larger and modern */
-  font-weight: 700;           /* bold and clean */
-  margin-bottom: 15px;        /* space below title */
-  color: #222;                /* dark gray instead of pure black */
-  text-align: center;         /* center align for polish */
-}
-
-/* Upgrade Word of the Day title */
-#wordBox h4 {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-  color: #fff;                /* keep white for contrast */
-}
-
-/* Upgrade Rules title */
-#rulesBox h4 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #222;                /* matches scorecard title color */
-}
-
-.table-wrap { 
-  overflow-x: auto; 
-  -webkit-overflow-scrolling: touch; 
-  width: 100%; 
-}
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
 
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
@@ -183,23 +133,17 @@ h2 {
       100% { box-shadow: inset 0 0 0 0 rgba(46,204,113,0); }
     }
     @keyframes birdieEmoji {
-  0%   { opacity: 0; transform: translate(-50%, -10%) scale(.6); }
-  50%  { opacity: 1; transform: translate(-50%, -55%) scale(1.5); }  /* bigger pop */
-  80%  { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }  /* hold size briefly */
-  100% { opacity: 0; transform: translate(-50%, -90%) scale(1); }    /* fade out */
-}
+      0%   { opacity: 0; transform: translate(-50%, -10%) scale(.6); }
+      60%  { opacity: 1; transform: translate(-50%, -55%) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -80%) scale(.9); }
+    }
     td.birdie-pop { position: relative; animation: birdieFlash .8s ease-out 1; }
     td.birdie-pop::after {
-  content: "🐦";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 2em;             /* was 1.2em → bigger by default */
-  height: 2em;            /* matches width */
-  transform: translate(-50%, -50%) scale(1);
-  pointer-events: none;
-  animation: birdieEmoji .8s ease-out 1 forwards;
-}
+      content: "🐦";
+      position: absolute; left: 50%; top: 50%;
+      width: 1.2em; height: 1.2em; transform: translate(-50%, -50%);
+      pointer-events: none; animation: birdieEmoji .8s ease-out 1 forwards;
+    }
 
     /* ---------- Sync badge ---------- */
     #syncBadge{
