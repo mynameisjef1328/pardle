@@ -137,24 +137,16 @@ th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
   padding-right: 30px;          /* room for custom arrow */
 }
 
-/* Course / Hole / Par: left-aligned, black text */
+/* Course / Hole / Par: left-aligned, black text (works for id and class) */
 #scorecard thead th#courseLabel,
 #scorecard thead th#holeLabel,
-#scorecard thead th#parLabel {
-  text-align: left !important;
-  color: #000 !important;
-  background: #eee;      /* matches your sticky first-column bg */
-  padding-left: 8px;
-  font-weight: bold;
-
-  /* Par label cell styling */
+#scorecard thead th#parLabel,
 #scorecard thead th.par-label {
   text-align: left !important;
   color: #000 !important;
   background: #eee !important;
   padding-left: 8px;
   font-weight: bold;
-
 }
 
     
@@ -204,9 +196,7 @@ thead th.current-hole {
   <th>Par</th>
   <th></th>
 </tr>
-<tr id="parRow">
-  <th id="parLabel">Par</th>
-</tr>
+<tr id="parRow"></tr>
     
 </thead>
   <tbody></tbody>
