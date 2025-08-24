@@ -178,6 +178,40 @@ th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
 thead th.current-hole { 
   outline: 2px solid rgba(0,120,255,0.35); 
 }
+
+/* Birdie celebration */
+@keyframes birdieFlash {
+  0%   { box-shadow: inset 0 0 0 0 rgba(46,204,113,.0); }
+  35%  { box-shadow: inset 0 0 0 4px rgba(46,204,113,.45); }
+  100% { box-shadow: inset 0 0 0 0 rgba(46,204,113,.0); }
+}
+
+@keyframes birdieEmoji {
+  0%   { opacity: 0; transform: translate(-50%, -10%) scale(.6); }
+  60%  { opacity: 1; transform: translate(-50%, -55%) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(.9); }
+}
+
+/* run the flash on the cell */
+td.birdie-pop { position: relative; animation: birdieFlash .8s ease-out 1; }
+
+/* lil' emoji pop (non-blocking, auto-fades) */
+td.birdie-pop::after {
+  content: "🐦";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1.2em;
+  height: 1.2em;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: birdieEmoji .8s ease-out 1 forwards;
+}
+
+/* looks good in dark mode too */
+@media (prefers-color-scheme: dark) {
+  td.birdie-pop { animation: birdieFlash .8s ease-out 1; }
+}
     
   </style>
 </head>
@@ -396,8 +430,31 @@ courseSelect.addEventListener('change', e => {
       if (val < par) cell.className = 'under-par';
       else if (val > par) cell.className = 'over-par';
       else cell.className = 'even-par';
-    }
-  });
+
+      const val = parseInt(input.value);
+const par = currentPar[index];
+const cell = input.parentElement;
+
+// clear previous classes
+cell.className = '';
+
+
+if (!isNaN(val)) {
+  if (val < par) {
+    // 🐦 Birdie or better — highlight + one-shot animation
+    cell.classList.add('under-par', 'birdie-pop');
+
+    // Remove animation class after it finishes so it can retrigger next time
+    cell.addEventListener('animationend', () => {
+      cell.classList.remove('birdie-pop');
+    }, { once: true });
+
+  } else if (val > par) {
+    cell.classList.add('over-par');
+  } else {
+    cell.classList.add('even-par');
+  }
+}
 
   row.querySelector('.total').textContent = total || '0';
   const diff = total - parTotal;
