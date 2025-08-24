@@ -5,8 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jef's Wonderful Wordle Golf Scorecard</title>
   <style>j
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
+    /* Global font + background normalization */
+body {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 20px;
+  background: #f9f9f9;
+  color: #222;
+}
+
+/* Ensure all headings and boxes use the same font */
+h2, h4, #wordBox, #rulesBox, table, th, td {
+  font-family: inherit;       /* Match body font */
+}
+
+/* Make the scorecard mobile-friendly */
+.table-wrap {
+  overflow-x: auto;                /* Allow horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth iOS scrolling */
+  width: 100%;
+  max-width: 100%;
+}
 
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
