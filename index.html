@@ -6,16 +6,14 @@
   <title>Jef's Wonderful Wordle Golf Scorecard</title>
   <style>j
     /* Global font + background normalization */
-body {
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 20px;
-  background: #f9f9f9;
-  color: #222;
+
+    body { 
+  font-family: Arial, sans-serif; 
+  margin: 20px; 
+  background: #f9f9f9; 
 }
 
-/* Force all page text to use the same font */
+/* Force all elements to inherit the body font */
 h1, h2, h3, h4, h5, h6,
 button,
 label,
@@ -31,12 +29,35 @@ div {
   font-family: inherit;
 }
 
-/* Make the scorecard mobile-friendly */
-.table-wrap {
-  overflow-x: auto;                /* Allow horizontal scrolling */
-  -webkit-overflow-scrolling: touch; /* Smooth iOS scrolling */
-  width: 100%;
-  max-width: 100%;
+/* Upgrade scorecard title for consistency and readability */
+h2 {
+  font-size: 28px;            /* slightly larger and modern */
+  font-weight: 700;           /* bold and clean */
+  margin-bottom: 15px;        /* space below title */
+  color: #222;                /* dark gray instead of pure black */
+  text-align: center;         /* center align for polish */
+}
+
+/* Upgrade Word of the Day title */
+#wordBox h4 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: #fff;                /* keep white for contrast */
+}
+
+/* Upgrade Rules title */
+#rulesBox h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #222;                /* matches scorecard title color */
+}
+
+.table-wrap { 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch; 
+  width: 100%; 
 }
 
     table { border-collapse: collapse; width: 100%; }
