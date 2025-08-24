@@ -93,6 +93,29 @@ thead th {
 /* optional: subtle divider where the sticky column meets the rest */
 th:first-child, td:first-child { box-shadow: 2px 0 0 rgba(0,0,0,.06); }
 
+    .table-wrap {
+  overflow-x: auto;               /* Enables horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for iPhones/iPads */
+  width: 100%;                    /* Take up full width of screen */
+}
+
+    @media (max-width: 768px) {
+  input[type="number"] {
+    width: 40px;       /* Slightly larger for touch targets */
+    font-size: 16px;   /* Prevent iOS from zooming */
+    padding: 4px;
+  }
+
+  input[type="text"] {
+    width: 90px;       /* Adjust player name inputs */
+    font-size: 16px;
+  }
+
+  th, td {
+    padding: 6px;      /* Reduce padding for mobile */
+  }
+}
+
     @media (prefers-color-scheme: dark) {
   body { background: #111; color: #eee; }
   th { background-color: #555; color: #fff; }
@@ -179,6 +202,7 @@ thead th.current-hole {
   <button id="clearBtn" style="margin-left:12px;">Clear Scores</button>
   <button id="clearNamesBtn" type="button" style="margin-left:8px;">Clear Names</button>
 
+  <div class="table-wrap">
   <table id="scorecard">
   <thead>
 
@@ -201,6 +225,7 @@ thead th.current-hole {
 </thead>
   <tbody></tbody>
 </table>
+  </div>
 
 <!-- Word of the Day box -->
 <div id="wordBox" aria-live="polite"></div>
