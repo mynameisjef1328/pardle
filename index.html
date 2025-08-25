@@ -12,6 +12,14 @@
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     th { background-color: #999; color: #fff; }
 
+/* Override font color for course name, hole numbers, and par numbers */
+#scorecard thead th#courseName,
+#scorecard thead tr:nth-child(2) th,   /* hole numbers */
+#scorecard thead tr#parRow th          /* par numbers */
+{
+  color: black !important; 
+}
+    
     /* score coloring */
     .under-par { background-color: lightgreen; }
     .over-par  { background-color: lightcoral; }
@@ -153,7 +161,7 @@
       padding: 6px 10px; border-radius: 14px;
       color: #fff; background: #777; box-shadow: 0 1px 6px rgba(0,0,0,.15);
     }
-    #syncBadge.is-synced  { background:#2ecc71; }
+    #syncBadge.is-synced  { background:orange; }
     #syncBadge.is-syncing { background:#f39c12; }
     #syncBadge.is-offline { background:#e74c3c; }
   </style>
