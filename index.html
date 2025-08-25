@@ -19,11 +19,6 @@
 {
   color: black !important; 
 }
-    
-    /* score coloring */
-    .under-par { background-color: green; }
-    .over-par  { background-color: orange; }
-    .even-par  { background-color: black; }
 
     /* inputs */
     input[type="number"] { width: 50px; text-align: center; display: inline-block; vertical-align: middle; }
@@ -146,6 +141,12 @@
       60%  { opacity: 1; transform: translate(-50%, -55%) scale(1.1); }
       100% { opacity: 0; transform: translate(-50%, -80%) scale(.9); }
     }
+
+/* score coloring */
+    .under-par { background-color: green; }
+    .over-par  { background-color: orange; }
+    .even-par  { background-color: black; }
+    
     td.birdie-pop { position: relative; animation: birdieFlash .8s ease-out 1; }
     td.birdie-pop::after {
       content: "🐦";
