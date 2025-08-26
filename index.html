@@ -179,14 +179,22 @@
 
 <script>
   (function () {
-    const correctPassword = "jef";
-    const input = prompt("Enter password to access this page:");
-    if (input === correctPassword) {
+    const correct = "jef";
+
+    // normalize, trim, and lowercase to avoid iOS autocap / trailing space issues
+    const input = (prompt("Enter password to access this page:") ?? "")
+      .normalize("NFKC")
+      .trim()
+      .toLowerCase();
+
+    if (input === correct.toLowerCase()) {
+      document.documentElement.classList.remove('denied');
       document.documentElement.classList.add('authed');
       window.__AUTH_OK__ = true;
     } else {
       document.body.innerHTML = '<h1 id="deny">Access Denied</h1>';
-      document.documentElement.classList.add('denied'); // <-- not .authed
+      document.documentElement.classList.remove('authed');
+      document.documentElement.classList.add('denied');
       window.__AUTH_OK__ = false;
       throw new Error("Unauthorized access");
     }
