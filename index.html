@@ -120,6 +120,83 @@
     #syncBadge.is-synced{background:orange;}
     #syncBadge.is-syncing{background:#f39c12;}
     #syncBadge.is-offline{background:#e74c3c;}
+
+/* ========= THEME VARIABLES ========= */
+:root{
+  --bg: #f9f9f9;
+  --fg: #111;
+  --head-bg: #999;
+  --head-fg: #fff;
+  --cell-border: #ccc;
+  --accent: #4CAF50;
+}
+
+/* Masters Mode */
+body[data-theme="masters"]{
+  --bg:#0e1b11;
+  --fg:#f6f6f6;
+  --head-bg:#1f3926;
+  --head-fg:#f6f6f6;
+  --cell-border:#2c4633;
+  --accent:#c9a227; /* golden yellow */
+}
+
+/* Dark Knight */
+body[data-theme="darkknight"]{
+  --bg:#0e0d15;
+  --fg:#e8e8ff;
+  --head-bg:#2a2540;
+  --head-fg:#e8e8ff;
+  --cell-border:#403a5e;
+  --accent:#00d3ff; /* neon cyan */
+}
+
+/* Wire your existing colors to variables (keeps your old style intact) */
+body{ background: var(--bg); color: var(--fg); }
+th{ background-color: var(--head-bg); color: var(--head-fg); }
+td, th{ border-color: var(--cell-border); }
+.btn:hover{ background-color: var(--accent); border-color: var(--accent); color:#fff; }
+
+/* ========= THEME TOGGLE BUTTON ========= */
+#themeToggle{
+  position: fixed;
+  top: 12px;
+  right: 96px;        /* sits just left of the sync badge */
+  z-index: 6;
+  width: 54px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.25);
+  background: #fff;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-shadow: 0 1px 6px rgba(0,0,0,.15);
+}
+#themeToggle .knob{
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-left: 2px;
+  background: var(--accent);
+  transition: transform .2s ease;
+}
+#themeToggle .icon{
+  position: absolute;
+  right: 8px;
+  font-size: 14px;
+  opacity: .85;
+}
+/* knob shifts when not default (purely for fun) */
+body[data-theme="masters"] #themeToggle .knob{ transform: translateX(24px); }
+body[data-theme="darkknight"] #themeToggle .knob{ transform: translateX(24px); }
+/* different emoji per theme */
+#themeToggle .icon::before{ content: "⚪"; }                /* default */
+body[data-theme="masters"] #themeToggle .icon::before{ content:"⛳️"; }
+body[data-theme="darkknight"] #themeToggle .icon::before{ content:"🌙"; }
+    
   </style>
 </head>
 <body>
@@ -171,6 +248,11 @@
 </div>
 
 <div id="syncBadge">Connecting…</div>
+
+  <button id="themeToggle" aria-label="Change theme">
+  <span class="knob"></span>
+  <span class="icon" aria-hidden="true"></span>
+</button>
 
 <!-- Word of the Day -->
 <div id="wordBox" aria-live="polite"></div>
@@ -250,6 +332,31 @@ const parRow = document.getElementById('parRow');
 const courseNameHeader = document.getElementById('courseName');
 const courseSelect = document.getElementById('courseSelect');
 const tbody = table.querySelector('tbody');
+
+  /* ===== Theme toggle ===== */
+const THEMES = ["default","masters","darkknight"];
+const themeBtn = document.getElementById("themeToggle");
+
+function applyTheme(t){
+  if (t === "default") {
+    document.body.removeAttribute("data-theme");
+  } else {
+    document.body.setAttribute("data-theme", t);
+  }
+  localStorage.setItem("pardleTheme", t);
+}
+
+(function initTheme(){
+  const saved = localStorage.getItem("pardleTheme") || "default";
+  applyTheme(saved);
+})();
+
+themeBtn.addEventListener("click", () => {
+  const cur = localStorage.getItem("pardleTheme") || "default";
+  const idx = THEMES.indexOf(cur);
+  const next = THEMES[(idx + 1) % THEMES.length];
+  applyTheme(next);
+});
 
 /* Populate course dropdown */
 Object.keys(courses).forEach(course => {
