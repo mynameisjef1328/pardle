@@ -158,44 +158,57 @@ td, th{ border-color: var(--cell-border); }
 .btn:hover{ background-color: var(--accent); border-color: var(--accent); color:#fff; }
 
 /* ========= THEME TOGGLE BUTTON ========= */
-#themeToggle{
+/* Theme toggle — match #syncBadge dimensions */
+.theme-toggle {
   position: fixed;
   top: 12px;
-  right: 96px;        /* sits just left of the sync badge */
+  right: 12px;                 /* adjust if you want it elsewhere */
+  transform: translateX(calc(-100% - 8px)); /* sit to the left of sync badge */
   z-index: 6;
-  width: 54px;
-  height: 28px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.25);
-  background: #fff;
+
+  /* Match sync badge typography & pill size */
+  font: 600 12px/1 system-ui, Arial, sans-serif;
+  padding: 6px 10px;           /* same as #syncBadge */
+  border-radius: 14px;         /* same as #syncBadge */
+  background: orange;          /* your requested bg */
+  color: #000;                 /* black text */
+  box-shadow: 0 1px 6px rgba(0,0,0,.15);
+  user-select: none;
   cursor: pointer;
-  padding: 0;
+
   display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
-  box-shadow: 0 1px 6px rgba(0,0,0,.15);
+  gap: 8px;
 }
-#themeToggle .knob{
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  margin-left: 2px;
-  background: var(--accent);
-  transition: transform .2s ease;
-}
-#themeToggle .icon{
+
+/* Hide the checkbox but keep it accessible */
+.theme-toggle input {
   position: absolute;
-  right: 8px;
-  font-size: 14px;
-  opacity: .85;
+  opacity: 0;
+  pointer-events: none;
 }
-/* knob shifts when not default (purely for fun) */
-body[data-theme="masters"] #themeToggle .knob{ transform: translateX(24px); }
-body[data-theme="darkknight"] #themeToggle .knob{ transform: translateX(24px); }
-/* different emoji per theme */
-#themeToggle .icon::before{ content: "⚪"; }                /* default */
-body[data-theme="masters"] #themeToggle .icon::before{ content:"⛳️"; }
-body[data-theme="darkknight"] #themeToggle .icon::before{ content:"🌙"; }
+
+/* Knob */
+.theme-toggle .knob {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #000;            /* black knob */
+  flex: 0 0 auto;
+}
+
+/* Label text */
+.theme-toggle .label {
+  line-height: 12px;           /* keeps the pill at ~24px tall with padding */
+}
+
+/* Optional: different text when checked */
+.theme-toggle input:checked ~ .label::after {
+  content: " Dark";
+}
+.theme-toggle input:not(:checked) ~ .label::after {
+  content: " Light";
+}
     
   </style>
 </head>
@@ -246,6 +259,14 @@ body[data-theme="darkknight"] #themeToggle .icon::before{ content:"🌙"; }
     <tbody></tbody>
   </table>
 </div>
+
+  <label class="theme-toggle" id="themeToggle">
+  <input type="checkbox" id="themeSwitch" />
+  <span class="knob" aria-hidden="true"></span>
+  <span class="label">Theme:</span>
+</label>
+
+<div id="syncBadge" class="">Connecting…</div>
 
 <div id="syncBadge">Connecting…</div>
 
