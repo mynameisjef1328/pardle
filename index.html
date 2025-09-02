@@ -259,8 +259,6 @@ td, th{ border-color: var(--cell-border); }
 
 <div id="syncBadge" class="">Connecting…</div>
 
-<div id="syncBadge">Connecting…</div>
-
   <button id="themeToggle" aria-label="Change theme">
   <span class="knob"></span>
   <span class="icon" aria-hidden="true"></span>
@@ -359,9 +357,9 @@ function applyTheme(t){
 }
 
 (function initTheme(){
-+ const saved = localStorage.getItem("pardleTheme");
-+ const initial = (saved === "dark") ? "dark" : "default";
-+ applyTheme(initial);
+const saved = localStorage.getItem("pardleTheme");
+const initial = (saved === "dark") ? "dark" : "default";
+applyTheme(initial);
 })();
 
 themeBtn.addEventListener("click", () => {
