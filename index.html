@@ -359,13 +359,6 @@ themeSwitch.addEventListener("change", () => {
   applyTheme(themeSwitch.checked ? "dark" : "default");
 });
 
-themeBtn.addEventListener("click", () => {
-  const cur = localStorage.getItem("pardleTheme") || "default";
-  const idx = THEMES.indexOf(cur);
-  const next = THEMES[(idx + 1) % THEMES.length];
-  applyTheme(next);
-});
-
 /* Populate course dropdown */
 Object.keys(courses).forEach(course => {
   const opt = document.createElement('option');
