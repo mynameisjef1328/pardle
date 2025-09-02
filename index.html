@@ -346,7 +346,7 @@ const courseSelect = document.getElementById('courseSelect');
 const tbody = table.querySelector('tbody');
 
   /* ===== Theme toggle ===== */
-const THEMES = ["default","masters","darkknight"];
+const THEMES = ["default","dark"];
 const themeBtn = document.getElementById("themeToggle");
 
 function applyTheme(t){
@@ -359,8 +359,9 @@ function applyTheme(t){
 }
 
 (function initTheme(){
-  const saved = localStorage.getItem("pardleTheme") || "default";
-  applyTheme(saved);
++ const saved = localStorage.getItem("pardleTheme");
++ const initial = (saved === "dark") ? "dark" : "default";
++ applyTheme(initial);
 })();
 
 themeBtn.addEventListener("click", () => {
