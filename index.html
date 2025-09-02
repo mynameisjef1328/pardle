@@ -354,12 +354,6 @@ function applyTheme(t){
   localStorage.setItem("pardleTheme", t);
 }
 
-// init from storage
-(function initTheme(){
-  const saved = localStorage.getItem("pardleTheme");
-  applyTheme(saved === "dark" ? "dark" : "default");
-})();
-
 // toggle when the checkbox changes (the label clicks this automatically)
 themeSwitch.addEventListener("change", () => {
   applyTheme(themeSwitch.checked ? "dark" : "default");
