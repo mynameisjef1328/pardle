@@ -259,9 +259,7 @@ td, th{ border-color: var(--cell-border); }
 
 <div id="syncBadge" class="">Connecting…</div>
 
-  <button id="themeToggle" aria-label="Change theme">
   <span class="knob"></span>
-  <span class="icon" aria-hidden="true"></span>
 </button>
 
 <!-- Word of the Day -->
@@ -343,24 +341,30 @@ const courseNameHeader = document.getElementById('courseName');
 const courseSelect = document.getElementById('courseSelect');
 const tbody = table.querySelector('tbody');
 
-  /* ===== Theme toggle ===== */
-const THEMES = ["default","dark"];
-const themeBtn = document.getElementById("themeToggle");
+/* ===== Theme toggle (two modes: default / dark) ===== */
+const themeSwitch = document.getElementById("themeSwitch");
 
 function applyTheme(t){
-  if (t === "default") {
-    document.body.removeAttribute("data-theme");
+  if (t === "dark") {
+    document.body.setAttribute("data-theme", "dark");
+    themeSwitch.checked = true;
   } else {
-    document.body.setAttribute("data-theme", t);
+    document.body.removeAttribute("data-theme");
+    themeSwitch.checked = false;
   }
   localStorage.setItem("pardleTheme", t);
 }
 
+// init from storage
 (function initTheme(){
-const saved = localStorage.getItem("pardleTheme");
-const initial = (saved === "dark") ? "dark" : "default";
-applyTheme(initial);
+  const saved = localStorage.getItem("pardleTheme");
+  applyTheme(saved === "dark" ? "dark" : "default");
 })();
+
+// toggle when the checkbox changes (the label clicks this automatically)
+themeSwitch.addEventListener("change", () => {
+  applyTheme(themeSwitch.checked ? "dark" : "default");
+});
 
 themeBtn.addEventListener("click", () => {
   const cur = localStorage.getItem("pardleTheme") || "default";
