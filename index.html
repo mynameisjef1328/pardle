@@ -114,12 +114,13 @@
 
     /* Sync badge */
     /* Replace your current #syncBadge block with this */
+/* make the badge participate in the flex row */
 #syncBadge{
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  transform: translateX(calc(-100% - 8px));
-  z-index: 6;
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  transform: none !important;
+}
 
   /* make it the same pill as the theme toggle */
   display: inline-flex;
