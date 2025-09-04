@@ -165,28 +165,27 @@ th{ background-color: var(--head-bg); color: var(--head-fg); }
 td, th{ border-color: var(--cell-border); }
 .btn:hover{ background-color: var(--accent); border-color: var(--accent); color:#fff; }
 
-/* ========= THEME TOGGLE BUTTON ========= */
-/* Theme toggle — match #syncBadge dimensions */
 .theme-toggle {
   position: fixed;
   top: 12px;
-  right: 12px;                 /* adjust if you want it elsewhere */
-  transform: translateX(calc(-100% - 8px)); /* sit to the left of sync badge */
+  right: 12px; 
   z-index: 6;
-
-  /* Match sync badge typography & pill size */
-  font: 600 12px/12px system-ui, Arial, sans-serif;
-  padding: 6px 10px;           /* same as #syncBadge */
-  border-radius: 14px;         /* same as #syncBadge */
-  background: orange;          /* your requested bg */
-  color: #000;                 /* black text */
-  box-shadow: 0 1px 6px rgba(0,0,0,.15);
-  user-select: none;
-  cursor: pointer;
 
   display: inline-flex;
   align-items: center;
   gap: 8px;
+
+  font: 600 12px/1 system-ui, Arial, sans-serif;
+  padding: 6px 10px;
+  border-radius: 14px;
+  background: orange;
+  color: #000;
+  box-shadow: 0 1px 6px rgba(0,0,0,.15);
+  user-select: none;
+  cursor: pointer;
+
+  /* NEW: give it spacing from the sync badge */
+  margin-right: 60px; /* adjust until spacing looks good */
 }
 
 /* Hide the checkbox but keep it accessible */
