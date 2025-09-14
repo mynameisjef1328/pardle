@@ -226,6 +226,44 @@ td, th{ border-color: var(--cell-border); }
 .theme-toggle input:checked ~ .label::after { content:" Dark"; }
 .theme-toggle input:not(:checked) ~ .label::after { content:" Light";
 }
+
+    /* Goat button: fixed at bottom center, small & pulsing */
+#goatBtn{
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 5;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 999px;        /* pill */
+  font: 700 12px/1 system-ui, Arial, sans-serif;
+  color: #000;
+  background: orange;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+
+  cursor: pointer;
+  user-select: none;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+/* subtle pulse */
+#goatBtn{ animation: goatPulse 1.4s ease-in-out infinite; }
+@keyframes goatPulse{
+  0%   { transform: translateX(-50%) scale(1);   box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+  50%  { transform: translateX(-50%) scale(1.06); box-shadow: 0 10px 28px rgba(255,165,0,.45); }
+  100% { transform: translateX(-50%) scale(1);   box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+}
+
+/* Respect accessibility */
+@media (prefers-reduced-motion: reduce){
+  #goatBtn{ animation: none; }
+}
     
   </style>
 </head>
@@ -752,13 +790,44 @@ document.getElementById('clearNamesBtn').addEventListener('click', () => {
   let hash = 0; for (let i=0;i<seed.length;i++) hash = (hash*31 + seed.charCodeAt(i)) >>> 0;
   const pick = words[hash % words.length];
   box.innerHTML = `<h4>Word of the Day</h4><span class="w">${pick.word}</span><span class="d"> — ${pick.def}</span>`;
-})();
+}
+ 
+<script>
+  (function(){
+    const btn = document.getElementById('goatBtn');
+    const snd = document.getElementById('goatSound');
+
+    if (!btn || !snd) return;
+
+    btn.addEventListener('click', () => {
+      try {
+        snd.currentTime = 0;
+        snd.play();
+        // tiny tap feedback
+        btn.style.transform = 'translateX(-50%) scale(0.96)';
+        setTimeout(() => btn.style.transform = 'translateX(-50%)', 120);
+      } catch (e) {
+        console.warn('Audio play failed:', e);
+      }
+    });
+  })();
 </script>
 
 <!-- Rick Roll overlay -->
 <div id="rickRoll">
   <img src="https://media.giphy.com/media/Vuw9m5wXviFIQ/giphy.gif" alt="Never Gonna Give You Up" />
 </div>
+
+  <!-- Screaming goat button + sound -->
+<button id="goatBtn" aria-label="Play screaming goat">Press Here</button>
+
+<!-- Audio file (replace src with your own path) -->
+<audio id="goatSound" preload="auto">
+  <!-- Put a goat scream mp3 in your repo and point to it: e.g. /assets/goat.mp3 -->
+  <source src="/assets/goat.mp3" type="audio/mpeg" />
+  <!-- Fallback text -->
+  Your browser does not support the audio element.
+</audio>
 
 </body>
 </html>
