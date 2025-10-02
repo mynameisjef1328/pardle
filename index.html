@@ -697,11 +697,11 @@ async function loadScorecard(courseName){
   markCurrentHole();
 }
 
-function dateIsHalloween2025(d = new Date()){
-  const now = new Date();
-  return d.getFullYear() === now.getFullYear() &&
-         d.getMonth() === now.getMonth() &&
-         d.getDate() === now.getDate();
+function dateIsTestDay(d = new Date()){
+  // Test day: Oct 2, 2025
+  return d.getFullYear() === 2025 &&
+         d.getMonth() === 9 &&   // months are 0-indexed (9 = October)
+         d.getDate() === 2;
 }
 
 function showSpookyOnce(){
