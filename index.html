@@ -704,26 +704,43 @@ function dateIsTestDay(d = new Date()){
          d.getDate() === 2;
 }
 
-function showSpookyOnce(){
+/* === SPOOKY OVERLAY (TEST-FRIENDLY) === */
+
+// Set to true to enable overlay on any date (for testing)
+const HALLOWEEN_TEST_MODE = true;
+
+function shouldShowSpookyOverlay(date = new Date()) {
+  if (HALLOWEEN_TEST_MODE) return true;
+
+  // Real Halloween logic: October 31, 2025
+  return date.getFullYear() === 2025 &&
+         date.getMonth() === 9 &&  // October (0-indexed)
+         date.getDate() === 31;
+}
+
+function showSpookyOnce() {
   const overlay = document.getElementById('spookyOverlay');
   if (!overlay) return;
 
-  // guard: once per page load
+  // Show only once per page load
   if (sessionStorage.getItem('spooky2025Shown') === '1') return;
   sessionStorage.setItem('spooky2025Shown', '1');
 
   overlay.classList.add('is-on');
 
-  // wire close button
   const closeBtn = document.getElementById('spookyClose');
-  closeBtn?.addEventListener('click', () => overlay.classList.remove('is-on'), { once:true });
+  closeBtn?.addEventListener('click', () => {
+    overlay.classList.remove('is-on');
+  }, { once: true });
 
-  // auto-hide after 4s as fallback
-  setTimeout(() => overlay.classList.remove('is-on'), 4000);
+  // Fallback auto-hide
+  setTimeout(() => {
+    overlay.classList.remove('is-on');
+  }, 4000);
 }
 
-function maybeShowSpooky(){
-  if (dateIsTestDay(new Date())) {
+function maybeShowSpooky() {
+  if (shouldShowSpookyOverlay(new Date())) {
     showSpookyOnce();
   }
 }
