@@ -611,7 +611,7 @@ function sameData(a,b){ try{return JSON.stringify(a)===JSON.stringify(b);}catch{
 
 function renderFromData(docData){
   applyingRemote = true;          // prevent effects while building
-  effectsEnabled = false;
+  effectsEnabled = true;
 
   tbody.innerHTML = '';
 
