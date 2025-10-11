@@ -697,32 +697,37 @@ async function loadScorecard(courseName){
   markCurrentHole();
 }
 
-function dateIsTestDay(d = new Date()){
-  // Test day: Oct 2, 2025
-  return d.getFullYear() === 2025 &&
-         d.getMonth() === 9 &&   // months are 0-indexed (9 = October)
-         d.getDate() === 2;
+/* === SPOOKY OVERLAY (DATE-CONTROLLED VERSION) === */
+
+/**
+ * 🎃 Dates the overlay should trigger.
+ * Add as many as you like (year, monthIndex, day)
+ * Note: months are 0-indexed → October = 9
+ */
+const SPOOKY_DATES = [
+  { year: 2025, month: 9, day: 31 }, // Halloween  🎃
+  { year: 2025, month: 9, day: 11 }, // 👻 today (Oct 11 2025) for testing
+];
+
+/**
+ * Returns true if today matches a spooky date.
+ */
+function isSpookyDay(d = new Date()) {
+  return SPOOKY_DATES.some(
+    dateObj =>
+      d.getFullYear() === dateObj.year &&
+      d.getMonth() === dateObj.month &&
+      d.getDate() === dateObj.day
+  );
 }
 
-/* === SPOOKY OVERLAY (TEST-FRIENDLY) === */
-
-// Set to true to enable overlay on any date (for testing)
-const HALLOWEEN_TEST_MODE = true;
-
-function shouldShowSpookyOverlay(date = new Date()) {
-  if (HALLOWEEN_TEST_MODE) return true;
-
-  // Real Halloween logic: October 31, 2025
-  return date.getFullYear() === 2025 &&
-         date.getMonth() === 9 &&  // October (0-indexed)
-         date.getDate() === 31;
-}
-
+/**
+ * Shows the spooky overlay once per page load.
+ */
 function showSpookyOnce() {
   const overlay = document.getElementById('spookyOverlay');
   if (!overlay) return;
 
-  // Show only once per page load
   if (sessionStorage.getItem('spooky2025Shown') === '1') return;
   sessionStorage.setItem('spooky2025Shown', '1');
 
@@ -733,14 +738,14 @@ function showSpookyOnce() {
     overlay.classList.remove('is-on');
   }, { once: true });
 
-  // Fallback auto-hide
-  setTimeout(() => {
-    overlay.classList.remove('is-on');
-  }, 4000);
+  setTimeout(() => overlay.classList.remove('is-on'), 4000);
 }
 
+/**
+ * Checks the date and triggers the overlay if spooky.
+ */
 function maybeShowSpooky() {
-  if (shouldShowSpookyOverlay(new Date())) {
+  if (isSpookyDay(new Date())) {
     showSpookyOnce();
   }
 }
