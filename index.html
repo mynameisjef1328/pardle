@@ -273,6 +273,30 @@
   })();
 </script>
 
+  <script>
+/* === SPOOKY ON LOGIN === */
+function isHalloween(d = new Date()) {
+  // 👇 Change 18 → 31 later for real Halloween
+  return d.getFullYear() === 2025 && d.getMonth() === 9 && d.getDate() === 18;
+}
+
+window.addEventListener('load', () => {
+  if (isHalloween(new Date())) {
+    if (!sessionStorage.getItem('spooky2025Shown')) {
+      sessionStorage.setItem('spooky2025Shown', '1');
+      const overlay = document.getElementById('spookyOverlay');
+      overlay?.classList.add('is-on');
+      document.getElementById('spookyClose')?.addEventListener(
+        'click',
+        () => overlay.classList.remove('is-on'),
+        { once: true }
+      );
+      setTimeout(() => overlay.classList.remove('is-on'), 4000);
+    }
+  }
+});
+</script>
+
 <h2>Pardle</h2>
 
 <label for="courseSelect">Choose a course:</label>
