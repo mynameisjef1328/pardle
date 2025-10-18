@@ -697,55 +697,34 @@ async function loadScorecard(courseName){
   markCurrentHole();
 }
 
-/* === SPOOKY OVERLAY (DATE-CONTROLLED VERSION) === */
+/* === SPOOKY OVERLAY – FINAL (Halloween-only) === */
 
 /**
- * 🎃 Dates the overlay should trigger.
- * Add as many as you like (year, monthIndex, day)
- * Note: months are 0-indexed → October = 9
+ * Show the overlay on Halloween (October 31, 2025)
  */
-const SPOOKY_DATES = [
-  { year: 2025, month: 9, day: 31 }, // Halloween  🎃
-  { year: 2025, month: 9, day: 13 }, // 👻 today (Oct 11 2025) for testing
-];
-
-/**
- * Returns true if today matches a spooky date.
- */
-function isSpookyDay(d = new Date()) {
-  return SPOOKY_DATES.some(
-    dateObj =>
-      d.getFullYear() === dateObj.year &&
-      d.getMonth() === dateObj.month &&
-      d.getDate() === dateObj.day
-  );
+function isHalloween(d = new Date()) {
+  return d.getFullYear() === 2025 && d.getMonth() === 9 && d.getDate() === 18;
 }
 
-/**
- * Shows the spooky overlay once per page load.
- */
 function showSpookyOnce() {
   const overlay = document.getElementById('spookyOverlay');
   if (!overlay) return;
 
+  // show only once per page load
   if (sessionStorage.getItem('spooky2025Shown') === '1') return;
   sessionStorage.setItem('spooky2025Shown', '1');
 
   overlay.classList.add('is-on');
 
   const closeBtn = document.getElementById('spookyClose');
-  closeBtn?.addEventListener('click', () => {
-    overlay.classList.remove('is-on');
-  }, { once: true });
+  closeBtn?.addEventListener('click', () => overlay.classList.remove('is-on'), { once: true });
 
+  // auto-hide fallback
   setTimeout(() => overlay.classList.remove('is-on'), 4000);
 }
 
-/**
- * Checks the date and triggers the overlay if spooky.
- */
 function maybeShowSpooky() {
-  if (isSpookyDay(new Date())) {
+  if (isHalloween(new Date())) {
     showSpookyOnce();
   }
 }
@@ -837,13 +816,10 @@ document.getElementById('clearNamesBtn').addEventListener('click', () => {
   <img src="https://media.giphy.com/media/Vuw9m5wXviFIQ/giphy.gif" alt="Never Gonna Give You Up" />
 </div>
 
-<!-- Spooky overlay (HTML) -->
+<!-- Spooky overlay -->
 <div id="spookyOverlay" aria-hidden="true">
   <div class="spooky-card" role="dialog" aria-label="Halloween Surprise">
-    <!-- Replace src with your hosted image path -->
-   <img id="spookyImg"
-     src="https://mynamesejef1328.github.io/pardle/assets/michael.png"
-     alt="Michael Myers" />
+    <img id="spookyImg" src="./assets/michael.PNG" alt="Michael Myers" />
     <div class="caption">Happy Halloween 🎃</div>
     <button class="close" type="button" id="spookyClose">Close</button>
   </div>
