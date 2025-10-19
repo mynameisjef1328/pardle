@@ -499,16 +499,17 @@ function setCellClassForScore(input, par){
     return;
   }
 
-  if (val < par){
-    cell.classList.add('under-par');
-    setBirdieAnimation(cell, true);
+if (val < par) {
+  cell.classList.add('under-par');
+  setBirdieAnimation(cell, true);
 
-  } 
+} else if (val > par) {
+  cell.classList.add('over-par');
+
+} else {
+  cell.classList.add('even-par');
+}
   
-  else {
-    cell.classList.add('even-par');
-  }
-
   input.dataset.prevScore = String(val);
 }
 
