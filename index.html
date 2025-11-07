@@ -158,16 +158,44 @@
     td, th{ border-color: var(--cell-border); }
     .btn:hover{ background-color: var(--accent); border-color: var(--accent); color:#fff; }
 
-    /* Fixed tray that holds both widgets */
-    #topRightTray{
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 6;
-    }
+   /* Fixed tray that holds both widgets */
+#topRightTray{
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 6;
+}
+
+/* larger tray gif: white rounded square with the animated image centered inside */
+.tray-gif{
+  width: 84px;                /* outer box width — change this to make box wider/narrower */
+  height: 84px;               /* outer box height — change this to make box taller/shorter */
+  padding: 8px;               /* space between box edge and GIF */
+  box-sizing: border-box;
+  background: #fff;           /* white square background like your screenshot */
+  border-radius: 12px;        /* rounded corner of the white box */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: contain;        /* ensures the GIF fits inside without stretching */
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  cursor: pointer;
+  margin-right: 8px;
+  z-index: 7;                 /* sit above table header */
+}
+
+/* scale down on very small screens */
+@media (max-width:420px){
+  .tray-gif{ display:none; }
+}
+
+/* hide on very small screens */
+@media (max-width:420px){
+  .tray-gif{ display:none; }
+}
 
     /* Shared pill look so heights match perfectly */
     .pill {
@@ -321,6 +349,11 @@ window.addEventListener('load', () => {
 </div>
 
 <div id="topRightTray">
+  <img id="themeGif"
+       class="tray-gif"
+       src="https://www.animatedimages.org/data/media/1528/animated-stick-figure-image-0057.gif"
+       alt="celebration" />
+
   <label class="theme-toggle" id="themeToggle">
     <input type="checkbox" id="themeSwitch" />
     <span class="knob" aria-hidden="true"></span>
