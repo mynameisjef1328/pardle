@@ -169,34 +169,38 @@
   z-index: 6;
 }
 
-/* larger tray gif: white rounded square with the animated image centered inside */
+/* show only the GIF pixels, no visible box */
 .tray-gif{
-  width: 84px;                /* outer box width — change this to make box wider/narrower */
-  height: 84px;               /* outer box height — change this to make box taller/shorter */
-  padding: 8px;               /* space between box edge and GIF */
+  width: 84px;               /* outer size, adjust as needed */
+  height: 84px;
+  padding: 0;                /* remove padding so no inner white space */
   box-sizing: border-box;
-  background: #fff;           /* white square background like your screenshot */
-  border-radius: 12px;        /* rounded corner of the white box */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  object-fit: contain;        /* ensures the GIF fits inside without stretching */
-  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  background: transparent;   /* no background color */
+  border-radius: 50%;        /* circular, change to 12px for rounded square */
+  display: inline-block;
+  overflow: hidden;          /* clip any extra pixels */
+  box-shadow: none;          /* remove the white-box shadow */
   cursor: pointer;
   margin-right: 8px;
-  z-index: 7;                 /* sit above table header */
+  z-index: 7;
 }
 
-/* scale down on very small screens */
-@media (max-width:420px){
-  .tray-gif{ display:none; }
+.tray-gif img{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
 }
 
-/* hide on very small screens */
-@media (max-width:420px){
-  .tray-gif{ display:none; }
+    /* responsive: scale the circle down on narrower viewports */
+@media (max-width: 900px){
+  .tray-gif{ width: 120px; height: 120px; }
 }
-
+@media (max-width: 420px){
+  .tray-gif{ display: none; } /* keep UI tidy on tiny screens */
+}
+    
     /* Shared pill look so heights match perfectly */
     .pill {
       display: inline-flex;
@@ -351,7 +355,7 @@ window.addEventListener('load', () => {
 <div id="topRightTray">
   <img id="themeGif"
        class="tray-gif"
-       src="https://www.animatedimages.org/data/media/1528/animated-stick-figure-image-0057.gif"
+       src="https://www.animatedimages.org/data/media/1528/animated-stick-figure-image-0049.gif"
        alt="celebration" />
 
   <label class="theme-toggle" id="themeToggle">
