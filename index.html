@@ -159,7 +159,7 @@
     .btn:hover{ background-color: var(--accent); border-color: var(--accent); color:#fff; }
 
    /* Fixed tray that holds both widgets */
-#topRightTray{
+#topRighttTray{
   position: fixed;
   top: 12px;
   right: 12px;
@@ -187,8 +187,8 @@
 
 .tray-gif img{
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 33%;
+  height: 33%;
   object-fit: contain;
   background: transparent;
 }
@@ -197,7 +197,7 @@
 @media (max-width: 900px){
   .tray-gif{ width: 120px; height: 120px; }
 }
-@media (max-width: 420px){
+@media (max-width: 111px){
   .tray-gif{ display: none; } /* keep UI tidy on tiny screens */
 }
     
@@ -352,7 +352,7 @@ window.addEventListener('load', () => {
   </table>
 </div>
 
-<div id="topRightTray">
+<div id="topRighttTray">
   <img id="themeGif"
        class="tray-gif"
        src="https://www.animatedimages.org/data/media/1528/animated-stick-figure-image-0049.gif"
