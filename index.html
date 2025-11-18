@@ -318,6 +318,54 @@
 
     /* scorecard */
 
+    .scorecard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .scorecard-header .section-title {
+      margin-bottom: 0;
+    }
+
+    .chat-btn {
+      border: none;
+      background: var(--accent);
+      color: #ffffff;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+      position: relative;
+    }
+
+    .chat-btn:active {
+      transform: scale(0.96);
+      opacity: 0.85;
+    }
+
+    .chat-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #d32f2f;
+      color: #ffffff;
+      font-size: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .scorecard-wrapper {
       overflow-x: auto;
       padding-bottom: 4px;
@@ -452,6 +500,107 @@
       white-space: pre-line;
     }
 
+    /* chat sheet */
+
+    .chat-sheet {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    .chat-sheet.visible {
+      display: flex;
+    }
+
+    .chat-sheet-inner {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-card);
+      border-radius: 16px 16px 0 0;
+      padding: 12px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .chat-sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .chat-sheet-header button {
+      border: none;
+      background: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .chat-targets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .chat-target-pill {
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text);
+    }
+
+    .chat-target-pill.selected {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .chat-input {
+      width: 100%;
+      min-height: 60px;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      padding: 6px 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      background: var(--input-bg);
+      color: var(--input-text);
+      resize: vertical;
+    }
+
+    /* chat toast */
+
+    .chat-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      max-width: 90%;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 30;
+    }
+
+    .chat-toast.visible {
+      opacity: 1;
+    }
+
     @media (min-width: 520px) {
       .app-content {
         padding-inline: 16px;
@@ -532,7 +681,14 @@
 
       <!-- Scorecard -->
       <section class="card">
-        <div class="section-title">Scorecard</div>
+        <div class="scorecard-header">
+          <div class="section-title">Scorecard</div>
+          <button id="chatButton" class="chat-btn" type="button">
+            💬 Chat
+            <span id="chatBadge" class="chat-badge" hidden>!</span>
+          </button>
+        </div>
+
         <div class="scorecard-wrapper">
           <table class="scorecard-table">
             <thead>
@@ -725,7 +881,23 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
         </div>
       </section>
     </main>
+
+    <!-- Chat sheet -->
+    <div id="chatSheet" class="chat-sheet">
+      <div class="chat-sheet-inner">
+        <div class="chat-sheet-header">
+          <span>Send smack talk</span>
+          <button id="chatCloseBtn" type="button">✕</button>
+        </div>
+        <div id="chatTargets" class="chat-targets"></div>
+        <textarea id="chatText" class="chat-input" placeholder="Type your masterpiece…"></textarea>
+        <button id="chatSendBtn" class="small-btn" type="button">Send</button>
+      </div>
+    </div>
   </div>
+
+  <!-- Toast for incoming messages -->
+  <div id="chatToast" class="chat-toast"></div>
 
   <script>
     // 1. Firebase setup with your config
@@ -768,6 +940,7 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
     let currentPlayerSlot = null;
     let currentGameData = null;
     let unsubscribeGame = null;
+    let unsubscribeMessages = null;
 
     // DOM references
     const body = document.body;
@@ -788,6 +961,15 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
     const parCells = document.querySelectorAll(".par-cell[data-hole]");
     const parTotalCell = document.querySelector(".par-total");
     const playerRows = document.querySelectorAll(".player-row");
+
+    const chatButton = document.getElementById("chatButton");
+    const chatBadge = document.getElementById("chatBadge");
+    const chatSheet = document.getElementById("chatSheet");
+    const chatCloseBtn = document.getElementById("chatCloseBtn");
+    const chatTargets = document.getElementById("chatTargets");
+    const chatText = document.getElementById("chatText");
+    const chatSendBtn = document.getElementById("chatSendBtn");
+    const chatToast = document.getElementById("chatToast");
 
     // helpers
     function generateId(len = 20) {
@@ -999,9 +1181,9 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
           }
 
           if (firstEmpty !== -1) {
-            holeForHighlight = firstEmpty;          // first empty hole
+            holeForHighlight = firstEmpty;
           } else if (myInputs.length > 0) {
-            holeForHighlight = myInputs.length - 1; // all filled, last hole
+            holeForHighlight = myInputs.length - 1;
           }
         }
       }
@@ -1130,6 +1312,8 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
         applyGameToUI(snap.data());
         enableScorecard(true);
       });
+
+      attachMessageListener(currentGameId);
     }
 
     async function joinGame() {
@@ -1209,6 +1393,8 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
         applyGameToUI(s.data());
         enableScorecard(true);
       });
+
+      attachMessageListener(currentGameId);
     }
 
     async function attemptAutoRejoin() {
@@ -1249,6 +1435,131 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
         applyGameToUI(s.data());
         enableScorecard(true);
       });
+
+      attachMessageListener(currentGameId);
+    }
+
+    // message / chat logic
+
+    function attachMessageListener(gameId) {
+      if (!gameId) return;
+
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+        unsubscribeMessages = null;
+      }
+
+      unsubscribeMessages = db.collection("games")
+        .doc(gameId)
+        .collection("messages")
+        .orderBy("createdAt", "desc")
+        .limit(20)
+        .onSnapshot(snapshot => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type !== "added") return;
+
+            const msg = change.doc.data();
+            if (!msg) return;
+
+            // do not show our own messages
+            if (msg.fromId === currentPlayerId) return;
+
+            const targets = Array.isArray(msg.toSlots) ? msg.toSlots : [];
+            const isBroadcast = targets.length === 0;
+            const isTargeted = targets.includes(currentPlayerSlot);
+
+            if (isBroadcast || isTargeted) {
+              const fromName = msg.fromName || "Player";
+              showChatToast(`${fromName}: ${msg.text}`);
+              bumpUnreadBadge();
+            }
+          });
+        });
+    }
+
+    function showChatToast(text) {
+      if (!chatToast) return;
+      chatToast.textContent = text;
+      chatToast.classList.add("visible");
+      setTimeout(() => {
+        chatToast.classList.remove("visible");
+      }, 2500);
+    }
+
+    function bumpUnreadBadge() {
+      if (!chatBadge) return;
+      chatBadge.hidden = false;
+    }
+
+    function clearUnreadBadge() {
+      if (!chatBadge) return;
+      chatBadge.hidden = true;
+    }
+
+    function renderChatTargets() {
+      if (!chatTargets) return;
+      chatTargets.innerHTML = "";
+
+      if (!currentGameData || !Array.isArray(currentGameData.players)) return;
+
+      currentGameData.players.forEach((p, idx) => {
+        if (!p || !p.id) return;
+
+        const pill = document.createElement("button");
+        pill.type = "button";
+        pill.className = "chat-target-pill";
+        pill.dataset.slot = String(idx);
+        pill.textContent = p.name || `Player ${idx + 1}`;
+        if (idx === currentPlayerSlot) {
+          pill.textContent += " (you)";
+        }
+        pill.addEventListener("click", () => {
+          pill.classList.toggle("selected");
+        });
+        chatTargets.appendChild(pill);
+      });
+    }
+
+    function showChatSheet() {
+      if (!chatSheet) return;
+      renderChatTargets();
+      clearUnreadBadge();
+      chatSheet.classList.add("visible");
+      chatText.value = "";
+      chatText.focus();
+    }
+
+    function hideChatSheet() {
+      if (!chatSheet) return;
+      chatSheet.classList.remove("visible");
+    }
+
+    async function sendChatMessage() {
+      if (!currentGameId || currentPlayerSlot == null || !currentPlayerId) return;
+
+      const text = chatText.value.trim();
+      if (!text) return;
+
+      const selectedSlots = Array.from(
+        document.querySelectorAll(".chat-target-pill.selected")
+      ).map(pill => parseInt(pill.dataset.slot, 10));
+
+      const toSlots = selectedSlots.length ? selectedSlots : [];
+
+      await db.collection("games")
+        .doc(currentGameId)
+        .collection("messages")
+        .add({
+          fromId: currentPlayerId,
+          fromName: playerNameInput.value || "Player",
+          fromSlot: currentPlayerSlot,
+          toSlots,
+          text,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+      chatText.value = "";
+      hideChatSheet();
     }
 
     if (gameIdPill) {
@@ -1287,6 +1598,31 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
         rulesCard.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
+
+    // chat button events
+    if (chatButton) {
+      chatButton.addEventListener("click", () => {
+        if (!currentGameId) {
+          setStatus("Create or join a game before chatting.", true);
+          return;
+        }
+        showChatSheet();
+      });
+    }
+
+    if (chatCloseBtn) {
+      chatCloseBtn.addEventListener("click", () => {
+        hideChatSheet();
+      });
+    }
+
+    if (chatSendBtn) {
+      chatSendBtn.addEventListener("click", () => {
+        sendChatMessage().catch(err => {
+          console.error(err);
+        });
+      });
+    }
 
     // event wiring and initial setup
     createGameBtn.addEventListener("click", () => {
