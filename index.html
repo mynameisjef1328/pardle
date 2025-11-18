@@ -116,7 +116,7 @@
       border-radius: 14px;
       padding: 12px;
       border: 1px solid var(--border-soft);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
 
     .section-title {
@@ -921,6 +921,30 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
       return scores;
     }
 
+    function setActiveHole(holeIndex) {
+      if (holeIndex < 0 || holeIndex >= HOLES) return;
+
+      const headerRow = document.querySelector(".scorecard-table thead tr");
+      if (!headerRow) return;
+
+      headerRow.querySelectorAll(".hole-header").forEach(h => h.classList.remove("active-hole"));
+      document.querySelectorAll(".scorecard-table td.active-hole").forEach(td => td.classList.remove("active-hole"));
+
+      const headerCells = headerRow.querySelectorAll("th");
+      const targetHeader = headerCells[1 + holeIndex];
+      if (targetHeader) {
+        targetHeader.classList.add("active-hole");
+      }
+
+      document.querySelectorAll(".scorecard-table tbody tr").forEach(row => {
+        const cells = row.querySelectorAll("th, td");
+        const targetCell = cells[1 + holeIndex];
+        if (targetCell && targetCell.tagName === "TD") {
+          targetCell.classList.add("active-hole");
+        }
+      });
+    }
+
     function applyGameToUI(data) {
       if (!data) return;
 
@@ -959,31 +983,31 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
         playerNameInput.value = players[currentPlayerSlot].name || "";
       }
 
-      recalcAllTotals();
-    }
+      // choose a sensible active hole for the current player
+      let holeForHighlight = 0;
+      if (currentPlayerSlot != null) {
+        const myRow = document.querySelector(`.player-row[data-slot="${currentPlayerSlot}"]`);
+        if (myRow) {
+          const myInputs = myRow.querySelectorAll(".score-input");
+          let firstEmpty = -1;
 
-    function setActiveHole(holeIndex) {
-      if (holeIndex < 0 || holeIndex >= HOLES) return;
+          for (let i = 0; i < myInputs.length; i++) {
+            if (!myInputs[i].value) {
+              firstEmpty = i;
+              break;
+            }
+          }
 
-      const headerRow = document.querySelector(".scorecard-table thead tr");
-      if (!headerRow) return;
-
-      headerRow.querySelectorAll(".hole-header").forEach(h => h.classList.remove("active-hole"));
-      document.querySelectorAll(".scorecard-table td.active-hole").forEach(td => td.classList.remove("active-hole"));
-
-      const headerCells = headerRow.querySelectorAll("th");
-      const targetHeader = headerCells[1 + holeIndex];
-      if (targetHeader) {
-        targetHeader.classList.add("active-hole");
+          if (firstEmpty !== -1) {
+            holeForHighlight = firstEmpty;          // first empty hole
+          } else if (myInputs.length > 0) {
+            holeForHighlight = myInputs.length - 1; // all filled, last hole
+          }
+        }
       }
 
-      document.querySelectorAll(".scorecard-table tbody tr").forEach(row => {
-        const cells = row.querySelectorAll("th, td");
-        const targetCell = cells[1 + holeIndex];
-        if (targetCell && targetCell.tagName === "TD") {
-          targetCell.classList.add("active-hole");
-        }
-      });
+      setActiveHole(holeForHighlight);
+      recalcAllTotals();
     }
 
     function bindScoreInputs() {
@@ -1282,7 +1306,6 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
     bindScoreInputs();
     updateParRow();
     enableScorecard(false);
-    setActiveHole(0);
 
     attemptAutoRejoin().catch(err => {
       console.error(err);
