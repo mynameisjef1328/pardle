@@ -42,8 +42,6 @@
       --sync-text: #ffffff;
       --table-header-bg: #333333;
       --table-header-text: #ffffff;
-      --table-player-header-bg: #000000;
-      --table-player-header-text: #ffffff;
       --input-bg: #202020;
       --input-text: #ffffff;
       --par-bg: #2e3b2f;
@@ -577,6 +575,11 @@
       resize: vertical;
     }
 
+    .chat-actions {
+      display: flex;
+      gap: 8px;
+    }
+
     /* chat toast */
 
     .chat-toast {
@@ -739,7 +742,7 @@
                 <td class="par-cell par-total">-</td>
               </tr>
 
-              <!-- Player rows map directly to players[0..3] -->
+              <!-- Player rows -->
 
               <tr class="player-row" data-slot="0">
                 <th class="player-label">
@@ -891,7 +894,10 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
         </div>
         <div id="chatTargets" class="chat-targets"></div>
         <textarea id="chatText" class="chat-input" placeholder="Type your masterpiece…"></textarea>
-        <button id="chatSendBtn" class="small-btn" type="button">Send</button>
+        <div class="chat-actions">
+          <button id="chatCancelBtn" class="small-btn secondary" type="button">Cancel</button>
+          <button id="chatSendBtn" class="small-btn" type="button">Send</button>
+        </div>
       </div>
     </div>
   </div>
@@ -900,7 +906,7 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
   <div id="chatToast" class="chat-toast"></div>
 
   <script>
-    // 1. Firebase setup with your config
+    // Firebase setup
     const firebaseConfig = {
       apiKey: "AIzaSyDxmmTSpvM1xvVRb8qiOQfbbQWHSJEgIrk",
       authDomain: "pardle-online.firebaseapp.com",
@@ -914,7 +920,7 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. Constants and state
+    // Constants and state
     const STORAGE_PLAYER_ID_KEY = "pardle_online_player_id";
     const STORAGE_LAST_GAME_ID_KEY = "pardle_online_last_game_id";
     const STORAGE_LAST_SLOT_KEY = "pardle_online_last_player_slot";
@@ -942,7 +948,7 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
     let unsubscribeGame = null;
     let unsubscribeMessages = null;
 
-    // DOM references
+    // DOM
     const body = document.body;
     const themeSwitch = document.getElementById("themeSwitch");
     const rulesLink = document.getElementById("rulesLink");
@@ -966,6 +972,7 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
     const chatBadge = document.getElementById("chatBadge");
     const chatSheet = document.getElementById("chatSheet");
     const chatCloseBtn = document.getElementById("chatCloseBtn");
+    const chatCancelBtn = document.getElementById("chatCancelBtn");
     const chatTargets = document.getElementById("chatTargets");
     const chatText = document.getElementById("chatText");
     const chatSendBtn = document.getElementById("chatSendBtn");
@@ -1160,12 +1167,10 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
         }
       }
 
-      // mirror your own name into the "Your name" box if we know your slot
       if (currentPlayerSlot != null && players[currentPlayerSlot]) {
         playerNameInput.value = players[currentPlayerSlot].name || "";
       }
 
-      // choose a sensible active hole for the current player
       let holeForHighlight = 0;
       if (currentPlayerSlot != null) {
         const myRow = document.querySelector(`.player-row[data-slot="${currentPlayerSlot}"]`);
@@ -1264,7 +1269,6 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
       await db.collection("games").doc(currentGameId).set(updated);
       recalcAllTotals();
 
-      // micro animation on save
       row.classList.remove("saved-pulse");
       void row.offsetWidth;
       row.classList.add("saved-pulse");
@@ -1461,7 +1465,6 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
             const msg = change.doc.data();
             if (!msg) return;
 
-            // do not show our own messages
             if (msg.fromId === currentPlayerId) return;
 
             const targets = Array.isArray(msg.toSlots) ? msg.toSlots : [];
@@ -1616,6 +1619,12 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
       });
     }
 
+    if (chatCancelBtn) {
+      chatCancelBtn.addEventListener("click", () => {
+        hideChatSheet();
+      });
+    }
+
     if (chatSendBtn) {
       chatSendBtn.addEventListener("click", () => {
         sendChatMessage().catch(err => {
@@ -1624,7 +1633,7 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
       });
     }
 
-    // event wiring and initial setup
+    // main buttons
     createGameBtn.addEventListener("click", () => {
       createGame().catch(err => {
         console.error(err);
@@ -1639,6 +1648,7 @@ Pardle is perfect for tracking daily scores with your crew, flexing your vocab g
       });
     });
 
+    // init
     bindScoreInputs();
     updateParRow();
     enableScorecard(false);
