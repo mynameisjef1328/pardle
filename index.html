@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Pardle Online</title>
+  <title>Pardle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Firebase compat SDKs -->
@@ -11,6 +11,7 @@
 
   <style>
     :root {
+      /* default: light mode, normal accents */
       --bg: #f5f5f5;
       --bg-card: #ffffff;
       --text: #111111;
@@ -30,7 +31,8 @@
       --active-hole-bg: rgba(255, 152, 0, 0.14);
     }
 
-    body.dark {
+    /* Dark mode overrides */
+    body[data-mode="dark"] {
       --bg: #101010;
       --bg-card: #181818;
       --text: #f5f5f5;
@@ -46,6 +48,14 @@
       --input-text: #ffffff;
       --par-bg: #2e3b2f;
       --active-hole-bg: rgba(255, 152, 0, 0.24);
+    }
+
+    /* Accent invert: green primary, orange sync */
+    body[data-accent="invert"] {
+      --accent: #00c853;
+      --accent-soft: #b9f6ca;
+      --sync-bg: #ff9800;
+      --sync-text: #111111;
     }
 
     * {
@@ -66,12 +76,17 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      padding: 12px 12px 24px;
+      gap: 12px;
     }
 
+    /* header styled like a card */
     .app-header {
-      background: var(--header-bg);
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-soft);
+      background: var(--bg-card);
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -82,27 +97,86 @@
       font-weight: 700;
     }
 
-    .sync-pill {
-      padding: 4px 10px;
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      outline: none;
+      transition: background 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.95);
+      opacity: 0.85;
+    }
+
+    .icon-btn:hover {
+      background: rgba(0,0,0,0.04);
+    }
+
+    body[data-mode="dark"] .icon-btn:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .icon-btn-gear span {
+      font-size: 33px;
+      color: var(--sync-bg);
+    }
+
+    .icon-btn-analytics {
+      gap: 2px;
+      position: relative;
+      top: 3px;
+    }
+
+    .icon-btn-analytics .bar {
+      display: inline-block;
+      width: 4px;
       border-radius: 999px;
       background: var(--sync-bg);
-      color: var(--sync-text);
-      font-size: 12px;
+    }
+
+    .icon-btn-analytics .bar.left {
+      height: 10px;
+    }
+    .icon-btn-analytics .bar.middle {
+      height: 16px;
+    }
+    .icon-btn-analytics .bar.right {
+      height: 10px;
+    }
+
+    /* shared pill style */
+    .pardle-pill {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      line-height: 1;
     }
 
-    .sync-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #ffffff;
+    .sync-pill {
+      background: var(--sync-bg);
+      color: var(--sync-text);
     }
 
     .app-content {
-      padding: 12px 12px 24px;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -238,83 +312,6 @@
       color: var(--input-text);
     }
 
-    /* theme toggle and rules */
-
-    .toolbar-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 14px;
-    }
-
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .theme-toggle span.label {
-      font-size: 13px;
-    }
-
-    .theme-toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      position: absolute;
-    }
-
-    .theme-toggle .slider {
-      width: 40px;
-      height: 20px;
-      border-radius: 999px;
-      background: #cccccc;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .theme-toggle .slider::before {
-      content: "";
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      left: 2px;
-      top: 2px;
-      border-radius: 50%;
-      background: #ffffff;
-      transition: transform 0.2s ease;
-    }
-
-    .theme-toggle input:checked + .slider {
-      background: #000000;
-    }
-
-    .theme-toggle input:checked + .slider::before {
-      transform: translateX(20px);
-    }
-
-    .rules-link {
-      font-size: 13px;
-      text-align: right;
-    }
-
-    .rules-link button {
-      border: none;
-      background: none;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 13px;
-      padding: 0;
-      cursor: pointer;
-    }
-
-    .rules-link button:active {
-      opacity: 0.7;
-    }
-
     /* scorecard */
 
     .scorecard-header {
@@ -333,16 +330,10 @@
       border: none;
       background: var(--accent);
       color: #ffffff;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 13px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+      cursor: pointer;
       position: relative;
+      gap: 4px;
       transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
 
@@ -351,37 +342,27 @@
       opacity: 0.85;
     }
 
-    /* bounce animation when unread messages are waiting */
-    .chat-btn.has-unread {
-      animation: chatBounce 0.7s ease-in-out infinite;
-    }
-
-    @keyframes chatBounce {
-      0% { transform: scale(1); }
-      30% { transform: scale(1.08) translateY(-1px); }
-      60% { transform: scale(0.97) translateY(1px); }
-      100% { transform: scale(1); }
-    }
-
     .chat-badge {
       position: absolute;
-      top: -3px;
-      right: -3px;
-      min-width: 14px;
-      height: 14px;
+      top: -2px;
+      right: -2px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #d32f2f;
-      color: #ffffff;
-      font-size: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #2ecc71;
+      display: none;
     }
 
     .scorecard-wrapper {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-card);
+    }
+
+    .scorecard-scroll {
       overflow-x: auto;
       padding-bottom: 4px;
-      position: relative;
     }
 
     .scorecard-table {
@@ -503,7 +484,6 @@
       display: none;
     }
 
-    /* Tighten spacing inside Pardle Rules */
     #rulesCard .rules-text h2 {
       margin-top: 6px;
       margin-bottom: 10px;
@@ -536,7 +516,7 @@
       line-height: 1.45;
     }
 
-    /* chat sheet */
+    /* generic bottom sheet styling, shared by chat, settings, analytics */
 
     .chat-sheet {
       position: fixed;
@@ -563,7 +543,7 @@
       overflow-y: auto;
     }
 
-    .chat-sheet-header {
+    .sheet-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -572,7 +552,7 @@
       font-weight: 600;
     }
 
-    .chat-sheet-header button {
+    .sheet-header-row button {
       border: none;
       background: none;
       font-size: 18px;
@@ -580,27 +560,7 @@
       color: var(--text);
     }
 
-    .chat-targets {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .chat-target-pill {
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      padding: 4px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      background: var(--bg-card);
-      color: var(--text);
-    }
-
-    .chat-target-pill.selected {
-      background: var(--accent-soft);
-      border-color: var(--accent);
-    }
+    /* chat specific */
 
     .chat-thread {
       max-height: 180px;
@@ -612,7 +572,7 @@
       font-size: 12px;
     }
 
-    body.dark .chat-thread {
+    body[data-mode="dark"] .chat-thread {
       background: rgba(255,255,255,0.04);
     }
 
@@ -653,20 +613,222 @@
       gap: 8px;
     }
 
+    .chat-targets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .chat-target-pill {
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text);
+    }
+
+    .chat-target-pill.selected {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    /* settings sheet */
+
+    .settings-section {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .settings-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .settings-label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .settings-link-btn {
+      border: none;
+      background: none;
+      padding: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* theme toggle reused */
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .theme-toggle span.label {
+      font-size: 13px;
+    }
+
+    .theme-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .theme-toggle .slider {
+      width: 40px;
+      height: 20px;
+      border-radius: 999px;
+      background: #cccccc;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .theme-toggle .slider::before {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: #ffffff;
+      transition: transform 0.2s ease;
+    }
+
+    .theme-toggle input:checked + .slider {
+      background: #000000;
+    }
+
+    .theme-toggle input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+    /* analytics sheet */
+
+    .analytics-intro {
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .analytics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .analytics-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.03);
+    }
+
+    body[data-mode="dark"] .analytics-row {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .analytics-name {
+      font-weight: 600;
+    }
+
+    .analytics-score {
+      font-weight: 700;
+    }
+
+    /* New game confirmation modal */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+    }
+
+    .modal-backdrop.visible {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 14px 16px 12px;
+      max-width: 320px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      border: 1px solid var(--border-soft);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .modal-body {
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .modal-actions .small-btn {
+      flex: 1;
+    }
+
+    .modal-actions .secondary {
+      background: var(--accent-soft);
+      color: #000000;
+    }
+
     @media (min-width: 520px) {
-      .app-content {
+      .app-shell {
         padding-inline: 16px;
       }
     }
   </style>
 </head>
-<body class="light">
+<body data-mode="dark" data-accent="normal">
   <div class="app-shell">
     <header class="app-header">
-      <div class="app-title">Pardle Online</div>
-      <div class="sync-pill">
-        <span class="sync-dot"></span>
-        Online
+      <div class="app-title">Pardle</div>
+      <div class="header-actions">
+        <button id="analyticsButton" class="icon-btn icon-btn-analytics" type="button" aria-label="View round stats">
+          <span class="bar left"></span>
+          <span class="bar middle"></span>
+          <span class="bar right"></span>
+        </button>
+        <button id="settingsButton" class="icon-btn icon-btn-gear" type="button" aria-label="Settings">
+          <span>⚙︎</span>
+        </button>
       </div>
     </header>
 
@@ -674,7 +836,6 @@
 
       <!-- Online game controls -->
       <section class="card">
-        <div class="section-title">Online Game</div>
         <div class="online-grid">
           <div class="online-row">
             <label for="playerNameInput">Your name</label>
@@ -716,189 +877,174 @@
         </div>
       </section>
 
-      <!-- Toolbar -->
-      <section class="card">
-        <div class="toolbar-row">
-          <label class="theme-toggle">
-            <span class="label">Theme</span>
-            <input type="checkbox" id="themeSwitch" />
-            <span class="slider"></span>
-          </label>
-
-          <div class="rules-link">
-            <button id="rulesLink" type="button">View Pardle Rules</button>
-          </div>
-        </div>
-      </section>
-
       <!-- Scorecard -->
       <section class="card">
         <div class="scorecard-header">
           <div class="section-title">Scorecard</div>
-          <button id="chatButton" class="chat-btn" type="button">
+          <button id="chatButton" class="chat-btn pardle-pill" type="button">
             💬 Chat
-            <span id="chatBadge" class="chat-badge" hidden>🟢</span>
+            <span id="chatBadge" class="chat-badge"></span>
           </button>
         </div>
 
         <div class="scorecard-wrapper">
-          <table class="scorecard-table">
-            <thead>
-              <tr>
-                <th class="course-label">Course</th>
-                <th class="hole-header">1</th>
-                <th class="hole-header">2</th>
-                <th class="hole-header">3</th>
-                <th class="hole-header">4</th>
-                <th class="hole-header">5</th>
-                <th class="hole-header">6</th>
-                <th class="hole-header">7</th>
-                <th class="hole-header">8</th>
-                <th class="hole-header">9</th>
-                <th class="hole-header">10</th>
-                <th class="hole-header">11</th>
-                <th class="hole-header">12</th>
-                <th class="hole-header">13</th>
-                <th class="hole-header">14</th>
-                <th class="hole-header">15</th>
-                <th class="hole-header">16</th>
-                <th class="hole-header">17</th>
-                <th class="hole-header">18</th>
-                <th class="hole-header">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr id="parRow">
-                <th class="course-label">Par</th>
-                <td class="par-cell" data-hole="0"></td>
-                <td class="par-cell" data-hole="1"></td>
-                <td class="par-cell" data-hole="2"></td>
-                <td class="par-cell" data-hole="3"></td>
-                <td class="par-cell" data-hole="4"></td>
-                <td class="par-cell" data-hole="5"></td>
-                <td class="par-cell" data-hole="6"></td>
-                <td class="par-cell" data-hole="7"></td>
-                <td class="par-cell" data-hole="8"></td>
-                <td class="par-cell" data-hole="9"></td>
-                <td class="par-cell" data-hole="10"></td>
-                <td class="par-cell" data-hole="11"></td>
-                <td class="par-cell" data-hole="12"></td>
-                <td class="par-cell" data-hole="13"></td>
-                <td class="par-cell" data-hole="14"></td>
-                <td class="par-cell" data-hole="15"></td>
-                <td class="par-cell" data-hole="16"></td>
-                <td class="par-cell" data-hole="17"></td>
-                <td class="par-cell par-total">-</td>
-              </tr>
+          <div class="scorecard-scroll">
+            <table class="scorecard-table">
+              <thead>
+                <tr>
+                  <th class="course-label">Course</th>
+                  <th class="hole-header">1</th>
+                  <th class="hole-header">2</th>
+                  <th class="hole-header">3</th>
+                  <th class="hole-header">4</th>
+                  <th class="hole-header">5</th>
+                  <th class="hole-header">6</th>
+                  <th class="hole-header">7</th>
+                  <th class="hole-header">8</th>
+                  <th class="hole-header">9</th>
+                  <th class="hole-header">10</th>
+                  <th class="hole-header">11</th>
+                  <th class="hole-header">12</th>
+                  <th class="hole-header">13</th>
+                  <th class="hole-header">14</th>
+                  <th class="hole-header">15</th>
+                  <th class="hole-header">16</th>
+                  <th class="hole-header">17</th>
+                  <th class="hole-header">18</th>
+                  <th class="hole-header">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="parRow">
+                  <th class="course-label">Par</th>
+                  <td class="par-cell" data-hole="0"></td>
+                  <td class="par-cell" data-hole="1"></td>
+                  <td class="par-cell" data-hole="2"></td>
+                  <td class="par-cell" data-hole="3"></td>
+                  <td class="par-cell" data-hole="4"></td>
+                  <td class="par-cell" data-hole="5"></td>
+                  <td class="par-cell" data-hole="6"></td>
+                  <td class="par-cell" data-hole="7"></td>
+                  <td class="par-cell" data-hole="8"></td>
+                  <td class="par-cell" data-hole="9"></td>
+                  <td class="par-cell" data-hole="10"></td>
+                  <td class="par-cell" data-hole="11"></td>
+                  <td class="par-cell" data-hole="12"></td>
+                  <td class="par-cell" data-hole="13"></td>
+                  <td class="par-cell" data-hole="14"></td>
+                  <td class="par-cell" data-hole="15"></td>
+                  <td class="par-cell" data-hole="16"></td>
+                  <td class="par-cell" data-hole="17"></td>
+                  <td class="par-cell par-total">-</td>
+                </tr>
 
-              <!-- Player rows -->
-              <tr class="player-row" data-slot="0">
-                <th class="player-label">
-                  <input class="player-name" placeholder="Player 1" disabled />
-                </th>
-                <!-- 18 holes -->
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td class="total-col">E</td>
-              </tr>
+                <!-- Player rows -->
+                <tr class="player-row" data-slot="0">
+                  <th class="player-label">
+                    <input class="player-name" placeholder="Player 1" disabled />
+                  </th>
+                  <!-- 18 holes -->
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td class="total-col">E</td>
+                </tr>
 
-              <tr class="player-row" data-slot="1">
-                <th class="player-label">
-                  <input class="player-name" placeholder="Player 2" disabled />
-                </th>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td class="total-col">E</td>
-              </tr>
+                <tr class="player-row" data-slot="1">
+                  <th class="player-label">
+                    <input class="player-name" placeholder="Player 2" disabled />
+                  </th>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td class="total-col">E</td>
+                </tr>
 
-              <tr class="player-row" data-slot="2">
-                <th class="player-label">
-                  <input class="player-name" placeholder="Player 3" disabled />
-                </th>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td class="total-col">E</td>
-              </tr>
+                <tr class="player-row" data-slot="2">
+                  <th class="player-label">
+                    <input class="player-name" placeholder="Player 3" disabled />
+                  </th>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td class="total-col">E</td>
+                </tr>
 
-              <tr class="player-row" data-slot="3">
-                <th class="player-label">
-                  <input class="player-name" placeholder="+ Add Player" disabled />
-                </th>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td><input class="score-input" type="number" min="1" disabled /></td>
-                <td class="total-col">E</td>
-              </tr>
-            </tbody>
-          </table>
+                <tr class="player-row" data-slot="3">
+                  <th class="player-label">
+                    <input class="player-name" placeholder="+ Add Player" disabled />
+                  </th>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td class="total-col">E</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <p class="swipe-hint">Swipe sideways to see all holes ⟶</p>
       </section>
 
-      <!-- Rules -->
+      <!-- Rules card lives below and is toggled from Settings -->
       <section class="card rules-card" id="rulesCard">
         <div class="section-title">Follow The Rules Or Follow The Fools</div>
         <div class="rules-text">
@@ -912,27 +1058,27 @@
           <ul>
             <li>Each “hole” is one Wordle puzzle.</li>
             <li>Your score for the hole equals the number of guesses it took you to solve that day’s Wordle.</li>
-            <li>Didn’t crack it? Mark it as a 7 or an “X” (just make sure your group agrees).</li>
-            <li>Par is the number of guesses you’re aiming for (can you beat it?).</li>
+            <li>Did not crack it? Mark it as a 7 or an “X” (just make sure your group agrees).</li>
+            <li>Par is the number of guesses you are aiming for (can you beat it?).</li>
           </ul>
 
           <h3>Scoring</h3>
           <ul>
             <li>Your total score is the sum of guesses across all holes in the round.</li>
-            <li>Relative score = total score vs. par. Just like golf, lower is better.</li>
+            <li>Relative score equals total score vs. par. Just like golf, lower is better.</li>
             <li>
               Score breakdown:
               <ul>
-                <li>“E” = even with par</li>
-                <li>“+2” = two over par (oof)</li>
-                <li>“-1” = one under par (nice work!)</li>
+                <li>“E” equals even with par</li>
+                <li>“+2” equals two over par</li>
+                <li>“-1” equals one under par</li>
               </ul>
             </li>
           </ul>
 
           <p>
             Pardle is perfect for tracking daily scores with your crew, flexing your vocab game, and delivering
-            top-tier trash talk. Keep it competitive, keep it classy(ish), keep it Pardle.
+            top tier trash talk. Keep it competitive, keep it classy, keep it Pardle.
           </p>
         </div>
       </section>
@@ -941,7 +1087,7 @@
     <!-- Chat sheet -->
     <div id="chatSheet" class="chat-sheet">
       <div class="chat-sheet-inner">
-        <div class="chat-sheet-header">
+        <div class="sheet-header-row">
           <span>Game chat</span>
           <button id="chatCloseBtn" type="button">✕</button>
         </div>
@@ -951,6 +1097,72 @@
         <div class="chat-actions">
           <button id="chatCancelBtn" class="small-btn secondary" type="button">Cancel</button>
           <button id="chatSendBtn" class="small-btn" type="button">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings sheet -->
+    <div id="settingsSheet" class="chat-sheet">
+      <div class="chat-sheet-inner">
+        <div class="sheet-header-row">
+          <span>Settings</span>
+          <button id="settingsCloseBtn" type="button">✕</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">Appearance</div>
+          <div class="settings-row" style="margin-bottom:6px;">
+            <span style="font-size:13px;">Theme</span>
+            <label class="theme-toggle">
+              <span class="label">Dark</span>
+              <input type="checkbox" id="themeSwitch" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <span style="font-size:13px;">Invert accents</span>
+            <label class="theme-toggle">
+              <span class="label">On</span>
+              <input type="checkbox" id="accentSwitch" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">Rules</div>
+          <button id="rulesLink" class="settings-link-btn" type="button">
+            View Pardle Rules
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics sheet -->
+    <div id="analyticsSheet" class="chat-sheet">
+      <div class="chat-sheet-inner">
+        <div class="sheet-header-row">
+          <span>Round stats</span>
+          <button id="analyticsCloseBtn" type="button">✕</button>
+        </div>
+        <p class="analytics-intro">
+          Pardle handicap and deeper analytics are coming soon. For now, here is a quick summary of this round.
+        </p>
+        <div id="analyticsList" class="analytics-list"></div>
+      </div>
+    </div>
+
+    <!-- New Game confirmation modal -->
+    <div id="newGameConfirm" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-title">Start a new game?</div>
+        <div class="modal-body">
+          <p>This will clear all player names and scores on this device.</p>
+          <p>If you are mid round, tap Cancel. If you are ready to wipe the slate and that triple bogey, tap Start New Game.</p>
+        </div>
+        <div class="modal-actions">
+          <button id="newGameCancelBtn" class="small-btn secondary" type="button">Cancel</button>
+          <button id="newGameConfirmBtn" class="small-btn" type="button">Start New Game</button>
         </div>
       </div>
     </div>
@@ -975,6 +1187,8 @@
     const STORAGE_PLAYER_ID_KEY = "pardle_online_player_id";
     const STORAGE_LAST_GAME_ID_KEY = "pardle_online_last_game_id";
     const STORAGE_LAST_SLOT_KEY = "pardle_online_last_player_slot";
+    const STORAGE_MODE_KEY = "pardle_mode";
+    const STORAGE_ACCENT_KEY = "pardle_accent";
 
     const COURSES = {
       "st-andrews": [4,4,4,4,5,4,4,3,4,4,3,4,4,5,4,4,4,4],
@@ -999,12 +1213,10 @@
     let unsubscribeGame = null;
     let unsubscribeMessages = null;
     let hasUnreadMessages = false;
+    let messagesInitialized = false;
 
     // DOM
     const body = document.body;
-    const themeSwitch = document.getElementById("themeSwitch");
-    const rulesLink = document.getElementById("rulesLink");
-    const rulesCard = document.getElementById("rulesCard");
 
     const playerNameInput = document.getElementById("playerNameInput");
     const createGameBtn = document.getElementById("createGameBtn");
@@ -1017,7 +1229,7 @@
 
     const courseSelect = document.getElementById("courseSelect");
     const parCells = document.querySelectorAll(".par-cell[data-hole]");
-    theParTotalCell = document.querySelector(".par-total");
+    const parTotalCell = document.querySelector(".par-total");
     const playerRows = document.querySelectorAll(".player-row");
 
     const chatButton = document.getElementById("chatButton");
@@ -1029,6 +1241,35 @@
     const chatThread = document.getElementById("chatThread");
     const chatText = document.getElementById("chatText");
     const chatSendBtn = document.getElementById("chatSendBtn");
+
+    const newGameConfirm = document.getElementById("newGameConfirm");
+    const newGameCancelBtn = document.getElementById("newGameCancelBtn");
+    const newGameConfirmBtn = document.getElementById("newGameConfirmBtn");
+
+    const settingsButton = document.getElementById("settingsButton");
+    const settingsSheet = document.getElementById("settingsSheet");
+    const settingsCloseBtn = document.getElementById("settingsCloseBtn");
+    const themeSwitch = document.getElementById("themeSwitch");
+    const accentSwitch = document.getElementById("accentSwitch");
+    const rulesLink = document.getElementById("rulesLink");
+    const rulesCard = document.getElementById("rulesCard");
+
+    const analyticsButton = document.getElementById("analyticsButton");
+    const analyticsSheet = document.getElementById("analyticsSheet");
+    const analyticsCloseBtn = document.getElementById("analyticsCloseBtn");
+    const analyticsList = document.getElementById("analyticsList");
+
+    setUnreadBadge(false);
+
+    // initial appearance load
+    (function initAppearance() {
+      const savedMode = localStorage.getItem(STORAGE_MODE_KEY) || "dark";
+      const savedAccent = localStorage.getItem(STORAGE_ACCENT_KEY) || "normal";
+      body.dataset.mode = savedMode;
+      body.dataset.accent = savedAccent;
+      if (themeSwitch) themeSwitch.checked = savedMode === "dark";
+      if (accentSwitch) accentSwitch.checked = savedAccent === "invert";
+    })();
 
     // helpers
     function generateId(len = 20) {
@@ -1139,7 +1380,7 @@
         }
 
         if (parTotalPlayed === 0) {
-          totalCell.textContent = scoreTotal;
+          totalCell.textContent = String(scoreTotal);
           return;
         }
 
@@ -1284,6 +1525,32 @@
               updatePlayerInGame();
             }
           });
+
+          // over par logic
+          inp.addEventListener("change", () => {
+            const raw = inp.value;
+            const score = parseInt(raw, 10);
+            if (isNaN(score) || score <= 0) return;
+
+            const cell = inp.closest("td");
+            if (!cell) return;
+            const rowEl = cell.parentElement;
+            const allCells = Array.from(rowEl.querySelectorAll("th, td"));
+            const holeIndex = allCells.indexOf(cell) - 1;
+            if (holeIndex < 0 || holeIndex >= HOLES) return;
+
+            const courseId = currentGameData ? currentGameData.courseId : courseSelect.value;
+            const pars = COURSES[courseId];
+            if (!pars) return;
+
+            const parVal = pars[holeIndex];
+            if (typeof parVal !== "number") return;
+
+            if (score > parVal) {
+              const diff = score - parVal;
+              alert(`Bruh. ${score} on a par ${parVal} is ${diff} over. That is rough. Do better.`);
+            }
+          });
         });
       });
 
@@ -1375,6 +1642,8 @@
         enableScorecard(true);
       });
 
+      setUnreadBadge(false);
+      messagesInitialized = false;
       attachMessageListener(currentGameId);
     }
 
@@ -1456,6 +1725,8 @@
         enableScorecard(true);
       });
 
+      setUnreadBadge(false);
+      messagesInitialized = false;
       attachMessageListener(currentGameId);
     }
 
@@ -1482,6 +1753,7 @@
         currentPlayerSlot = null;
         setStatus("Last saved game not found. Create or join a new one.");
         enableScorecard(false);
+        setUnreadBadge(false);
         return;
       }
 
@@ -1498,10 +1770,12 @@
         enableScorecard(true);
       });
 
+      setUnreadBadge(false);
+      messagesInitialized = false;
       attachMessageListener(currentGameId);
     }
 
-    // message / chat logic
+    // message and chat logic
 
     function attachMessageListener(gameId) {
       if (!gameId) return;
@@ -1510,6 +1784,8 @@
         unsubscribeMessages();
         unsubscribeMessages = null;
       }
+
+      messagesInitialized = false;
 
       unsubscribeMessages = db.collection("games")
         .doc(gameId)
@@ -1536,6 +1812,11 @@
           });
 
           renderChatThreadMessages(all);
+
+          if (!messagesInitialized) {
+            messagesInitialized = true;
+            return;
+          }
 
           snapshot.docChanges().forEach(change => {
             if (change.type !== "added") return;
@@ -1639,16 +1920,8 @@
 
     function setUnreadBadge(flag) {
       hasUnreadMessages = flag;
-      if (chatBadge) {
-        chatBadge.hidden = !flag;
-      }
-      if (chatButton) {
-        if (flag) {
-          chatButton.classList.add("has-unread");
-        } else {
-          chatButton.classList.remove("has-unread");
-        }
-      }
+      if (!chatBadge) return;
+      chatBadge.style.display = flag ? "inline-block" : "none";
     }
 
     async function sendChatMessage() {
@@ -1695,26 +1968,186 @@
       });
     }
 
-    // theme and rules
-    themeSwitch.addEventListener("change", () => {
-      if (themeSwitch.checked) {
-        body.classList.add("dark");
-      } else {
-        body.classList.remove("dark");
-      }
-    });
+    // new game confirm helpers
 
-    rulesLink.addEventListener("click", () => {
-      const isVisible = rulesCard.classList.contains("visible");
-      if (isVisible) {
-        rulesCard.classList.remove("visible");
-        rulesLink.textContent = "View Pardle Rules";
+    function hasExistingGameData() {
+      if (currentGameId) return true;
+
+      let hasStuff = false;
+
+      document.querySelectorAll(".player-name").forEach(inp => {
+        if (inp.value && inp.value.trim() !== "") {
+          hasStuff = true;
+        }
+      });
+
+      document.querySelectorAll(".score-input").forEach(inp => {
+        if (inp.value && inp.value.trim() !== "") {
+          hasStuff = true;
+        }
+      });
+
+      return hasStuff;
+    }
+
+    function showNewGameConfirm() {
+      if (!newGameConfirm) return;
+      newGameConfirm.classList.add("visible");
+    }
+
+    function hideNewGameConfirm() {
+      if (!newGameConfirm) return;
+      newGameConfirm.classList.remove("visible");
+    }
+
+    function handleCreateGameClick() {
+      if (hasExistingGameData()) {
+        showNewGameConfirm();
       } else {
-        rulesCard.classList.add("visible");
-        rulesLink.textContent = "Hide Pardle Rules";
-        rulesCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        createGame().catch(err => {
+          console.error(err);
+          setStatus("Error creating game.", true);
+        });
       }
-    });
+    }
+
+    if (newGameCancelBtn) {
+      newGameCancelBtn.addEventListener("click", () => {
+        hideNewGameConfirm();
+      });
+    }
+
+    if (newGameConfirmBtn) {
+      newGameConfirmBtn.addEventListener("click", () => {
+        hideNewGameConfirm();
+        createGame().catch(err => {
+          console.error(err);
+          setStatus("Error creating game.", true);
+        });
+      });
+    }
+
+    // theme, settings, rules
+
+    function openSettingsSheet() {
+      if (!settingsSheet) return;
+      // sync switches with current state
+      if (themeSwitch) {
+        themeSwitch.checked = body.dataset.mode === "dark";
+      }
+      if (accentSwitch) {
+        accentSwitch.checked = body.dataset.accent === "invert";
+      }
+      settingsSheet.classList.add("visible");
+    }
+
+    function closeSettingsSheet() {
+      if (!settingsSheet) return;
+      settingsSheet.classList.remove("visible");
+    }
+
+    if (settingsButton) {
+      settingsButton.addEventListener("click", openSettingsSheet);
+    }
+
+    if (settingsCloseBtn) {
+      settingsCloseBtn.addEventListener("click", closeSettingsSheet);
+    }
+
+    if (themeSwitch) {
+      themeSwitch.addEventListener("change", () => {
+        const mode = themeSwitch.checked ? "dark" : "light";
+        body.dataset.mode = mode;
+        localStorage.setItem(STORAGE_MODE_KEY, mode);
+      });
+    }
+
+    if (accentSwitch) {
+      accentSwitch.addEventListener("change", () => {
+        const accent = accentSwitch.checked ? "invert" : "normal";
+        body.dataset.accent = accent;
+        localStorage.setItem(STORAGE_ACCENT_KEY, accent);
+      });
+    }
+
+    if (rulesLink) {
+      rulesLink.addEventListener("click", () => {
+        const isVisible = rulesCard.classList.contains("visible");
+        if (isVisible) {
+          rulesCard.classList.remove("visible");
+          rulesLink.textContent = "View Pardle Rules";
+        } else {
+          rulesCard.classList.add("visible");
+          rulesLink.textContent = "Hide Pardle Rules";
+          rulesCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        closeSettingsSheet();
+      });
+    }
+
+    // analytics
+
+    function openAnalyticsSheet() {
+      if (!analyticsSheet) return;
+      buildAnalyticsSummary();
+      analyticsSheet.classList.add("visible");
+    }
+
+    function closeAnalyticsSheet() {
+      if (!analyticsSheet) return;
+      analyticsSheet.classList.remove("visible");
+    }
+
+    function buildAnalyticsSummary() {
+      if (!analyticsList) return;
+      analyticsList.innerHTML = "";
+
+      const rows = document.querySelectorAll(".player-row");
+      let hasAny = false;
+
+      rows.forEach(row => {
+        const nameInput = row.querySelector(".player-name");
+        const totalCell = row.querySelector(".total-col");
+        if (!nameInput || !totalCell) return;
+
+        const name = nameInput.value.trim();
+        if (!name) return;
+
+        const totalText = totalCell.textContent || "E";
+
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "analytics-row";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "analytics-name";
+        nameSpan.textContent = name;
+
+        const scoreSpan = document.createElement("span");
+        scoreSpan.className = "analytics-score";
+        scoreSpan.textContent = totalText;
+
+        rowDiv.appendChild(nameSpan);
+        rowDiv.appendChild(scoreSpan);
+        analyticsList.appendChild(rowDiv);
+        hasAny = true;
+      });
+
+      if (!hasAny) {
+        const empty = document.createElement("div");
+        empty.style.fontSize = "13px";
+        empty.style.opacity = "0.7";
+        empty.textContent = "No scores yet. Fill in a few holes and your Pardle recap will appear here.";
+        analyticsList.appendChild(empty);
+      }
+    }
+
+    if (analyticsButton) {
+      analyticsButton.addEventListener("click", openAnalyticsSheet);
+    }
+
+    if (analyticsCloseBtn) {
+      analyticsCloseBtn.addEventListener("click", closeAnalyticsSheet);
+    }
 
     // chat button events
     if (chatButton) {
@@ -1748,19 +2181,18 @@
     }
 
     // main buttons
-    createGameBtn.addEventListener("click", () => {
-      createGame().catch(err => {
-        console.error(err);
-        setStatus("Error creating game.", true);
-      });
-    });
+    if (createGameBtn) {
+      createGameBtn.addEventListener("click", handleCreateGameClick);
+    }
 
-    joinGameBtn.addEventListener("click", () => {
-      joinGame().catch(err => {
-        console.error(err);
-        setStatus("Error joining game.", true);
+    if (joinGameBtn) {
+      joinGameBtn.addEventListener("click", () => {
+        joinGame().catch(err => {
+          console.error(err);
+          setStatus("Error joining game.", true);
+        });
       });
-    });
+    }
 
     // init
     bindScoreInputs();
