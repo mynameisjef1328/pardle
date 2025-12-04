@@ -4,495 +4,1189 @@
   <meta charset="UTF-8" />
   <title>Pardle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Firebase SDKs -->
+
+  <!-- Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-    <style>
-:root {
-  --bg: #181818;
-  --bg-card: #202024;
-  --text: #fff;
-  --accent: #ff9800;
-  --accent-hover: #ffa726;
-  --border-soft: #222;
-  --modal-bg: rgba(0,0,0,0.32);
-}
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system,BlinkMacSystemFont,"Inter",sans-serif;
-  margin: 0;
-  min-height: 100vh;
-  letter-spacing: 0.01em;
-}
-a { color: var(--accent); text-decoration: none; }
-.landing-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-.landing-card {
-  background: var(--bg-card);
-  padding: 2.5em 2em 2em 2em;
-  border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 320px;
-  min-height: 240px;
-  animation: fadeInUp 0.4s cubic-bezier(.22,1,.36,1);
-}
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(32px);}
-  100% { opacity: 1; transform: none;}
-}
-.landing-title {
-  color: #fff;
-  font-size: 2.1rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  letter-spacing: 0.04em;
-}
-.landing-play-btn {
-  width: 100%;
-  font-size: 1.17rem;
-  background: var(--accent);
-  color: #fff;
-  padding: 0.9em 0;
-  border-radius: 14px;
-  border: none;
-  font-weight: 700;
-  margin-bottom: 1.1rem;
-  cursor: pointer;
-  box-shadow: 0 2px 12px rgba(255,152,0,0.11);
-  transition: background 0.18s;
-}
-.landing-play-btn:hover,
-.landing-play-btn:focus {
-  background: var(--accent-hover);
-  outline: none;
-}
-.landing-join-link {
-  color: #ccc;
-  font-size: 1rem;
-  text-decoration: underline;
-  cursor: pointer;
-  margin-top: 0.4rem;
-  opacity: 0.88;
-  transition: color 0.18s, opacity 0.18s;
-}
-.landing-join-link:hover,
-.landing-join-link:focus {
-  color: var(--accent);
-  opacity: 1;
-}
-.app-shell {
-  max-width: 540px;
-  margin: 2.3rem auto;
-  background: var(--bg-card);
-  border-radius: 18px;
-  box-shadow: 0 4px 28px rgba(0,0,0,0.21);
-  padding: 1.3rem 1.6rem 2.2rem 1.6rem;
-}
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  border-bottom: 1.5px solid var(--border-soft);
-  padding-bottom: 0.7rem;
-}
-.app-title {
-  font-size: 1.6rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-.header-actions {
-  display: flex;
-  gap: 0.5em;
-}
-.card {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  margin-bottom: 1.5rem;
-}
-.online-grid {
-  min-height: 140px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.online-grid h2 {
-  font-weight: 500;
-  color: #fff;
-  opacity: 0.88;
-}
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--modal-bg);
-  align-items: center;
-  justify-content: center;
-  z-index: 3000;
-  display: none; /* Controlled inline by JS */
-}
-.modal-card {
-  background: var(--bg-card);
-  border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
-  padding: 2.5rem 2rem 2rem 2rem;
-  width: 350px;
-  max-width: 92vw;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 1.2rem;
-  animation: fadeInUp 0.33s cubic-bezier(.21,1,.22,1);
-}
-.modal-title {
-  margin: 0 0 0.4rem 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  text-align: center;
-  color: #fff;
-  letter-spacing: 0.04em;
-}
-.modal-input {
-  font-size: 1.13rem;
-  padding: 0.7em 1em;
-  border: 1.5px solid #333;
-  border-radius: 12px;
-  outline: none;
-  background: #222;
-  color: #fff;
-  margin-bottom: 0.7rem;
-  width: 100%;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-}
-.modal-input:focus { border-color: var(--accent); }
-.modal-btn, .modal-btn-cancel {
-  font-size: 1.08rem;
-  padding: 0.7em 1em;
-  margin-top: 0.25rem;
-  border: none;
-  border-radius: 11px;
-  cursor: pointer;
-  font-weight: 600;
-  background: var(--accent);
-  color: #fff;
-  transition: background 0.2s, color 0.2s;
-}
-.modal-btn-cancel {
-  background: #444;
-  color: #fff;
-  margin-top: 0.4rem;
-}
-.modal-btn:active, .modal-btn-cancel:active {
-  opacity: 0.8;
-}
-.modal-error {
-  color: #ff5252;
-  font-size: 1rem;
-  text-align: center;
-  margin-top: 0.5rem;
-  min-height: 1.3em;
-}
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --bg-card: #ffffff;
+      --text: #111111;
+      --accent: #ff9800;
+      --accent-soft: #ffe0b2;
+      --border-soft: #dddddd;
+      --header-bg: #ffffff;
+      --sync-bg: #00c853;
+      --sync-text: #ffffff;
+      --table-header-bg: #e0e0e0;
+      --table-header-text: #111111;
+      --table-player-header-bg: #000000;
+      --table-player-header-text: #ffffff;
+      --input-bg: #ffffff;
+      --input-text: #000000;
+      --par-bg: #cde8cf;
+      --active-hole-bg: rgba(255, 152, 0, 0.14);
+    }
+    body[data-mode="dark"] {
+      --bg: #101010;
+      --bg-card: #181818;
+      --text: #f5f5f5;
+      --accent: #ff9800;
+      --accent-soft: #664200;
+      --border-soft: #333333;
+      --header-bg: #181818;
+      --sync-bg: #00c853;
+      --sync-text: #ffffff;
+      --table-header-bg: #333333;
+      --table-header-text: #ffffff;
+      --input-bg: #202020;
+      --input-text: #ffffff;
+      --par-bg: #2e3b2f;
+      --active-hole-bg: rgba(255, 152, 0, 0.24);
+    }
+    body[data-accent="invert"] {
+      --accent: #00c853;
+      --accent-soft: #b9f6ca;
+      --sync-bg: #ff9800;
+      --sync-text: #111111;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .app-shell {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 12px 24px;
+      gap: 12px;
+    }
+    .app-header {
+      background: var(--bg-card);
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .app-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      outline: none;
+      transition: background 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .icon-btn:active {
+      transform: scale(0.95);
+      opacity: 0.85;
+    }
+    .icon-btn:hover {
+      background: rgba(0,0,0,0.04);
+    }
+    body[data-mode="dark"] .icon-btn:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    .icon-btn-gear span {
+      font-size: 33px;
+      color: var(--sync-bg);
+    }
+    .icon-btn-analytics {
+      gap: 2px;
+      position: relative;
+      top: 3px;
+    }
+    .icon-btn-analytics .bar {
+      display: inline-block;
+      width: 4px;
+      border-radius: 999px;
+      background: var(--sync-bg);
+    }
+    .icon-btn-analytics .bar.left { height: 10px; }
+    .icon-btn-analytics .bar.middle { height: 16px; }
+    .icon-btn-analytics .bar.right { height: 10px; }
+    .pardle-pill {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .sync-pill {
+      background: var(--sync-bg);
+      color: var(--sync-text);
+    }
+    .app-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+    .card {
+      background: var(--bg-card);
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .online-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .online-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .online-row label {
+      min-width: 80px;
+      font-size: 14px;
+    }
+    .online-input {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      background: var(--input-bg);
+      color: var(--input-text);
+      font-size: 16px;
+    }
+    .online-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .small-btn {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+    }
+    .small-btn.secondary {
+      background: var(--accent-soft);
+      color: #000000;
+    }
+    .online-status {
+      font-size: 12px;
+      line-height: 1.4;
+      color: #555;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .online-status.error-text {
+      color: #d32f2f;
+    }
+    .online-status strong {
+      color: var(--text);
+    }
+    .gameid-pill {
+      align-self: flex-start;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      padding: 4px 10px;
+      background: var(--bg-card);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .gameid-pill .icon {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    .gameid-pill:active {
+      transform: scale(0.97);
+      opacity: 0.85;
+    }
+    /* ===== JOIN GAME MODAL STYLES (NEW) ===== */
+    #joinGameModalBackdrop {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.33);
+      align-items: center;
+      justify-content: center;
+    }
+    #joinGameModalBackdrop.visible {
+      display: flex;
+    }
+    #joinGameModal {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 2em 1.5em 1.4em 1.5em;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.23);
+      min-width: 300px;
+      max-width: 95vw;
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      align-items: stretch;
+    }
+    #joinGameModal h2 {
+      margin: 0 0 0.6em 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+    #joinGameModal input[type="text"] {
+      font-size: 1.13rem;
+      padding: 0.7em 1em;
+      border: 1.5px solid #bbb;
+      border-radius: 12px;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--input-text);
+      margin-bottom: 0.5em;
+      width: 100%;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    #joinGameModal input[type="text"]:focus { border-color: var(--accent); }
+    #joinGameModal .modal-btn {
+      font-size: 1.08rem;
+      padding: 0.7em 1em;
+      border: none;
+      border-radius: 11px;
+      cursor: pointer;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      transition: background 0.18s;
+      margin-bottom: 0.3em;
+    }
+    #joinGameModal .modal-btn-cancel {
+      background: #444;
+      color: #fff;
+    }
+    #joinGameModal .modal-error {
+      color: #ff5252;
+      font-size: 1rem;
+      text-align: center;
+      margin-top: 0.5rem;
+      min-height: 1.3em;
+    }
+    @media (min-width: 520px) {
+      .app-shell {
+        padding-inline: 16px;
+      }
+    }
   </style>
-</head>
 
+  </head>
 <body data-mode="dark" data-accent="normal">
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-title">Pardle</div>
+      <div class="header-actions">
+        <button id="analyticsButton" class="icon-btn icon-btn-analytics" type="button" aria-label="View round stats">
+          <span class="bar left"></span>
+          <span class="bar middle"></span>
+          <span class="bar right"></span>
+        </button>
+        <button id="settingsButton" class="icon-btn icon-btn-gear" type="button" aria-label="Settings">
+          <span>⚙︎</span>
+        </button>
+        <!-- NEW: Modal Join Game Button -->
+        <button id="showJoinGameModalBtn" class="small-btn secondary" type="button" style="margin-left:10px;">
+          Join Game (Popup)
+        </button>
+      </div>
+    </header>
 
-  <!-- ===== LANDING OVERLAY ===== -->
-  <div id="landingCard" class="landing-overlay">
-    <div class="landing-card">
-      <h1 class="landing-title">Pardle</h1>
-      <button class="landing-play-btn" onclick="onLandingPlay()">Play</button>
-      <a href="#" class="landing-join-link" onclick="onLandingJoin(event)">Join Game</a>
-    </div>
-  </div>
+    <main class="app-content">
+      <!-- Online game controls -->
+      <section class="card">
+        <div class="online-grid">
+          <div class="online-row">
+            <label for="playerNameInput">Your name</label>
+            <input id="playerNameInput" class="online-input" placeholder="Name" />
+          </div>
+          <div class="online-row online-buttons">
+            <button id="createGameBtn" class="small-btn">Create Game</button>
+            <input id="joinGameIdInput" class="online-input" placeholder="Enter ID" />
+            <button id="joinGameBtn" class="small-btn secondary">Join Game</button>
+          </div>
+          <div class="online-status" id="onlineStatusText">
+            <button class="gameid-pill" id="gameIdPill" type="button">
+              <span class="icon">⧉</span>
+              <span id="gameIdValue">none</span>
+            </button>
+            <span id="statusMessage">Not in a game. Create or join to start.</span>
+          </div>
+        </div>
+      </section>
 
-  <!-- ===== MAIN APP ===== -->
-  <div id="mainApp" style="display:none;">
-    <div class="app-shell">
-      <header class="app-header">
-        <div class="app-title">Pardle</div>
-        <div class="header-actions">
-          <button id="analyticsButton" class="icon-btn icon-btn-analytics" type="button" aria-label="View round stats">
-            <span class="bar left"></span>
-            <span class="bar middle"></span>
-            <span class="bar right"></span>
-          </button>
-          <button id="settingsButton" class="icon-btn icon-btn-gear" type="button" aria-label="Settings">
-            <span>⚙</span>
-          </button>
-          <button class="modal-btn" onclick="showJoinGameModal()" style="margin-left:8px;">
-            Join Game
+      <!-- Course selector -->
+      <section class="card">
+        <div class="section-title">Course</div>
+        <div class="course-row">
+          <select class="course-select" id="courseSelect" disabled>
+            <option value="st-andrews">St. Androos Links</option>
+            <option value="augusta">Azalea National</option>
+            <option value="bully-pulpit">Badlands Pulpit</option>
+            <option value="torrey-pines">Torrey Pints</option>
+            <option value="bethpage-black">Bethpage Back Tees</option>
+            <option value="sweetwater">Sweetwater Country Klub</option>
+            <option value="tpc-sawgrass">TPC Strawgrass</option>
+            <option value="whistling-straits">Whistling Straights</option>
+            <option value="pebble-beach">Pebble Reach</option>
+            <option value="congressional">Congress-ish National</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Scorecard -->
+      <section class="card">
+        <div class="scorecard-header">
+          <div class="section-title">Scorecard</div>
+          <button id="chatButton" class="chat-btn pardle-pill" type="button">
+            💬 Chat
+            <span id="chatBadge" class="chat-badge"></span>
           </button>
         </div>
-      </header>
-      <main class="app-content">
-        <section class="card">
-          <div class="online-grid" id="pardleScorecardContainer">
-            <!-- App will render the scorecard here -->
+        <div class="scorecard-wrapper">
+          <div class="scorecard-scroll">
+            <table class="scorecard-table">
+              <thead>
+                <tr>
+                  <th class="course-label">Course</th>
+                  <th class="hole-header">1</th>
+                  <th class="hole-header">2</th>
+                  <th class="hole-header">3</th>
+                  <th class="hole-header">4</th>
+                  <th class="hole-header">5</th>
+                  <th class="hole-header">6</th>
+                  <th class="hole-header">7</th>
+                  <th class="hole-header">8</th>
+                  <th class="hole-header">9</th>
+                  <th class="hole-header">10</th>
+                  <th class="hole-header">11</th>
+                  <th class="hole-header">12</th>
+                  <th class="hole-header">13</th>
+                  <th class="hole-header">14</th>
+                  <th class="hole-header">15</th>
+                  <th class="hole-header">16</th>
+                  <th class="hole-header">17</th>
+                  <th class="hole-header">18</th>
+                  <th class="hole-header">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Par row and player rows are rendered here as in your previous code -->
+                <tr id="parRow">
+                  <th class="course-label">Par</th>
+                  <td class="par-cell" data-hole="0"></td>
+                  <td class="par-cell" data-hole="1"></td>
+                  <td class="par-cell" data-hole="2"></td>
+                  <td class="par-cell" data-hole="3"></td>
+                  <td class="par-cell" data-hole="4"></td>
+                  <td class="par-cell" data-hole="5"></td>
+                  <td class="par-cell" data-hole="6"></td>
+                  <td class="par-cell" data-hole="7"></td>
+                  <td class="par-cell" data-hole="8"></td>
+                  <td class="par-cell" data-hole="9"></td>
+                  <td class="par-cell" data-hole="10"></td>
+                  <td class="par-cell" data-hole="11"></td>
+                  <td class="par-cell" data-hole="12"></td>
+                  <td class="par-cell" data-hole="13"></td>
+                  <td class="par-cell" data-hole="14"></td>
+                  <td class="par-cell" data-hole="15"></td>
+                  <td class="par-cell" data-hole="16"></td>
+                  <td class="par-cell" data-hole="17"></td>
+                  <td class="par-cell par-total">-</td>
+                </tr>
+                <tr class="player-row" data-slot="0">
+                  <th class="player-label">
+                    <input class="player-name" placeholder="Player 1" disabled />
+                  </th>
+                  <!-- 18 input cells per player -->
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td class="total-col">E</td>
+                </tr>
+                <!-- Add player-row for data-slot 1, 2, 3 as in your existing file -->
+                <tr class="player-row" data-slot="1">
+                  <th class="player-label">
+                    <input class="player-name" placeholder="Player 2" disabled />
+                  </th>
+                  <!-- ...18 inputs... -->
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td class="total-col">E</td>
+                </tr>
+                <tr class="player-row" data-slot="2">
+                  <th class="player-label">
+                    <input class="player-name" placeholder="Player 3" disabled />
+                  </th>
+                  <!-- ...18 inputs... -->
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td class="total-col">E</td>
+                </tr>
+                <tr class="player-row" data-slot="3">
+                  <th class="player-label">
+                    <input class="player-name" placeholder="+ Add Player" disabled />
+                  </th>
+                  <!-- ...18 inputs... -->
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td class="total-col">E</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </section>
-      </main>
-    </div>
-  </div>
+        </div>
+        <p class="swipe-hint">Swipe sideways to see all holes ⟶</p>
+      </section>
 
-  <!-- ===== JOIN GAME MODAL ===== -->
-  <div id="joinGameModal" class="modal-overlay" style="display:none;">
-    <div class="modal-card">
-      <h2 class="modal-title">Join a Game</h2>
-      <form id="joinGameForm" autocomplete="off">
+      <!-- Rules card lives below and is toggled from Settings -->
+      <section class="card rules-card" id="rulesCard">
+        <div class="section-title">Follow The Rules Or Follow The Fools</div>
+        <div class="rules-text">
+          <!-- ... [rules text as before] ... -->
+          <h2>PARDLE RULES</h2>
+          <p>Pardle is what happens when Wordle and golf have a beautiful, competitive baby.</p>
+          <!-- [snip: keep all rules content as in your current file] -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Chat sheet -->
+    <div id="chatSheet" class="chat-sheet">
+      <!-- ... [your chat modal content as before] ... -->
+    </div>
+    <!-- Settings sheet -->
+    <div id="settingsSheet" class="chat-sheet">
+      <!-- ... [your settings modal content as before] ... -->
+    </div>
+    <!-- Analytics sheet -->
+    <div id="analyticsSheet" class="chat-sheet">
+      <!-- ... [your analytics modal content as before] ... -->
+    </div>
+    <!-- New Game confirmation modal -->
+    <div id="newGameConfirm" class="modal-backdrop">
+      <!-- ... [your new game confirm modal as before] ... -->
+    </div>
+
+    <!-- ===== JOIN GAME MODAL (NEW) ===== -->
+    <div id="joinGameModalBackdrop">
+      <form id="joinGameModal" autocomplete="off" tabindex="-1">
+        <h2>Join a Game</h2>
         <input
           type="text"
-          id="joinGameIdInput"
-          class="modal-input"
-          maxlength="8"
+          id="joinGameModalInput"
+          maxlength="12"
           placeholder="Enter Game ID"
           required
+          autocomplete="off"
         />
         <button type="submit" class="modal-btn">Join</button>
-        <button type="button" class="modal-btn-cancel" id="cancelJoinGameBtn">Cancel</button>
+        <button type="button" class="modal-btn modal-btn-cancel" id="joinGameModalCancelBtn">Cancel</button>
+        <div id="joinGameModalError" class="modal-error"></div>
       </form>
-      <div id="joinGameError" class="modal-error" style="display:none;"></div>
     </div>
-  </div>
 
     <script>
-  // ==============================
-  // FIREBASE CONFIG & INIT
-  // ==============================
-
+  // ===== Firebase config (uses your prod keys) =====
   const firebaseConfig = {
     apiKey: "AIzaSyDxmmTSpvM1xvVRb8qiOQfbbQWHSJEgIrk",
     authDomain: "pardle-online.firebaseapp.com",
     projectId: "pardle-online",
     storageBucket: "pardle-online.firebasestorage.app",
     messagingSenderId: "552026596516",
-    appId: "1:552026596516:web:779d08f94ef455eda7f231"
+    appId: "1:552026596516:web:779d08f94ef455eda7f231",
     measurementId: "G-SJLZZ84L8F"
   };
-
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
-  const firestore = firebase.firestore();
+  const db = firebase.firestore();
 
-  // ==============================
-  // PARDLE APP CONSTANTS
-  // ==============================
-  const NUM_HOLES = 18;
-  const DEFAULT_PAR = [4,4,3,5,4,4,3,5,4,4,4,3,5,4,4,3,5,4]; // Change for your course
+  // ===== App Constants =====
+  const STORAGE_PLAYER_ID_KEY = "pardle_online_player_id";
+  const STORAGE_LAST_GAME_ID_KEY = "pardle_online_last_game_id";
+  const STORAGE_LAST_SLOT_KEY = "pardle_online_last_player_slot";
+  const STORAGE_MODE_KEY = "pardle_mode";
+  const STORAGE_ACCENT_KEY = "pardle_accent";
 
-  function generateGameId(len = 7) {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let id = '';
-    for (let i = 0; i < len; ++i) id += chars[Math.floor(Math.random() * chars.length)];
+  const COURSES = {
+    "st-andrews": [4,4,4,4,5,4,4,3,4,4,3,4,4,5,4,4,4,4],
+    "augusta": [4,5,4,3,4,3,4,5,4,4,4,3,5,4,5,3,4,4],
+    "bully-pulpit": [4,4,4,5,5,3,4,3,4,4,5,3,4,4,3,4,5,4],
+    "torrey-pines": [4,4,3,4,5,4,4,3,5,5,4,3,4,4,3,4,5,4],
+    "bethpage-black": [4,4,3,5,4,4,5,3,4,4,4,4,5,3,4,4,3,4],
+    "sweetwater": [4,4,3,4,5,3,4,4,3,4,4,3,4,5,3,4,4,3],
+    "tpc-sawgrass": [4,5,3,4,4,4,4,3,5,4,5,4,3,4,4,5,3,4],
+    "whistling-straits": [4,5,3,4,5,4,3,4,4,4,5,3,4,4,4,5,3,4],
+    "pebble-beach": [4,5,4,4,3,5,3,4,4,4,4,3,4,5,4,4,3,5],
+    "congressional": [4,3,4,5,4,5,3,4,5,3,5,4,3,4,5,5,4,4]
+  };
+
+  const MAX_PLAYERS = 4;
+  const HOLES = 18;
+
+  // ===== Global State =====
+  let currentGameId = null;
+  let currentPlayerId = null;
+  let currentPlayerSlot = null;
+  let currentGameData = null;
+  let unsubscribeGame = null;
+  let unsubscribeMessages = null;
+  let hasUnreadMessages = false;
+  let messagesInitialized = false;
+
+  // ===== DOM Refs =====
+  const body = document.body;
+  const playerNameInput = document.getElementById("playerNameInput");
+  const createGameBtn = document.getElementById("createGameBtn");
+  const joinGameBtn = document.getElementById("joinGameBtn");
+  const joinGameIdInput = document.getElementById("joinGameIdInput");
+  const onlineStatusText = document.getElementById("onlineStatusText");
+  const gameIdPill = document.getElementById("gameIdPill");
+  const gameIdValue = document.getElementById("gameIdValue");
+  const statusMessage = document.getElementById("statusMessage");
+  const courseSelect = document.getElementById("courseSelect");
+  const parCells = document.querySelectorAll(".par-cell[data-hole]");
+  const parTotalCell = document.querySelector(".par-total");
+  const playerRows = document.querySelectorAll(".player-row");
+
+  const chatButton = document.getElementById("chatButton");
+  const chatBadge = document.getElementById("chatBadge");
+  const chatSheet = document.getElementById("chatSheet");
+  const chatCloseBtn = document.getElementById("chatCloseBtn");
+  const chatCancelBtn = document.getElementById("chatCancelBtn");
+  const chatTargets = document.getElementById("chatTargets");
+  const chatThread = document.getElementById("chatThread");
+  const chatText = document.getElementById("chatText");
+  const chatSendBtn = document.getElementById("chatSendBtn");
+
+  const newGameConfirm = document.getElementById("newGameConfirm");
+  const newGameCancelBtn = document.getElementById("newGameCancelBtn");
+  const newGameConfirmBtn = document.getElementById("newGameConfirmBtn");
+
+  const settingsButton = document.getElementById("settingsButton");
+  const settingsSheet = document.getElementById("settingsSheet");
+  const settingsCloseBtn = document.getElementById("settingsCloseBtn");
+  const themeSwitch = document.getElementById("themeSwitch");
+  const accentSwitch = document.getElementById("accentSwitch");
+  const rulesLink = document.getElementById("rulesLink");
+  const rulesCard = document.getElementById("rulesCard");
+
+  const analyticsButton = document.getElementById("analyticsButton");
+  const analyticsSheet = document.getElementById("analyticsSheet");
+  const analyticsCloseBtn = document.getElementById("analyticsCloseBtn");
+  const analyticsList = document.getElementById("analyticsList");
+
+  // ===== Modal Refs =====
+  const showJoinGameModalBtn = document.getElementById('showJoinGameModalBtn');
+  const joinGameModalBackdrop = document.getElementById('joinGameModalBackdrop');
+  const joinGameModal = document.getElementById('joinGameModal');
+  const joinGameModalInput = document.getElementById('joinGameModalInput');
+  const joinGameModalCancelBtn = document.getElementById('joinGameModalCancelBtn');
+  const joinGameModalError = document.getElementById('joinGameModalError');
+
+  // ===== Initial Appearance =====
+  (function initAppearance() {
+    const savedMode = localStorage.getItem(STORAGE_MODE_KEY) || "dark";
+    const savedAccent = localStorage.getItem(STORAGE_ACCENT_KEY) || "normal";
+    body.dataset.mode = savedMode;
+    body.dataset.accent = savedAccent;
+    if (themeSwitch) themeSwitch.checked = savedMode === "dark";
+    if (accentSwitch) accentSwitch.checked = savedAccent === "invert";
+  })();
+
+  // ===== Helper Functions =====
+  function generateId(len = 20) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let out = "";
+    for (let i = 0; i < len; i++) {
+      out += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return out;
+  }
+
+  function getOrCreatePlayerId() {
+    let id = localStorage.getItem(STORAGE_PLAYER_ID_KEY);
+    if (!id) {
+      id = generateId(16);
+      localStorage.setItem(STORAGE_PLAYER_ID_KEY, id);
+    }
     return id;
   }
 
-  // ===============================
-  // ONBOARDING: Landing/Modal Logic
-  // ===============================
-
-  window.onload = function() {
-    document.getElementById('landingCard').style.display = '';
-    document.getElementById('mainApp').style.display = 'none';
-    document.getElementById('joinGameModal').style.display = 'none';
-  };
-
-  window.onLandingPlay = function() {
-    document.getElementById('landingCard').style.display = 'none';
-    showCreateGamePrompt();
-  };
-
-  window.onLandingJoin = function(e) {
-    e.preventDefault();
-    document.getElementById('landingCard').style.display = 'none';
-    document.getElementById('mainApp').style.display = '';
-    showJoinGameModal();
-  };
-
-  // ===============================
-  // JOIN GAME MODAL LOGIC
-  // ===============================
-  const joinGameModal = document.getElementById('joinGameModal');
-  const joinGameForm = document.getElementById('joinGameForm');
-  const joinGameIdInput = document.getElementById('joinGameIdInput');
-  const joinGameError = document.getElementById('joinGameError');
-  const cancelJoinGameBtn = document.getElementById('cancelJoinGameBtn');
-
-  window.showJoinGameModal = function() {
-    joinGameModal.style.display = 'flex';
-    joinGameIdInput.value = '';
-    joinGameError.style.display = 'none';
-    setTimeout(() => joinGameIdInput.focus(), 10);
-  };
-  window.hideJoinGameModal = function() {
-    joinGameModal.style.display = 'none';
-  };
-  if (cancelJoinGameBtn) cancelJoinGameBtn.addEventListener('click', hideJoinGameModal);
-
-  if (joinGameForm) joinGameForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const gameId = joinGameIdInput.value.trim().toUpperCase();
-    joinGameError.style.display = 'none';
-
-    if (!/^[A-Z0-9]{4,8}$/.test(gameId)) {
-      joinGameError.textContent = 'Please enter a valid Game ID.';
-      joinGameError.style.display = 'block';
-      return;
+  function setStatus(msg, isError = false) {
+    const gameIdText = currentGameId || "none";
+    if (gameIdValue) gameIdValue.textContent = gameIdText;
+    if (statusMessage) statusMessage.textContent = msg;
+    if (isError) {
+      onlineStatusText.classList.add("error-text");
+    } else {
+      onlineStatusText.classList.remove("error-text");
     }
+  }
 
-    firestore.collection('games').doc(gameId).get().then(doc => {
-      if (!doc.exists) {
-        joinGameError.textContent = 'Game not found. Try again.';
-        joinGameError.style.display = 'block';
+  function enableScorecard(enabled) {
+    courseSelect.disabled = !enabled;
+    playerRows.forEach(row => {
+      const slot = parseInt(row.dataset.slot, 10);
+      const isMine = enabled && currentPlayerSlot === slot;
+      const nameInput = row.querySelector(".player-name");
+      const scoreInputs = row.querySelectorAll(".score-input");
+      nameInput.disabled = !isMine;
+      scoreInputs.forEach(inp => inp.disabled = !isMine);
+    });
+  }
+
+  function updateParRow() {
+    const courseId = currentGameData ? currentGameData.courseId : courseSelect.value;
+    const pars = COURSES[courseId];
+    if (!pars) return;
+    let parTotal = 0;
+    parCells.forEach(cell => {
+      const idx = parseInt(cell.dataset.hole, 10);
+      const value = pars[idx];
+      if (typeof value === "number") {
+        cell.textContent = value;
+        parTotal += value;
+      } else {
+        cell.textContent = "";
+      }
+    });
+    parTotalCell.textContent = parTotal > 0 ? parTotal : "-";
+    recalcAllTotals();
+  }
+
+  function recalcAllTotals() {
+    const courseId = currentGameData ? currentGameData.courseId : courseSelect.value;
+    const pars = COURSES[courseId] || [];
+    const rows = document.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+      if (row.id === "parRow") return;
+      const scoreInputs = row.querySelectorAll(".score-input");
+      if (!scoreInputs.length) return;
+      let scoreTotal = 0;
+      let parTotalPlayed = 0;
+      scoreInputs.forEach((input, idx) => {
+        const val = parseInt(input.value, 10);
+        if (!isNaN(val) && val > 0) {
+          scoreTotal += val;
+          const parVal = pars[idx];
+          if (typeof parVal === "number") parTotalPlayed += parVal;
+        }
+      });
+      const totalCell = row.querySelector(".total-col");
+      if (!totalCell) return;
+      if (scoreTotal === 0) {
+        totalCell.textContent = "E";
         return;
       }
-      joinGameModal.style.display = 'none';
-      document.getElementById('mainApp').style.display = '';
-      loadGame(gameId);
-    }).catch(() => {
-      joinGameError.textContent = 'Could not join game. Try again.';
-      joinGameError.style.display = 'block';
+      if (parTotalPlayed === 0) {
+        totalCell.textContent = String(scoreTotal);
+        return;
+      }
+      const diff = scoreTotal - parTotalPlayed;
+      if (diff === 0) {
+        totalCell.textContent = "E";
+      } else if (diff > 0) {
+        totalCell.textContent = "+" + diff;
+      } else {
+        totalCell.textContent = diff.toString();
+      }
     });
-  });
+  }
 
-  // ===============================
-  // CREATE GAME FLOW
-  // ===============================
-  function showCreateGamePrompt() {
-    const container = document.getElementById('pardleScorecardContainer');
-    container.innerHTML = `
-      <div style="width:100%;text-align:center;">
-        <form id="playerNameForm" autocomplete="off">
-          <label for="playerNameInput" style="font-size:1.1rem;">Your name to start:</label>
-          <input type="text" id="playerNameInput" class="modal-input" maxlength="20" style="margin:1em 0;display:block;width:100%;max-width:220px;margin-left:auto;margin-right:auto;" required placeholder="e.g., El Jefe">
-          <button type="submit" class="landing-play-btn" style="width:130px;">Start</button>
-        </form>
-      </div>
-    `;
-    document.getElementById('mainApp').style.display = '';
-    const playerNameForm = document.getElementById('playerNameForm');
-    const playerNameInput = document.getElementById('playerNameInput');
-    if (playerNameInput) playerNameInput.focus();
+  function readScoresFromSlot(slot) {
+    const row = document.querySelector(`.player-row[data-slot="${slot}"]`);
+    if (!row) return Array(HOLES).fill(null);
+    const inputs = row.querySelectorAll(".score-input");
+    const scores = [];
+    inputs.forEach(inp => {
+      const v = inp.value;
+      scores.push(v === "" ? null : Number(v));
+    });
+    return scores;
+  }
 
-    playerNameForm.onsubmit = function(ev) {
-      ev.preventDefault();
-      const playerName = playerNameInput.value.trim();
-      if (!playerName) return playerNameInput.focus();
-      const gameId = generateGameId();
-      const playerId = 'player_' + Math.random().toString(36).substr(2,9);
-      firestore.collection('games').doc(gameId).set({
-        created: firebase.firestore.FieldValue.serverTimestamp(),
-        status: 'active',
-        holes: NUM_HOLES,
-        par: DEFAULT_PAR,
-        players: {
-          [playerId]: {
-            name: playerName,
-            scores: Array(NUM_HOLES).fill(""),
-            joined: firebase.firestore.FieldValue.serverTimestamp()
+  function setActiveHole(holeIndex) {
+    if (holeIndex < 0 || holeIndex >= HOLES) return;
+    const headerRow = document.querySelector(".scorecard-table thead tr");
+    if (!headerRow) return;
+    headerRow.querySelectorAll(".hole-header").forEach(h => h.classList.remove("active-hole"));
+    document.querySelectorAll(".scorecard-table td.active-hole").forEach(td => td.classList.remove("active-hole"));
+    const headerCells = headerRow.querySelectorAll("th");
+    const targetHeader = headerCells[1 + holeIndex];
+    if (targetHeader) {
+      targetHeader.classList.add("active-hole");
+    }
+    document.querySelectorAll(".scorecard-table tbody tr").forEach(row => {
+      const cells = row.querySelectorAll("th, td");
+      const targetCell = cells[1 + holeIndex];
+      if (targetCell && targetCell.tagName === "TD") {
+        targetCell.classList.add("active-hole");
+      }
+    });
+  }
+
+  function applyGameToUI(data) {
+    if (!data) return;
+    currentGameData = data;
+    const courseId = data.courseId || "st-andrews";
+    if (COURSES[courseId]) courseSelect.value = courseId;
+    updateParRow();
+    const players = Array.isArray(data.players) ? data.players : [];
+    for (let i = 0; i < MAX_PLAYERS; i++) {
+      const row = document.querySelector(`.player-row[data-slot="${i}"]`);
+      if (!row) continue;
+      const nameInput = row.querySelector(".player-name");
+      const scoreInputs = row.querySelectorAll(".score-input");
+      const p = players[i];
+      if (p && p.id) {
+        nameInput.value = p.name || "";
+        const scores = Array.isArray(p.scores) ? p.scores : [];
+        for (let h = 0; h < HOLES; h++) {
+          const score = scores[h];
+          scoreInputs[h].value = score == null ? "" : score;
+        }
+      } else {
+        nameInput.value = "";
+        scoreInputs.forEach(inp => inp.value = "");
+      }
+    }
+    if (currentPlayerSlot != null && players[currentPlayerSlot]) {
+      playerNameInput.value = players[currentPlayerSlot].name || "";
+    }
+    let holeForHighlight = 0;
+    if (currentPlayerSlot != null) {
+      const myRow = document.querySelector(`.player-row[data-slot="${currentPlayerSlot}"]`);
+      if (myRow) {
+        const myInputs = myRow.querySelectorAll(".score-input");
+        let firstEmpty = -1;
+        for (let i = 0; i < myInputs.length; i++) {
+          if (!myInputs[i].value) {
+            firstEmpty = i;
+            break;
           }
         }
-      }).then(() => {
-        sessionStorage.setItem('pardle_playerId', playerId);
-        loadGame(gameId);
-      });
-    };
-  }
-
-  // ===============================
-  // LOAD GAME & REAL-TIME SCORECARD
-  // ===============================
-  let unsubscribeGame = null;
-  function loadGame(gameId) {
-    if (unsubscribeGame) unsubscribeGame();
-    unsubscribeGame = firestore.collection('games').doc(gameId)
-      .onSnapshot(doc => {
-        if (!doc.exists) {
-          showError("Game not found or was deleted.");
-          return;
+        if (firstEmpty !== -1) {
+          holeForHighlight = firstEmpty;
+        } else if (myInputs.length > 0) {
+          holeForHighlight = myInputs.length - 1;
         }
-        renderScorecard(gameId, doc.data());
-      });
+      }
+    }
+    setActiveHole(holeForHighlight);
+    recalcAllTotals();
+    renderChatTargets();
   }
 
-  // ===============================
-  // SCORECARD RENDER/UPDATE LOGIC
-  // ===============================
-  function renderScorecard(gameId, gameData) {
-    const container = document.getElementById('pardleScorecardContainer');
-    if (!gameData || !gameData.players) {
-      container.innerHTML = "<div>No game data found.</div>";
+  function bindScoreInputs() {
+    playerRows.forEach(row => {
+      const slot = parseInt(row.dataset.slot, 10);
+      const nameInput = row.querySelector(".player-name");
+      const scoreInputs = row.querySelectorAll(".score-input");
+      nameInput.addEventListener("input", () => {
+        if (currentGameId && currentPlayerSlot === slot) updatePlayerInGame();
+      });
+      scoreInputs.forEach(inp => {
+        inp.addEventListener("focus", () => {
+          const cell = inp.closest("td");
+          if (!cell) return;
+          const rowEl = cell.parentElement;
+          const allCells = Array.from(rowEl.querySelectorAll("th, td"));
+          const holeIndex = allCells.indexOf(cell) - 1;
+          if (holeIndex >= 0 && holeIndex < HOLES) setActiveHole(holeIndex);
+        });
+        inp.addEventListener("input", () => {
+          if (currentGameId && currentPlayerSlot === slot) updatePlayerInGame();
+        });
+        // Over par logic
+        inp.addEventListener("change", () => {
+          const score = parseInt(inp.value, 10);
+          if (isNaN(score) || score <= 0) return;
+          const cell = inp.closest("td");
+          if (!cell) return;
+          const rowEl = cell.parentElement;
+          const allCells = Array.from(rowEl.querySelectorAll("th, td"));
+          const holeIndex = allCells.indexOf(cell) - 1;
+          if (holeIndex < 0 || holeIndex >= HOLES) return;
+          const courseId = currentGameData ? currentGameData.courseId : courseSelect.value;
+          const pars = COURSES[courseId];
+          if (!pars) return;
+          const parVal = pars[holeIndex];
+          if (typeof parVal !== "number") return;
+          if (score > parVal) {
+            const diff = score - parVal;
+            alert(`Bruh. ${score} on a par ${parVal} is ${diff} over. That is rough. Do better.`);
+          }
+        });
+      });
+    });
+    courseSelect.addEventListener("change", () => {
+      if (!currentGameId || !currentGameData) {
+        updateParRow();
+        return;
+      }
+      const newCourseId = courseSelect.value;
+      const updated = { ...currentGameData, courseId: newCourseId };
+      currentGameData = updated;
+      db.collection("games").doc(currentGameId).set(updated);
+    });
+  }
+
+  async function updatePlayerInGame() {
+    if (!currentGameId || currentPlayerSlot == null || !currentGameData) return;
+    const row = document.querySelector(`.player-row[data-slot="${currentPlayerSlot}"]`);
+    if (!row) return;
+    const nameInput = row.querySelector(".player-name");
+    const scores = readScoresFromSlot(currentPlayerSlot);
+    const updated = { ...currentGameData };
+    const players = Array.isArray(updated.players) ? [...updated.players] : [];
+    while (players.length < MAX_PLAYERS) {
+      players.push({ id: null, name: "", scores: Array(HOLES).fill(null) });
+    }
+    players[currentPlayerSlot] = {
+      id: currentPlayerId,
+      name: nameInput.value || "",
+      scores
+    };
+    updated.players = players;
+    currentGameData = updated;
+    await db.collection("games").doc(currentGameId).set(updated);
+    recalcAllTotals();
+    row.classList.remove("saved-pulse");
+    void row.offsetWidth;
+    row.classList.add("saved-pulse");
+  }
+
+  async function createGame() {
+    const name = playerNameInput.value.trim();
+    if (!name) {
+      setStatus("Enter your name before creating a game.", true);
       return;
     }
-    const playerIds = Object.keys(gameData.players);
-    const holes = gameData.holes || NUM_HOLES;
-    const par = gameData.par || DEFAULT_PAR;
-
-    let html = `<div style="display:flex;justify-content:space-between;align-items:center;">
-      <div style="font-size:1.3em;font-weight:600;letter-spacing:0.05em;">Game ID: ${gameId}</div>
-      <button class="modal-btn-cancel" onclick="copyToClipboard('${gameId}')">Copy Game ID</button>
-    </div>
-    <table style="width:100%;margin-top:1.2em;border-collapse:collapse;">
-      <thead>
-        <tr>
-          <th style="text-align:left;">Player</th>`;
-    for (let h=0; h<holes; ++h) html += `<th style="text-align:center;">${h+1}</th>`;
-    html += `<th style="text-align:center;">Total</th></tr></thead><tbody>`;
-
-    for (let pid of playerIds) {
-      const p = gameData.players[pid];
-      html += `<tr><td>${p.name || 'Player'}</td>`;
-      let total = 0;
-      for (let h=0; h<holes; ++h) {
-        const score = p.scores && p.scores[h] !== undefined ? p.scores[h] : "";
-        html += `<td style="text-align:center;">${pid === sessionStorage.getItem('pardle_playerId') ? 
-          `<input type="number" min="1" max="15" style="width:2.5em;" value="${score}" data-hole="${h}" data-player="${pid}" class="score-input">`
-          : (score !== "" ? score : "-")
-        }</td>`;
-        if (score !== "" && !isNaN(Number(score))) total += Number(score);
-      }
-      html += `<td style="text-align:center;font-weight:600;">${total}</td></tr>`;
+    currentPlayerId = getOrCreatePlayerId();
+    currentPlayerSlot = 0;
+    const emptyScores = Array(HOLES).fill(null);
+    const players = [];
+    for (let i = 0; i < MAX_PLAYERS; i++) {
+      players.push({ id: null, name: "", scores: emptyScores });
     }
-    html += `</tbody></table>`;
+    players[0] = { id: currentPlayerId, name, scores: emptyScores };
+    const initialCourseId = courseSelect.value || "st-andrews";
+    const docRef = await db.collection("games").add({
+      courseId: initialCourseId,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      players
+    });
+    currentGameId = docRef.id;
+    localStorage.setItem(STORAGE_LAST_GAME_ID_KEY, currentGameId);
+    localStorage.setItem(STORAGE_LAST_SLOT_KEY, String(currentPlayerSlot));
+    setStatus("Game created. Share this code with your friends.");
+    if (unsubscribeGame) unsubscribeGame();
+    unsubscribeGame = docRef.onSnapshot(snap => {
+      if (!snap.exists) {
+        setStatus("Game was deleted or not found.", true);
+        enableScorecard(false);
+        return;
+      }
+      applyGameToUI(snap.data());
+      enableScorecard(true);
+    });
+    setUnreadBadge(false);
+    messagesInitialized = false;
+    attachMessageListener(currentGameId);
+  }
 
-    container.innerHTML = html;
-    document.querySelectorAll('.score-input').forEach(input => {
-      input.onchange = function() {
-        const h = Number(this.getAttribute('data-hole'));
-        const pid = this.getAttribute('data-player');
-        const val = this.value ? Number(this.value) : "";
-        if (isNaN(val) || val < 1 || val > 15) return;
-        const update = {};
-        update[`players.${pid}.scores.${h}`] = val;
-        firestore.collection('games').doc(gameId).update(update);
+  async function joinGameCustom(gameId) {
+    // Used by modal for popup join
+    const name = playerNameInput.value.trim();
+    if (!name) {
+      setStatus("Enter your name before joining a game.", true);
+      throw new Error("No name");
+    }
+    if (!gameId) {
+      setStatus("Enter a game code to join.", true);
+      throw new Error("No code");
+    }
+    currentPlayerId = getOrCreatePlayerId();
+    const docRef = db.collection("games").doc(gameId);
+    const snap = await docRef.get();
+    if (!snap.exists) {
+      setStatus("Game not found. Check the code and try again.", true);
+      throw new Error("Not found");
+    }
+    const data = snap.data() || {};
+    let players = Array.isArray(data.players) ? [...data.players] : [];
+    while (players.length < MAX_PLAYERS) {
+      players.push({ id: null, name: "", scores: Array(HOLES).fill(null) });
+    }
+    let slot = players.findIndex(p => p && p.id === currentPlayerId);
+    if (slot === -1) {
+      slot = players.findIndex(p => !p || !p.id);
+      if (slot === -1) {
+        setStatus("This game already has 4 players.", true);
+        throw new Error("Full");
+      }
+      const emptyScores = Array(HOLES).fill(null);
+      players[slot] = {
+        id: currentPlayerId,
+        name,
+        scores: emptyScores
+      };
+    } else {
+      const existing = players[slot] || {};
+      players[slot] = {
+        id: existing.id || currentPlayerId,
+        name: name || existing.name || "",
+        scores: Array.isArray(existing.scores)
+          ? existing.scores
+          : Array(HOLES).fill(null)
+      };
+    }
+    await docRef.set({ ...data, players });
+    currentGameId = gameId;
+    currentPlayerSlot = slot;
+    localStorage.setItem(STORAGE_LAST_GAME_ID_KEY, currentGameId);
+    localStorage.setItem(STORAGE_LAST_SLOT_KEY, String(currentPlayerSlot));
+    setStatus(`Joined game in slot ${slot + 1}.`);
+    if (unsubscribeGame) unsubscribeGame();
+    unsubscribeGame = docRef.onSnapshot(s => {
+      if (!s.exists) {
+        setStatus("Game was deleted or not found.", true);
+        enableScorecard(false);
+        return;
+      }
+      applyGameToUI(s.data());
+      enableScorecard(true);
+    });
+    setUnreadBadge(false);
+    messagesInitialized = false;
+    attachMessageListener(currentGameId);
+  }
+
+  async function joinGame() {
+    const gameId = joinGameIdInput.value.trim();
+    return joinGameCustom(gameId);
+  }
+
+  async function attemptAutoRejoin() {
+    const savedGameId = localStorage.getItem(STORAGE_LAST_GAME_ID_KEY);
+    const savedSlotStr = localStorage.getItem(STORAGE_LAST_SLOT_KEY);
+    if (!savedGameId || savedSlotStr == null) {
+      setStatus("Not in a game. Create or join to start.");
+      return;
+    }
+    currentPlayerId = getOrCreatePlayerId();
+    currentGameId = savedGameId;
+    currentPlayerSlot = parseInt(savedSlotStr, 10);
+    const docRef = db.collection("games").doc(savedGameId);
+    const snap = await docRef.get();
+    if (!snap.exists) {
+      localStorage.removeItem(STORAGE_LAST_GAME_ID_KEY);
+      localStorage.removeItem(STORAGE_LAST_SLOT_KEY);
+      currentGameId = null;
+      currentPlayerSlot = null;
+      setStatus("Last saved game not found. Create or join a new one.");
+      enableScorecard(false);
+      setUnreadBadge(false);
+      return;
+    }
+    setStatus("Rejoined your last game. Enter scores as normal.");
+    if (unsubscribeGame) unsubscribeGame();
+    unsubscribeGame = docRef.onSnapshot(s => {
+      if (!s.exists) {
+        setStatus("Game was deleted or not found.", true);
+        enableScorecard(false);
+        return;
+      }
+      applyGameToUI(s.data());
+      enableScorecard(true);
+    });
+    setUnreadBadge(false);
+    messagesInitialized = false;
+    attachMessageListener(currentGameId);
+  }
+
+  // ===== Join Game Modal Handlers =====
+  if (showJoinGameModalBtn && joinGameModalBackdrop && joinGameModal && joinGameModalInput) {
+    showJoinGameModalBtn.addEventListener('click', () => {
+      joinGameModalInput.value = "";
+      joinGameModalError.textContent = "";
+      joinGameModalBackdrop.classList.add('visible');
+      setTimeout(() => joinGameModalInput.focus(), 80);
+    });
+    joinGameModalCancelBtn.addEventListener('click', () => {
+      joinGameModalBackdrop.classList.remove('visible');
+    });
+    joinGameModalBackdrop.addEventListener('click', e => {
+      if (e.target === joinGameModalBackdrop) {
+        joinGameModalBackdrop.classList.remove('visible');
+      }
+    });
+    joinGameModalInput.addEventListener('keydown', async e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        try {
+          await joinGameCustom(joinGameModalInput.value.trim());
+          joinGameModalBackdrop.classList.remove('visible');
+        } catch (err) {
+          joinGameModalError.textContent = "Game not found or full. Try again.";
+        }
       }
     });
   }
 
-  window.copyToClipboard = function(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Game ID copied to clipboard!');
-    });
-  };
+  // ====== Chat Logic (unchanged) ======
+  // ... [KEEP your entire chat, chat sheet, analytics, and settings code from original file here—
+  //      It’s already working as intended!]
+  // That includes:
+  //  - renderChatThreadMessages()
+  //  - renderChatTargets()
+  //  - showChatSheet(), hideChatSheet(), setUnreadBadge(), sendChatMessage()
+  //  - gameIdPill copy
+  //  - new game confirm logic
+  //  - settingsSheet and analyticsSheet open/close logic
+  //  - bindScoreInputs(), updateParRow(), enableScorecard()
+  //  - analytics summary builder
+  //  - createGameBtn, joinGameBtn click handlers
+  //  - appearance/theme logic, etc.
 
-  function showError(msg) {
-    document.getElementById('pardleScorecardContainer').innerHTML =
-      `<div style="color:#ff5252;font-weight:600;padding:2em;text-align:center;">${msg}</div>`;
+  // ===== Main Button Handlers =====
+  if (createGameBtn) {
+    createGameBtn.addEventListener("click", handleCreateGameClick);
   }
-  </script>
+  if (joinGameBtn) {
+    joinGameBtn.addEventListener("click", () => {
+      joinGame().catch(err => {
+        setStatus("Error joining game.", true);
+      });
+    });
+  }
+
+  // ===== INIT =====
+  bindScoreInputs();
+  updateParRow();
+  enableScorecard(false);
+
+  attemptAutoRejoin().catch(err => {
+    setStatus("Not in a game. Create or join to start.");
+  });
+
+</script>
 </body>
 </html>
+      
+      
