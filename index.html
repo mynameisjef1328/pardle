@@ -3348,6 +3348,46 @@
       });
     }
 
+        function handleStartPlayClick() {
+      if (startModal) {
+        startModal.classList.add("hidden");
+      }
+
+      // Try to rejoin a game in progress
+      if (typeof attemptAutoRejoin === "function") {
+        attemptAutoRejoin().catch(err => {
+          console.error(err);
+          if (typeof setStatus === "function") {
+            setStatus("Not in a game. Create or join to start.", true);
+          }
+        });
+      }
+
+      if (playerNameInput) {
+        playerNameInput.focus();
+      }
+    }
+
+    function handleStartJoinClick() {
+      if (startModal) {
+        startModal.classList.add("hidden");
+      }
+
+      if (typeof setStatus === "function") {
+        setStatus("Enter a game code or create a new one.");
+      }
+
+      if (playerNameInput) {
+        playerNameInput.focus();
+      }
+
+      setTimeout(() => {
+        if (joinGameIdInput) {
+          joinGameIdInput.focus();
+        }
+      }, 120);
+    }
+
     // start modal buttons
     if (startPlayButton) {
       startPlayButton.addEventListener("click", handleStartPlayClick);
