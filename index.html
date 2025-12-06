@@ -578,11 +578,11 @@
       margin-bottom: 10px;
     }
 
-    #rulesCard .rules-text h3 {
+       #rulesCard .rules-text h3 {
       margin-top: 14px;
       margin-bottom: 6px;
       color: var(--accent);
-    }
+    } 
 
     #rulesCard .rules-text p {
       margin: 6px 0;
@@ -604,10 +604,6 @@
     .rules-text {
       font-size: 13px;
       line-height: 1.45;
-    }
-
-    .start-help {
-      margin-top: 10px;
     }
 
     /* generic bottom sheet styling */
@@ -1081,6 +1077,7 @@
                   <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td class="total-col">E</td>
                 </tr>
                 <tr class="player-row" data-slot="2">
@@ -1104,12 +1101,14 @@
                   <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td class="total-col">E</td>
                 </tr>
                 <tr class="player-row" data-slot="3">
                   <th class="player-label">
                     <input class="player-name" placeholder="+ Add Player" disabled />
                   </th>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td><input class="score-input" type="number" min="1" disabled /></td>
@@ -1167,23 +1166,22 @@
 
           <p>Pardle is perfect for tracking daily scores with your crew, flexing your vocab game, and delivering top tier trash talk.</p>
 
-          <div class="start-help">
-            <h3>Not sure where to tap?</h3>
-            <p><strong>Play Button</strong><br>
-              Use this if you are the one setting up the match or coming back on the same device you used last time.<br>
-              • If you already have a Pardle game on this device, it will reopen that game.<br>
-              • If you do not have a game yet, you will go to the main screen where you can tap <strong>Create Game</strong> and get a game code to share.
-            </p>
-            <p><strong>Join Game Link</strong><br>
-              Use this if someone else already created a game and sent you a game code.<br>
-              • Tap <strong>Join Game</strong>.<br>
-              • Enter the code they gave you.<br>
-              • You will join their existing match on this device.
-            </p>
-          </div>
-        </div>
-      </section>
-    </main>
+<div class="start-help">
+  <p><h3>Not sure which to tap?</h3></p>
+  <p><strong>Play Button</strong><br>
+    Use this if you are the one setting up the match or coming back on the same device you used last time.<br>
+    • If you already have a Pardle game on this device, it will reopen that game.<br>
+    • If you do not have a game yet, you will go to the main screen where you can tap <strong>Create Game</strong> and get a game code to share.
+  </p>
+  <p><strong>Join Game Link</strong><br>
+    Use this if someone else already created a game and sent you a game code.<br>
+    • Tap <strong>Join Game</strong>.<br>
+    • Enter the code they gave you.<br>
+    • You will join their existing match on this device.
+  </p>
+</div>
+</section>
+</main>
 
     <!-- Chat sheet -->
     <div id="chatSheet" class="chat-sheet">
@@ -1568,6 +1566,7 @@
           nameInput.value = p.name || "";
           const scores = Array.isArray(p.scores) ? p.scores : [];
           for (let h = 0; h < HOLES; h++) {
+            if (!scoreInputs[h]) continue;
             const score = scores[h];
             scoreInputs[h].value = score == null ? "" : score;
           }
@@ -1868,101 +1867,83 @@
       attachMessageListener(currentGameId);
     }
 
-    // NEW, smarter auto-rejoin
-    async function attemptAutoRejoin() {
-      if (!db) {
-        setStatus("Connection error. Check your network and reload.", true);
-        return;
-      }
+  async function attemptAutoRejoin() {
+  const savedGameId = localStorage.getItem(STORAGE_LAST_GAME_ID_KEY);
+  const savedSlotStr = localStorage.getItem(STORAGE_LAST_SLOT_KEY);
 
-      const savedGameId = localStorage.getItem(STORAGE_LAST_GAME_ID_KEY);
-      const savedSlotStr = localStorage.getItem(STORAGE_LAST_SLOT_KEY);
+  if (!savedGameId) {
+    setStatus("Not in a game. Create or join to start.");
+    return;
+  }
 
-      if (!savedGameId) {
-        setStatus("Not in a game. Create or join to start.");
-        return;
-      }
+  currentPlayerId = getOrCreatePlayerId();
+  currentGameId = savedGameId;
 
-      currentPlayerId = getOrCreatePlayerId();
-      currentGameId = savedGameId;
+  const docRef = db.collection("games").doc(savedGameId);
+  const snap = await docRef.get();
 
-      const docRef = db.collection("games").doc(savedGameId);
-      const snap = await docRef.get();
+  if (!snap.exists) {
+    // old game is gone, clean up and bail
+    localStorage.removeItem(STORAGE_LAST_GAME_ID_KEY);
+    localStorage.removeItem(STORAGE_LAST_SLOT_KEY);
+    currentGameId = null;
+    currentPlayerSlot = null;
+    setStatus("Last saved game not found. Create or join a new one.");
+    enableScorecard(false);
+    setUnreadBadge(false);
+    return;
+  }
 
-      if (!snap.exists) {
-        localStorage.removeItem(STORAGE_LAST_GAME_ID_KEY);
-        localStorage.removeItem(STORAGE_LAST_SLOT_KEY);
-        currentGameId = null;
-        currentPlayerSlot = null;
-        setStatus("Last saved game not found. Create or join a new one.");
-        enableScorecard(false);
-        setUnreadBadge(false);
-        return;
-      }
+  const data = snap.data() || {};
+  currentGameData = data;
 
-      const data = snap.data() || {};
-      currentGameData = data;
-      const players = Array.isArray(data.players) ? data.players : [];
+  const players = Array.isArray(data.players) ? data.players : [];
+  const myId = currentPlayerId;
 
-      const myId = currentPlayerId;
+  // 1) best case, find by player id
+  let slot = players.findIndex(p => p && p.id === myId);
 
-      // 1) best case: match by player id
-      let slot = players.findIndex(p => p && p.id === myId);
-
-      // 2) fallback to stored slot if valid
-      if (slot === -1 && savedSlotStr != null) {
-        const storedSlot = parseInt(savedSlotStr, 10);
-        if (!Number.isNaN(storedSlot) && players[storedSlot]) {
-          slot = storedSlot;
-        }
-      }
-
-      // 3) fallback to first occupied slot
-      if (slot === -1) {
-        slot = players.findIndex(p => p && p.id);
-      }
-
-      // 4) if nothing else, default to slot 0 and claim it for this player
-      if (slot === -1) {
-        slot = 0;
-        const emptyScores = Array(HOLES).fill(null);
-        const newPlayers = players.slice();
-        while (newPlayers.length < MAX_PLAYERS) {
-          newPlayers.push({ id: null, name: "", scores: Array(HOLES).fill(null) });
-        }
-        const existing = newPlayers[0] || {};
-        newPlayers[0] = {
-          id: myId,
-          name: existing.name || playerNameInput.value || "",
-          scores: Array.isArray(existing.scores) ? existing.scores : emptyScores
-        };
-        data.players = newPlayers;
-        currentGameData = data;
-        await docRef.set(data);
-      }
-
-      currentPlayerSlot = slot;
-      localStorage.setItem(STORAGE_LAST_SLOT_KEY, String(slot));
-
-      applyGameToUI(currentGameData);
-      enableScorecard(true);
-      setStatus("Rejoined your last game. Enter scores as normal.");
-
-      if (unsubscribeGame) unsubscribeGame();
-      unsubscribeGame = docRef.onSnapshot(s => {
-        if (!s.exists) {
-          setStatus("Game was deleted or not found.", true);
-          enableScorecard(false);
-          return;
-        }
-        applyGameToUI(s.data());
-        enableScorecard(true);
-      });
-
-      setUnreadBadge(false);
-      messagesInitialized = false;
-      attachMessageListener(currentGameId);
+  // 2) fall back to stored slot if it exists and looks valid
+  if (slot === -1 && savedSlotStr != null) {
+    const storedSlot = parseInt(savedSlotStr, 10);
+    if (!Number.isNaN(storedSlot) && players[storedSlot]) {
+      slot = storedSlot;
     }
+  }
+
+  // 3) final fallback, default to slot 0 if someone is there
+  if (slot === -1 && players[0]) {
+    slot = 0;
+  }
+
+  if (slot !== -1) {
+    currentPlayerSlot = slot;
+    localStorage.setItem(STORAGE_LAST_SLOT_KEY, String(slot));
+  } else {
+    currentPlayerSlot = null;
+  }
+
+  // paint the UI with the game and enable your row
+  applyGameToUI(currentGameData);
+  enableScorecard(true);
+  setStatus("Rejoined your last game. Enter scores as normal.");
+
+  // live updates
+  if (unsubscribeGame) unsubscribeGame();
+  unsubscribeGame = docRef.onSnapshot(s => {
+    if (!s.exists) {
+      setStatus("Game was deleted or not found.", true);
+      enableScorecard(false);
+      return;
+    }
+    applyGameToUI(s.data());
+    enableScorecard(true);
+  });
+
+  setUnreadBadge(false);
+  messagesInitialized = false;
+  attachMessageListener(currentGameId);
+}
 
     // ==============================
     // Messaging and chat
