@@ -627,11 +627,14 @@
       max-width: 480px;
       background: var(--bg-card);
       border-radius: 16px 16px 0 0;
-      padding: 12px;
+      padding: 12px 16px;
       border-top: 1px solid var(--border-soft);
       max-height: 85vh;
       overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
     }
+
 
     .sheet-header-row {
       display: flex;
@@ -742,9 +745,10 @@
 .settings-row {
   display: flex;
   align-items: center;
-  width: 100%;
+  gap: 12px;
   padding: 12px 0;
 }
+
 
 /* Left-side label */
 .settings-label {
@@ -770,10 +774,11 @@
 
 .theme-toggle {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
   margin-left: auto;
   flex-shrink: 0;
 }
+
 
 /* Hide native checkbox */
 .theme-toggle input {
