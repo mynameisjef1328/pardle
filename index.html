@@ -743,7 +743,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px 12px 16px;
+  padding: 12px 16px;
 }
 
 
@@ -1213,32 +1213,35 @@
     </div>
 
     <!-- Settings sheet -->
-    <div id="settingsSheet" class="chat-sheet">
-      <div class="chat-sheet-inner">
-        <div class="sheet-header-row">
-          <span>Settings</span>
-          <button id="settingsCloseBtn" type="button">✕</button>
-        </div>
+   <div id="settingsSheet" class="chat-sheet">
+  <div class="chat-sheet-inner">
+    <div class="sheet-header-row">
+      <span>Settings</span>
+      <button id="settingsCloseBtn" type="button">✕</button>
+    </div>
 
-        <div class="settings-section">
-        <div class="settings-label">Appearance</div>
-          
-        <div class="settings-row">
-          <span class="settings-label">Dark Theme</span>
-          <label class="theme-toggle">
-            <input type="checkbox" id="darkToggle">
-            <span class="slider"></span>
-          </label>
-        </div>
+    <div class="settings-section">
+      <div class="settings-label">Appearance</div>
 
-        
-        <div class="settings-row">
-          <span class="settings-label">Invert accents</span>
-          <label class="theme-toggle">
-            <input type="checkbox" id="invertSwitch">
-            <span class="slider"></span>
-          </label>
-        </div>
+      <div class="settings-row">
+        <span class="settings-label">Dark Theme</span>
+        <label class="theme-toggle">
+          <input type="checkbox" id="themeSwitch">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-row">
+        <span class="settings-label">Invert accents</span>
+        <label class="theme-toggle">
+          <input type="checkbox" id="accentSwitch">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
 
           
     <!-- Analytics sheet -->
