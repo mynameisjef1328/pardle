@@ -1274,13 +1274,22 @@
       measurementId: "G-SJLZZ84L8F"
     };
 
-    let db = null;
-    try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-    } catch (e) {
-      console.error("Firebase init error:", e);
-    }
+   let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+
+  firebase.auth().signInAnonymously()
+    .then(() => {
+      console.log("Anonymous auth OK");
+    })
+    .catch((error) => {
+      console.error("Anonymous auth failed:", error);
+    });
+
+} catch (e) {
+  console.error("Firebase init error:", e);
+}
 
     // ==============================
     // Constants and state
