@@ -724,87 +724,96 @@
       border-color: var(--accent);
     }
 
-    /* settings sheet */
-    .settings-section {
-      margin-bottom: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-soft);
-    }
+    /* ================================
+   SETTINGS SHEET (Wordle-style)
+   ================================ */
 
-    .settings-section:last-of-type {
-      border-bottom: none;
-    }
+.settings-section {
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-soft);
+}
 
-    .settings-label {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
+.settings-section:last-of-type {
+  border-bottom: none;
+}
 
-    .settings-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
+/* Row layout: label left, toggle right */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 4px;
+}
 
-    .settings-link-btn {
-      border: none;
-      background: none;
-      padding: 0;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
-      cursor: pointer;
-    }
+/* Left-side label */
+.settings-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
 
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      position: relative;
-    }
+/* Optional helper or link button */
+.settings-link-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
 
-    .theme-toggle span.label {
-      font-size: 13px;
-    }
+/* ================================
+   TOGGLE (Wordle-style)
+   ================================ */
 
-    .theme-toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      position: absolute;
-    }
+.theme-toggle {
+  position: relative;
+  display: inline-block;
+}
 
-    .theme-toggle .slider {
-      width: 40px;
-      height: 20px;
-      border-radius: 999px;
-      background: #cccccc;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
+/* Hide native checkbox */
+.theme-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
 
-    .theme-toggle .slider::before {
-      content: "";
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      left: 2px;
-      top: 2px;
-      border-radius: 50%;
-      background: #ffffff;
-      transition: transform 0.2s ease;
-    }
+/* Toggle track */
+.theme-toggle .slider {
+  width: 40px;
+  height: 20px;
+  border-radius: 999px;
+  background-color: #2a2a2a; /* dark gray, not black */
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
-    .theme-toggle input:checked + .slider {
-      background: #000000;
-    }
+/* Toggle thumb */
+.theme-toggle .slider::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
 
-    .theme-toggle input:checked + .slider::before {
-      transform: translateX(20px);
-    }
+/* ON state (Wordle green) */
+.theme-toggle input:checked + .slider {
+  background-color: #6aaa64;
+}
+
+.theme-toggle input:checked + .slider::before {
+  transform: translateX(20px);
+}
 
     /* analytics sheet */
     .analytics-intro {
