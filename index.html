@@ -2243,6 +2243,22 @@ try {
       settingsSheet.classList.remove("visible");
     }
 
+    function openRulesSheet() {
+  if (!rulesSheet || !rulesSheetContent) return;
+
+  // Pull your existing rules HTML from the rulesCard and show it in the sheet
+  const rulesTextEl = document.querySelector("#rulesCard .rules-text");
+  rulesSheetContent.innerHTML = rulesTextEl ? rulesTextEl.innerHTML : "<p>Rules not found.</p>";
+
+  closeSettingsSheet();
+  rulesSheet.classList.add("visible");
+}
+
+function closeRulesSheet() {
+  if (!rulesSheet) return;
+  rulesSheet.classList.remove("visible");
+}
+
     // ==============================
     // Analytics
     // ==============================
