@@ -2350,12 +2350,9 @@ function closeRulesSheet() {
     }
 
     function handleStartRulesClick() {
-      hideStartModal();
-      if (rulesCard) {
-        rulesCard.classList.add("visible");
-        rulesCard.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }
+  hideStartModal();
+  openRulesSheet();
+}
 
     // ==============================
     // Event wiring
