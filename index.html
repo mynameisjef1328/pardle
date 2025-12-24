@@ -1227,7 +1227,13 @@
 
     <div class="settings-section">
       <div class="settings-label">Appearance</div>
-
+    <div class="settings-section">
+      <div class="settings-label">Help</div>
+      <button id="rulesFromSettingsBtn" class="settings-row settings-row-btn" type="button">
+        <span class="settings-label">Game Rules</span>
+        <span class="settings-chevron">›</span>
+      </button>
+    </div>
       <div class="settings-row">
         <span class="settings-label">Dark Theme</span>
         <label class="theme-toggle">
@@ -1246,7 +1252,18 @@
     </div>
   </div>
 </div>
+    
+<!-- Rules sheet -->
+<div id="rulesSheet" class="chat-sheet">
+  <div class="chat-sheet-inner">
+    <div class="sheet-header-row">
+      <span>Game Rules</span>
+      <button id="rulesCloseBtn" type="button">✕</button>
+    </div>
 
+    <div id="rulesSheetContent" class="rules-text"></div>
+  </div>
+</div>
 
           
     <!-- Analytics sheet -->
