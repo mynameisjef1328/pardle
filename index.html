@@ -2394,6 +2394,14 @@ function closeRulesSheet() {
       settingsButton.addEventListener("click", openSettingsSheet);
     }
 
+    if (rulesFromSettingsBtn) {
+  rulesFromSettingsBtn.addEventListener("click", openRulesSheet);
+}
+
+if (rulesCloseBtn) {
+  rulesCloseBtn.addEventListener("click", closeRulesSheet);
+}
+
     if (settingsCloseBtn) {
       settingsCloseBtn.addEventListener("click", closeSettingsSheet);
     }
