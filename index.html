@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <
+    const invitedGameId = getInviteParamGameId();
+    if (invitedGameId) {
+      joinGameIdInput.value = invitedGameId;
+      startSubtitle.textContent = "Invite link detected. Tap Join Game, enter your name, then join.";
+    }
+meta charset="UTF-8" />
   <title>Pardle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -374,6 +380,52 @@
       font-size: 12px;
       cursor: pointer;
     }
+
+    .gameid-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .invite-pill {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      gap: 6px;
+      border: 1px solid var(--border-soft);
+      background: rgba(0,0,0,0.05);
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s ease, opacity 0.12s ease, background 0.12s ease;
+    }
+
+    body[data-mode="dark"] .invite-pill {
+      background: rgba(255,255,255,0.06);
+    }
+
+    .invite-pill:active {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
+
+    a.invite-pill {
+      text-decoration: none;
+    }
+
+    .small-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
 
     .gameid-pill .icon {
       font-size: 12px;
@@ -1038,10 +1090,21 @@ body[data-mode="dark"] .sheet-header-row button {
           </div>
 
           <div class="online-status" id="onlineStatusText">
-            <button class="gameid-pill" id="gameIdPill" type="button">
-              <span class="icon">⧉</span>
-              <span id="gameIdValue">none</span>
-            </button>
+            <div class="gameid-row">
+              <button class="gameid-pill" id="gameIdPill" type="button" aria-label="Copy game code">
+                <span class="icon">⧉</span>
+                <span id="gameIdValue">none</span>
+              </button>
+
+              <button id="invitePlayerBtn" class="invite-pill" type="button" style="display:none;" aria-label="Invite players">
+                🔗 Invite players
+              </button>
+
+              <a id="comingSoonLink" class="invite-pill" href="coming-soon.html" aria-label="Coming soon">
+                ✨ Coming soon
+              </a>
+            </div>
+
             <span id="statusMessage">Not in a game. Create or join to start.</span>
           </div>
         </div>
@@ -1351,6 +1414,53 @@ body[data-mode="dark"] .sheet-header-row button {
 </div>
 
           
+    <!-- Invite players sheet -->
+    <div id="inviteSheet" class="chat-sheet" role="dialog" aria-modal="true" aria-label="Invite players">
+      <div class="sheet-backdrop" aria-hidden="true"></div>
+      <div class="chat-sheet-inner">
+        <div class="sheet-header-row">
+          <span>Invite players</span>
+          <button id="inviteCloseBtn" type="button">✕</button>
+        </div>
+
+        <p class="analytics-intro" style="margin-top:0;">
+          Share your game code or a one-tap invite link. Invite links auto-fill the code on the join screen.
+        </p>
+
+        <div class="analytics-list" style="gap:10px;">
+          <div class="analytics-row" style="justify-content:flex-start; gap:10px;">
+            <span class="analytics-name" style="min-width:90px;">Game code</span>
+            <button id="inviteCopyCodeBtn" class="gameid-pill" type="button" style="margin-left:auto;">
+              <span class="icon">⧉</span>
+              <span id="inviteCodeValue">none</span>
+            </button>
+          </div>
+
+          <div class="analytics-row" style="flex-direction:column; align-items:stretch; gap:8px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <span class="analytics-name">Invite link</span>
+              <button id="inviteCopyLinkBtn" class="small-btn secondary" type="button" style="flex:0 0 auto; padding:8px 12px;">Copy</button>
+            </div>
+            <div id="inviteLinkValue" style="font-size:12px; word-break:break-all; opacity:0.85;">none</div>
+
+            <div class="chat-actions" style="margin-top:4px;">
+              <button id="inviteShareBtn" class="small-btn" type="button">Share</button>
+              <a id="inviteSmsLink" class="small-btn secondary" href="#" target="_blank" rel="noopener">Text</a>
+            </div>
+
+            <div class="chat-actions" style="margin-top:4px;">
+              <a id="inviteEmailLink" class="small-btn secondary" href="#" target="_blank" rel="noopener">Email</a>
+              <a id="inviteQrLink" class="small-btn secondary" href="coming-soon.html">QR (soon)</a>
+            </div>
+
+            <div class="invite-note" style="font-size:12px; opacity:0.75; line-height:1.35;">
+              Tip: If your friend is already on this page, you can just have them tap the game code above to copy it.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Analytics sheet -->
     <div id="analyticsSheet" class="chat-sheet">
       <div class="sheet-backdrop" aria-hidden="true"></div>
@@ -1465,6 +1575,18 @@ try {
     const gameIdPill = document.getElementById("gameIdPill");
     const gameIdValue = document.getElementById("gameIdValue");
     const statusMessage = document.getElementById("statusMessage");
+    const invitePlayerBtn = document.getElementById("invitePlayerBtn");
+    const comingSoonLink = document.getElementById("comingSoonLink");
+
+    const inviteSheet = document.getElementById("inviteSheet");
+    const inviteCloseBtn = document.getElementById("inviteCloseBtn");
+    const inviteCopyCodeBtn = document.getElementById("inviteCopyCodeBtn");
+    const inviteCodeValue = document.getElementById("inviteCodeValue");
+    const inviteLinkValue = document.getElementById("inviteLinkValue");
+    const inviteCopyLinkBtn = document.getElementById("inviteCopyLinkBtn");
+    const inviteShareBtn = document.getElementById("inviteShareBtn");
+    const inviteSmsLink = document.getElementById("inviteSmsLink");
+    const inviteEmailLink = document.getElementById("inviteEmailLink");
 
     const courseSelect = document.getElementById("courseSelect");
     const parCells = document.querySelectorAll(".par-cell[data-hole]");
@@ -1549,7 +1671,149 @@ try {
       } else {
         onlineStatusText.classList.remove("error-text");
       }
+    
+      if (invitePlayerBtn) {
+        invitePlayerBtn.style.display = currentGameId ? "inline-flex" : "none";
+      }
+      if (comingSoonLink) {
+        comingSoonLink.style.display = "inline-flex";
+      }
+}
+
+
+    function getInviteLink(gameId) {
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.set("join", gameId);
+        u.searchParams.delete("game");
+        u.searchParams.delete("id");
+        return u.toString();
+      } catch (e) {
+        return window.location.href.split("?")[0] + "?join=" + encodeURIComponent(gameId);
+      }
     }
+
+    function buildSmsHref(inviteLink) {
+      const body = encodeURIComponent("Join my Pardle game. Paste your name and tap Join.\n\n" + inviteLink);
+      return "sms:?&body=" + body;
+    }
+
+    function buildEmailHref(inviteLink) {
+      const subject = encodeURIComponent("Pardle game invite");
+      const body = encodeURIComponent("Join my Pardle game. Paste your name and tap Join.\n\n" + inviteLink);
+      return "mailto:?subject=" + subject + "&body=" + body;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (e) {
+        try {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand("copy");
+          document.body.removeChild(ta);
+          return ok;
+        } catch (e2) {
+          return false;
+        }
+      }
+    }
+
+    function openInviteSheet() {
+      if (!inviteSheet) return;
+      if (!currentGameId) {
+        setStatus("Create or join a game before inviting players.", true);
+        return;
+      }
+
+      const link = getInviteLink(currentGameId);
+
+      if (inviteCodeValue) inviteCodeValue.textContent = currentGameId;
+      if (inviteLinkValue) inviteLinkValue.textContent = link;
+      if (inviteSmsLink) inviteSmsLink.href = buildSmsHref(link);
+      if (inviteEmailLink) inviteEmailLink.href = buildEmailHref(link);
+
+      inviteSheet.classList.add("visible");
+      syncSheetOpenClass();
+    }
+
+    function closeInviteSheet() {
+      if (!inviteSheet) return;
+      inviteSheet.classList.remove("visible");
+      syncSheetOpenClass();
+    }
+
+    async function handleCopyInviteCode() {
+      if (!currentGameId) return;
+      const ok = await copyText(currentGameId);
+      if (ok && inviteCodeValue) {
+        const original = inviteCodeValue.textContent;
+        inviteCodeValue.textContent = "Copied!";
+        setTimeout(() => { inviteCodeValue.textContent = original; }, 900);
+      }
+    }
+
+    async function handleCopyInviteLink() {
+      if (!currentGameId) return;
+      const link = getInviteLink(currentGameId);
+      const ok = await copyText(link);
+      if (ok && inviteLinkValue) {
+        const original = inviteLinkValue.textContent;
+        inviteLinkValue.textContent = "Copied!";
+        setTimeout(() => { inviteLinkValue.textContent = original; }, 900);
+      }
+    }
+
+    async function handleShareInvite() {
+      if (!currentGameId) return;
+      const link = getInviteLink(currentGameId);
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "Pardle game invite",
+            text: "Join my Pardle game. Paste your name and tap Join.",
+            url: link
+          });
+          return;
+        } catch (e) {}
+      }
+
+      const ok = await copyText(link);
+      if (ok && inviteLinkValue) {
+        const original = inviteLinkValue.textContent;
+        inviteLinkValue.textContent = "Copied!";
+        setTimeout(() => { inviteLinkValue.textContent = original; }, 900);
+      }
+    }
+
+    function getInviteParamGameId() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get("join") || params.get("game") || params.get("id");
+        return raw ? raw.trim() : "";
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function clearInviteParamsFromUrl() {
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.delete("join");
+        u.searchParams.delete("game");
+        u.searchParams.delete("id");
+        window.history.replaceState({}, "", u.toString());
+      } catch (e) {}
+    }
+
 
     function enableScorecard(enabled) {
       courseSelect.disabled = !enabled;
@@ -1999,6 +2263,7 @@ try {
       setUnreadBadge(false);
       messagesInitialized = false;
       attachMessageListener(currentGameId);
+      clearInviteParamsFromUrl();
     }
 
   async function attemptAutoRejoin() {
@@ -2541,6 +2806,18 @@ if (rulesCloseBtn) {
         showChatSheet();
       });
     }
+
+    invitePlayerBtn.addEventListener("click", () => {
+      openInviteSheet();
+    });
+
+    inviteCloseBtn.addEventListener("click", closeInviteSheet);
+    inviteCopyCodeBtn.addEventListener("click", handleCopyInviteCode);
+    inviteCopyLinkBtn.addEventListener("click", handleCopyInviteLink);
+    inviteShareBtn.addEventListener("click", handleShareInvite);
+
+    enableBackdropTapToClose(inviteSheet, closeInviteSheet);
+
 
     if (chatCloseBtn) {
       chatCloseBtn.addEventListener("click", hideChatSheet);
