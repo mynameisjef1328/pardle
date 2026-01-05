@@ -2453,6 +2453,92 @@ function showChatSheet() {
       }
     }
 
+    function hasSavedGame() {
+  return !!localStorage.getItem(STORAGE_LAST_GAME_ID_KEY);
+}
+
+function updateStartModalButtons() {
+  const saved = hasSavedGame();
+  if (startPlayButton) startPlayButton.textContent = saved ? "Rejoin Game" : "Create Game";
+  if (startNewGameButton) startNewGameButton.style.display = saved ? "block" : "none";
+}
+
+function openCreateFlow() {
+  if (!createFlowSheet) return;
+  createFlowSheet.classList.add("visible");
+  syncSheetOpenClass();
+  if (createNameInput) {
+    createNameInput.value = playerNameInput ? (playerNameInput.value || "") : "";
+    setTimeout(() => createNameInput.focus(), 50);
+  }
+}
+
+function closeCreateFlow() {
+  if (!createFlowSheet) return;
+  createFlowSheet.classList.remove("visible");
+  syncSheetOpenClass();
+}
+
+function openJoinFlow(prefillCode = "") {
+  if (!joinFlowSheet) return;
+  joinFlowSheet.classList.add("visible");
+  syncSheetOpenClass();
+
+  if (joinNameInput) joinNameInput.value = playerNameInput ? (playerNameInput.value || "") : "";
+  if (joinCodeInput) joinCodeInput.value = prefillCode || "";
+
+  setTimeout(() => {
+    if (joinNameInput && !joinNameInput.value) joinNameInput.focus();
+    else if (joinCodeInput) joinCodeInput.focus();
+  }, 60);
+}
+
+function closeJoinFlow() {
+  if (!joinFlowSheet) return;
+  joinFlowSheet.classList.remove("visible");
+  syncSheetOpenClass();
+}
+
+function getShareLink(gameId) {
+  const base = window.location.origin + window.location.pathname;
+  return base + "?game=" + encodeURIComponent(gameId);
+}
+
+function openInviteSheet(gameId) {
+  if (!inviteSheet) return;
+  if (inviteCodeValue) inviteCodeValue.textContent = gameId || "none";
+  inviteSheet.classList.add("visible");
+  syncSheetOpenClass();
+}
+
+function closeInviteSheet() {
+  if (!inviteSheet) return;
+  inviteSheet.classList.remove("visible");
+  syncSheetOpenClass();
+}
+
+async function copyTextSmart(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+}
+
+
     // ==============================
     // Settings, theme
     // ==============================
