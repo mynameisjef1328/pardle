@@ -2111,7 +2111,7 @@ try {
       updated.players = players;
       currentGameData = updated;
 
-      await db.collection("games").doc(currentGameId).set(updated);
+      await db.collection("games").doc(currentGameId).set(updated, { merge: true });
       recalcAllTotals();
 
       row.classList.remove("saved-pulse");
