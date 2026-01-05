@@ -1761,9 +1761,10 @@ try {
     const body = document.body;
 
     const startModal = document.getElementById("startModal");
-    const startPlayButton = document.getElementById("startPlayButton");
-    const startJoinButton = document.getElementById("startJoinButton");
-    const startRulesButton = document.getElementById("startRulesButton");
+    const startPlayButton = document.getElementById("newGameBtn");
+    const startJoinButton = document.getElementById("joinGameBtn");
+    const startRulesButton = document.getElementById("rulesBtn");
+
 
     const startNewGameButton = document.getElementById("startNewGameButton");
 
@@ -2112,7 +2113,7 @@ try {
           });
 
           // over par logic
-          inp.addEventListener("change", () => {
+          inp("change", () => {
             const raw = inp.value;
             const score = parseInt(raw, 10);
             if (isNaN(score) || score <= 0) return;
