@@ -1589,7 +1589,7 @@ try {
 
     const startModal = document.getElementById("startModal");
     const startPlayButton = document.getElementById("startPlayButton");
-    const startJoinLink = document.getElementById("startJoinLink");
+    const startJoinButton = document.getElementById("startJoinButton");
     const startRulesButton = document.getElementById("startRulesButton");
 
     const startNewGameButton = document.getElementById("startNewGameButton");
@@ -2943,8 +2943,8 @@ if (rulesCloseBtn) {
       startPlayButton.addEventListener("click", handleStartPlayClick);
     }
 
-    if (startJoinLink) {
-      startJoinLink.addEventListener("click", handleStartJoinClick);
+    if (startJoinButton) {
+      startJoinButton.addEventListener("click", handleStartJoinClick);
     }
 
     if (startRulesButton) {
