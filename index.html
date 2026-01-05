@@ -2647,18 +2647,30 @@ function closeRulesSheet() {
 
     function handleStartPlayClick() {
       hideStartModal();
-      setStatus("Not in a game. Create or join to start.");
-      if (playerNameInput) {
-        playerNameInput.focus();
+      syncSheetOpenClass();
+    
+      if (hasSavedGame()) {
+        attemptAutoRejoin().catch(err => {
+          console.error(err);
+          setStatus("Could not rejoin. Start a new game or join one.", true);
+          openCreateFlow();
+        });
+        return;
       }
-      attemptAutoRejoin().catch(err => {
-        console.error(err);
-        setStatus("Not in a game. Create or join to start.", true);
-      });
+  
+    openCreateFlow();
+  }
+
+    function handleStartNewGameClick() {
+      hideStartModal();
+      syncSheetOpenClass();
+      openCreateFlow();
     }
 
     function handleStartJoinClick() {
       hideStartModal();
+      syncSheetOpenClass();
+      openJoinFlow();
       setStatus("Enter a game code or create a new one.");
       if (playerNameInput) {
         playerNameInput.focus();
