@@ -1768,10 +1768,6 @@ try {
 
 // Reference: https://developer.mozilla.org/en-US/docs/Web/API/Document/getElementById
 
-
-
-    const startNewGameButton = document.getElementById("startNewGameButton");
-
     const createFlowSheet = document.getElementById("createFlowSheet");
     const createFlowCloseBtn = document.getElementById("createFlowCloseBtn");
     const createFlowCancelBtn = document.getElementById("createFlowCancelBtn");
@@ -2953,10 +2949,6 @@ function closeRulesSheet() {
       });
     }
 
-    if (startNewGameButton) {
-  startNewGameButton.addEventListener("click", handleStartNewGameClick);
-}
-
     if (startRejoinButton) {
   startRejoinButton.addEventListener("click", handleStartRejoinClick);
 }
@@ -3147,9 +3139,10 @@ if (rulesCloseBtn) {
       });
     }
 
-   if (startPlayButton) {
-    startPlayButton.addEventListener("click", handleStartNewGameClick);
-  }
+    if (startPlayButton) {
+      startPlayButton.addEventListener("click", handleStartPlayClick);
+    }
+
 
     if (startJoinButton) {
       startJoinButton.addEventListener("click", handleStartJoinClick);
