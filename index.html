@@ -2949,6 +2949,11 @@ function closeRulesSheet() {
   startNewGameButton.addEventListener("click", handleStartNewGameClick);
 }
 
+    if (startRejoinButton) {
+  startRejoinButton.addEventListener("click", handleStartRejoinClick);
+}
+
+
 if (createFlowCloseBtn) createFlowCloseBtn.addEventListener("click", closeCreateFlow);
 if (createFlowCancelBtn) createFlowCancelBtn.addEventListener("click", closeCreateFlow);
 
