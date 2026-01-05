@@ -2819,21 +2819,24 @@ function closeRulesSheet() {
       openCreateFlow();
     }
 
-    function handleStartJoinClick() {
-      hideStartModal();
-      syncSheetOpenClass();
-      openJoinFlow();
-      setStatus("Enter a game code or create a new one.");
-      if (playerNameInput) {
-        playerNameInput.focus();
-      }
-      setTimeout(() => {
-        if (joinGameIdInput) {
-          joinGameIdInput.focus();
-        }
-      }, 120);
-    }
+function handleStartJoinClick() {
+  hideStartModal();
+  syncSheetOpenClass();
 
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      openJoinFlow();
+
+      setStatus("Enter your name, then join the game.");
+
+      setTimeout(() => {
+        if (joinNameInput && !joinNameInput.value) joinNameInput.focus();
+        else if (joinCodeInput) joinCodeInput.focus();
+      }, 80);
+    });
+  });
+}
+    
     function handleStartRejoinClick() {
   hideStartModal();
   syncSheetOpenClass();
