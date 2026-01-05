@@ -2665,8 +2665,16 @@ function showChatSheet() {
 
 function updateStartModalButtons() {
   const saved = hasSavedGame();
-  if (startPlayButton) startPlayButton.textContent = saved ? "Rejoin Game" : "Create Game";
-  if (startNewGameButton) startNewGameButton.style.display = saved ? "block" : "none";
+
+  // Top button should always be Create Game
+  if (startPlayButton) startPlayButton.textContent = "Create Game";
+
+  // Rejoin button only enabled if there’s actually something to rejoin
+  if (startRejoinButton) {
+    startRejoinButton.disabled = !saved;
+    startRejoinButton.style.opacity = saved ? "1" : "0.45";
+    startRejoinButton.style.pointerEvents = saved ? "auto" : "none";
+  }
 }
 
     updateStartModalButtons();
