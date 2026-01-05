@@ -1387,6 +1387,93 @@ body[data-mode="dark"] .sheet-header-row button {
       </div>
     </div>
 
+    <!-- Create game flow sheet -->
+<div id="createFlowSheet" class="chat-sheet" role="dialog" aria-modal="true" aria-label="Create Game">
+  <div class="sheet-backdrop" aria-hidden="true"></div>
+  <div class="chat-sheet-inner">
+    <div class="sheet-header-row">
+      <span>Create Game</span>
+      <button id="createFlowCloseBtn" type="button">✕</button>
+    </div>
+
+    <div class="section-title">Player 1 name</div>
+    <input id="createNameInput" class="online-input" placeholder="Your name" autocomplete="name" />
+
+    <div style="height:10px;"></div>
+
+    <div class="online-status" style="margin-bottom:10px;">
+      <span style="opacity:0.8; font-size:12px;">Next you’ll get a code to share with your group.</span>
+    </div>
+
+    <div class="chat-actions">
+      <button id="createFlowCancelBtn" class="small-btn secondary" type="button">Cancel</button>
+      <button id="createFlowStartBtn" class="small-btn" type="button">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Join game flow sheet -->
+<div id="joinFlowSheet" class="chat-sheet" role="dialog" aria-modal="true" aria-label="Join Game">
+  <div class="sheet-backdrop" aria-hidden="true"></div>
+  <div class="chat-sheet-inner">
+    <div class="sheet-header-row">
+      <span>Join Game</span>
+      <button id="joinFlowCloseBtn" type="button">✕</button>
+    </div>
+
+    <div class="section-title">Your name</div>
+    <input id="joinNameInput" class="online-input" placeholder="Your name" autocomplete="name" />
+
+    <div style="height:10px;"></div>
+
+    <div class="section-title">Game code</div>
+    <input id="joinCodeInput" class="online-input" placeholder="Paste the code" autocapitalize="none" />
+
+    <div style="height:12px;"></div>
+
+    <div class="chat-actions">
+      <button id="joinFlowCancelBtn" class="small-btn secondary" type="button">Cancel</button>
+      <button id="joinFlowGoBtn" class="small-btn" type="button">Join</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invite players sheet -->
+<div id="inviteSheet" class="chat-sheet" role="dialog" aria-modal="true" aria-label="Invite Players">
+  <div class="sheet-backdrop" aria-hidden="true"></div>
+  <div class="chat-sheet-inner">
+    <div class="sheet-header-row">
+      <span>Invite your crew</span>
+      <button id="inviteCloseBtn" type="button">✕</button>
+    </div>
+
+    <div class="online-status" style="margin-bottom:10px;">
+      <strong style="font-size:13px;">Share this code</strong>
+      <span style="opacity:0.85;">Your friends tap Join Game and enter it.</span>
+    </div>
+
+    <button class="gameid-pill" id="inviteCodePill" type="button" style="font-size:14px; padding:10px 12px;">
+      <span class="icon">⧉</span>
+      <span id="inviteCodeValue">none</span>
+    </button>
+
+    <div style="height:12px;"></div>
+
+    <div class="online-status" style="margin-bottom:10px;">
+      <span style="opacity:0.8; font-size:12px;">Pro move, use Share to open Messages or Mail with the code prefilled.</span>
+    </div>
+
+    <div class="chat-actions">
+      <button id="inviteCopyBtn" class="small-btn secondary" type="button">Copy</button>
+      <button id="inviteShareBtn" class="small-btn" type="button">Share</button>
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <button id="inviteDoneBtn" class="small-btn secondary" type="button">Done</button>
+  </div>
+</div>
+
     <!-- New Game confirmation modal -->
     <div id="newGameConfirm" class="modal-backdrop">
       <div class="modal-card">
