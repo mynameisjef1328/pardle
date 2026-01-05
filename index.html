@@ -2707,6 +2707,102 @@ function closeRulesSheet() {
       });
     }
 
+    if (startNewGameButton) {
+  startNewGameButton.addEventListener("click", handleStartNewGameClick);
+}
+
+if (createFlowCloseBtn) createFlowCloseBtn.addEventListener("click", closeCreateFlow);
+if (createFlowCancelBtn) createFlowCancelBtn.addEventListener("click", closeCreateFlow);
+
+if (createFlowStartBtn) {
+  createFlowStartBtn.addEventListener("click", () => {
+    const name = (createNameInput ? createNameInput.value.trim() : "");
+    if (!name) {
+      setStatus("Enter your name to create a game.", true);
+      if (createNameInput) createNameInput.focus();
+      return;
+    }
+    if (playerNameInput) playerNameInput.value = name;
+    closeCreateFlow();
+    handleCreateGameClick();
+  });
+}
+
+if (joinFlowCloseBtn) joinFlowCloseBtn.addEventListener("click", closeJoinFlow);
+if (joinFlowCancelBtn) joinFlowCancelBtn.addEventListener("click", closeJoinFlow);
+
+if (joinFlowGoBtn) {
+  joinFlowGoBtn.addEventListener("click", () => {
+    const name = (joinNameInput ? joinNameInput.value.trim() : "");
+    const code = (joinCodeInput ? joinCodeInput.value.trim() : "");
+    if (!name) {
+      setStatus("Enter your name to join.", true);
+      if (joinNameInput) joinNameInput.focus();
+      return;
+    }
+    if (!code) {
+      setStatus("Enter a game code to join.", true);
+      if (joinCodeInput) joinCodeInput.focus();
+      return;
+    }
+    if (playerNameInput) playerNameInput.value = name;
+    if (joinGameIdInput) joinGameIdInput.value = code;
+
+    closeJoinFlow();
+    joinGame().catch(err => {
+      console.error(err);
+      setStatus("Error joining game.", true);
+    });
+  });
+}
+
+if (inviteCloseBtn) inviteCloseBtn.addEventListener("click", closeInviteSheet);
+if (inviteDoneBtn) inviteDoneBtn.addEventListener("click", closeInviteSheet);
+
+if (inviteCodePill) {
+  inviteCodePill.addEventListener("click", async () => {
+    if (!currentGameId) return;
+    const ok = await copyTextSmart(currentGameId);
+    if (inviteCodeValue) {
+      const original = inviteCodeValue.textContent;
+      inviteCodeValue.textContent = ok ? "Copied!" : "Copy failed";
+      setTimeout(() => (inviteCodeValue.textContent = original), 900);
+    }
+  });
+}
+
+if (inviteCopyBtn) {
+  inviteCopyBtn.addEventListener("click", async () => {
+    if (!currentGameId) return;
+    const ok = await copyTextSmart(currentGameId);
+    setStatus(ok ? "Code copied. Send it to your crew." : "Could not copy, tap the code and try again.", !ok);
+  });
+}
+
+if (inviteShareBtn) {
+  inviteShareBtn.addEventListener("click", async () => {
+    if (!currentGameId) return;
+
+    const code = currentGameId;
+    const link = getShareLink(code);
+    const msg = "Join my Pardle game.\n\nCode: " + code + "\nLink: " + link;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Pardle", text: msg, url: link });
+        return;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // fallback: open mail composer
+    const subject = encodeURIComponent("Join my Pardle game");
+    const body = encodeURIComponent(msg);
+    window.location.href = "mailto:?subject=" + subject + "&body=" + body;
+  });
+}
+
     if (newGameCancelBtn) {
       newGameCancelBtn.addEventListener("click", hideNewGameConfirm);
     }
