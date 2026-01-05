@@ -2904,6 +2904,23 @@ function closeRulesSheet() {
       }, 120);
     }
 
+    function handleStartRejoinClick() {
+  hideStartModal();
+  syncSheetOpenClass();
+
+  if (!hasSavedGame()) {
+    setStatus("No saved game found to rejoin. Create a new game or join one.", true);
+    openJoinFlow();
+    return;
+  }
+
+  attemptAutoRejoin().catch(err => {
+    console.error(err);
+    setStatus("Could not rejoin. Create a new game or join one instead.", true);
+    openJoinFlow();
+  });
+}
+
     function handleStartRulesClick() {
   hideStartModal();
   openRulesSheet();
