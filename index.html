@@ -1045,15 +1045,24 @@ body[data-mode="dark"] .sheet-header-row button {
 <body data-mode="dark" data-accent="normal">
 
   <!-- Start screen overlay -->
-  <div id="startModal">
-    <div class="start-card">
+<div id="startModal" class="modal-overlay">
+  <div class="start-modal" role="dialog" aria-modal="true" aria-label="Pardle start menu">
+    <div class="start-inner">
       <div class="start-title">Pardle</div>
-      <button id="startPlayButton" class="start-main-btn" type="button">Create Game</button>
-      <button id="startNewGameButton" class="start-secondary-btn" type="button" style="display:none;">New Game</button>
-      <button id="startJoinButton" class="start-secondary-btn join" type="button">Join Game</button>
-      <button id="startRulesButton" class="start-rules-btn" type="button">Game Rules</button>
+
+      <div class="menu-stack">
+        <button id="newGameBtn" class="menu-btn primary">New Game</button>
+
+        <button id="rejoinGameBtn" class="menu-btn secondary">Rejoin Game</button>
+        <button id="joinGameBtn" class="menu-btn secondary">Join Game</button>
+
+        <div class="menu-divider" aria-hidden="true"></div>
+
+        <button id="rulesBtn" class="menu-btn secondary rules">Game Rules</button>
+      </div>
     </div>
   </div>
+</div>
 
   <div class="app-shell">
     <header class="app-header">
