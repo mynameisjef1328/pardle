@@ -2464,6 +2464,22 @@ function updateStartModalButtons() {
   if (startNewGameButton) startNewGameButton.style.display = saved ? "block" : "none";
 }
 
+    updateStartModalButtons();
+    syncSheetOpenClass();
+
+// If someone opened an invite link, pop Join flow with code filled
+(function initJoinFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const gid = params.get("game");
+    if (gid) {
+      hideStartModal();
+      openJoinFlow(gid);
+      setStatus("Enter your name, then join the game.");
+    }
+  } catch (e) {}
+})();
+
 function openCreateFlow() {
   if (!createFlowSheet) return;
   createFlowSheet.classList.add("visible");
