@@ -1565,6 +1565,29 @@ try {
     const startJoinLink = document.getElementById("startJoinLink");
     const startRulesButton = document.getElementById("startRulesButton");
 
+    const startNewGameButton = document.getElementById("startNewGameButton");
+
+    const createFlowSheet = document.getElementById("createFlowSheet");
+    const createFlowCloseBtn = document.getElementById("createFlowCloseBtn");
+    const createFlowCancelBtn = document.getElementById("createFlowCancelBtn");
+    const createFlowStartBtn = document.getElementById("createFlowStartBtn");
+    const createNameInput = document.getElementById("createNameInput");
+    
+    const joinFlowSheet = document.getElementById("joinFlowSheet");
+    const joinFlowCloseBtn = document.getElementById("joinFlowCloseBtn");
+    const joinFlowCancelBtn = document.getElementById("joinFlowCancelBtn");
+    const joinFlowGoBtn = document.getElementById("joinFlowGoBtn");
+    const joinNameInput = document.getElementById("joinNameInput");
+    const joinCodeInput = document.getElementById("joinCodeInput");
+    
+    const inviteSheet = document.getElementById("inviteSheet");
+    const inviteCloseBtn = document.getElementById("inviteCloseBtn");
+    const inviteDoneBtn = document.getElementById("inviteDoneBtn");
+    const inviteCopyBtn = document.getElementById("inviteCopyBtn");
+    const inviteShareBtn = document.getElementById("inviteShareBtn");
+    const inviteCodePill = document.getElementById("inviteCodePill");
+    const inviteCodeValue = document.getElementById("inviteCodeValue");
+
     const playerNameInput = document.getElementById("playerNameInput");
     const createGameBtn = document.getElementById("createGameBtn");
     const joinGameBtn = document.getElementById("joinGameBtn");
@@ -2329,12 +2352,11 @@ try {
   sheetEl.addEventListener("touchstart", handler, { passive: true });
 }
 
-
 function syncSheetOpenClass() {
   const anySheetOpen = !!document.querySelector(".chat-sheet.visible");
   const anyModalOpen =
     (typeof newGameConfirm !== "undefined" && newGameConfirm && newGameConfirm.classList.contains("visible")) ||
-    (typeof startModal !== "undefined" && startModal && startModal.classList.contains("visible"));
+    (typeof startModal !== "undefined" && startModal && !startModal.classList.contains("hidden"));
 
   document.body.classList.toggle("sheet-open", anySheetOpen || anyModalOpen);
 }
