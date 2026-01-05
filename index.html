@@ -2028,6 +2028,7 @@ try {
       localStorage.setItem(STORAGE_LAST_SLOT_KEY, String(currentPlayerSlot));
 
       setStatus("Game created. Share this code with your friends.");
+      openInviteSheet(currentGameId);
 
       if (unsubscribeGame) unsubscribeGame();
       unsubscribeGame = docRef.onSnapshot(snap => {
