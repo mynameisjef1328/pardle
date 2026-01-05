@@ -2801,17 +2801,14 @@ function closeRulesSheet() {
       hideStartModal();
       syncSheetOpenClass();
     
-      if (hasSavedGame()) {
-        attemptAutoRejoin().catch(err => {
-          console.error(err);
-          setStatus("Could not rejoin. Start a new game or join one.", true);
-          openCreateFlow();
-        });
+      // If you already have a game or any data, confirm first
+      if (hasExistingGameData()) {
+        showNewGameConfirm();
         return;
       }
-  
-    openCreateFlow();
-  }
+    
+      openCreateFlow();
+    }
 
     function handleStartNewGameClick() {
       hideStartModal();
