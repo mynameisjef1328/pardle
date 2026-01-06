@@ -1185,13 +1185,16 @@ body[data-mode="dark"] .sheet-header-row button {
           </div>
 
           <div class="online-status" id="onlineStatusText">
-            <button class="gameid-pill" id="gameIdPill" type="button">
-              <span class="icon">⧉</span>
-              <span id="gameIdValue">none</span>
-            </button>
-            <span id="statusMessage">Not in a game. Create or join to start.</span>
-          </div>
-        </div>
+  <div id="gameIdCopyRow" class="game-id-row" role="button" tabindex="0" aria-label="Copy game ID">
+    <span class="copy-icon" aria-hidden="true">⧉</span>
+    <span id="gameIdText" class="game-id-text"></span>
+  </div>
+
+  <div id="copyToast" class="copy-toast" aria-live="polite">Copied</div>
+
+  <span id="statusMessage">Not in a game. Create or join to start.</span>
+</div>
+
       </section>
 
       <!-- Course selector -->
@@ -1721,7 +1724,7 @@ try {
     const joinGameIdInput = document.getElementById("joinGameIdInput");
     const onlineStatusText = document.getElementById("onlineStatusText");
     const gameIdPill = document.getElementById("gameIdPill");
-    const gameIdValue = document.getElementById("gameIdValue");
+    const gameIdValue = document.getElementById("gameIdText").textContent = currentGameId || "none";
     const statusMessage = document.getElementById("statusMessage");
 
     const courseSelect = document.getElementById("courseSelect");
