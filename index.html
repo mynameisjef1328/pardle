@@ -1130,12 +1130,13 @@ body[data-mode="dark"] .sheet-header-row button {
   display: none;
 }
 
-    .start-title{
-  margin: 0 0 8px;
+.start-title{
+  margin: 0 0 6px; /* was 8px, tighter */
 }
 
 .start-tagline{
-  margin: 0 0 20px;
+  align-self: center; 
+  margin: -2px auto 20px;  /* auto centers the box, -2 nudges up */
   max-width: 34ch;
   text-align: center;
   font-size: 13px;
