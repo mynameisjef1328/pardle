@@ -1130,49 +1130,6 @@ body[data-mode="dark"] .sheet-header-row button {
   display: none;
 }
 
-    .game-id-row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:12px 14px;
-  border-radius:12px;
-  cursor:pointer;
-  user-select:text;
-  background: rgba(255,255,255,0.03);
-}
-
-.game-id-row:active{ transform: scale(0.99); }
-
-.copy-icon{
-  font-size:20px;
-  opacity:0.9;
-}
-
-.game-id-text{
-  font-size:16px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  letter-spacing:0.2px;
-}
-
-/* Toast */
-.copy-toast{
-  position: fixed;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
-  padding: 10px 12px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.75);
-  color: #fff;
-  font-size: 14px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 150ms ease;
-  z-index: 9999;
-}
-
-.copy-toast.show{ opacity: 1; }
-
   </style>
 </head>
 <body data-mode="dark" data-accent="normal">
@@ -1228,16 +1185,13 @@ body[data-mode="dark"] .sheet-header-row button {
           </div>
 
           <div class="online-status" id="onlineStatusText">
-  <div id="gameIdCopyRow" class="game-id-row" role="button" tabindex="0" aria-label="Copy game ID">
-    <span class="copy-icon" aria-hidden="true">⧉</span>
-    <span id="gameIdText" class="game-id-text"></span>
-  </div>
-
-  <div id="copyToast" class="copy-toast" aria-live="polite">Copied</div>
-
-  <span id="statusMessage">Not in a game. Create or join to start.</span>
-</div>
-
+            <button class="gameid-pill" id="gameIdPill" type="button">
+              <span class="icon">⧉</span>
+              <span id="gameIdValue">none</span>
+            </button>
+            <span id="statusMessage">Not in a game. Create or join to start.</span>
+          </div>
+        </div>
       </section>
 
       <!-- Course selector -->
@@ -1767,7 +1721,7 @@ try {
     const joinGameIdInput = document.getElementById("joinGameIdInput");
     const onlineStatusText = document.getElementById("onlineStatusText");
     const gameIdPill = document.getElementById("gameIdPill");
-    const gameIdValue = document.getElementById("gameIdText").textContent = currentGameId || "none";
+    const gameIdValue = document.getElementById("gameIdValue");
     const statusMessage = document.getElementById("statusMessage");
 
     const courseSelect = document.getElementById("courseSelect");
@@ -3145,49 +3099,6 @@ enableBackdropTapToClose(createFlowSheet, closeCreateFlow);
 enableBackdropTapToClose(joinFlowSheet, closeJoinFlow);
 enableBackdropTapToClose(inviteSheet, closeInviteSheet);
 
-function showCopyToast(){
-  const t = document.getElementById("copyToast");
-  if (!t) return;
-  t.classList.add("show");
-  clearTimeout(window.__copyToastTimer);
-  window.__copyToastTimer = setTimeout(() => t.classList.remove("show"), 900);
-}
-
-async function copyGameId(){
-  const el = document.getElementById("gameIdText");
-  const id = el?.textContent?.trim();
-  if (!id) return;
-
-  try{
-    await navigator.clipboard.writeText(id);
-    showCopyToast();
-  }catch{
-    const ta = document.createElement("textarea");
-    ta.value = id;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    ta.remove();
-    showCopyToast();
-  }
-}
-
-function wireGameIdCopy(){
-  const row = document.getElementById("gameIdCopyRow");
-  if (!row) return;
-
-  row.addEventListener("click", copyGameId);
-  row.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" || e.key === " ") {
-    e.preventDefault();
-    copyGameId();
-  }
-});
-
-}
-
-    wireGameIdCopy();
-    
   </script>
 </body>
 </html>
