@@ -2558,17 +2558,36 @@ function showChatSheet() {
       return hasStuff;
     }
 
-    function showNewGameConfirm() {
-      if (!newGameConfirm) return;
-      newGameConfirm.classList.add("visible");
-  syncSheetOpenClass();
-    }
+    function clearSavedGame() {
+  // Remove “rejoin” pointers
+  localStorage.removeItem(STORAGE_LAST_GAME_ID_KEY);
+  localStorage.removeItem(STORAGE_LAST_SLOT_KEY);
 
-    function hideNewGameConfirm() {
-      if (!newGameConfirm) return;
-      newGameConfirm.classList.remove("visible");
-  syncSheetOpenClass();
-    }
+  // Drop in-memory state
+  currentGameId = null;
+  currentPlayerSlot = null;
+  currentGameData = null;
+
+  // Stop listeners
+  if (unsubscribeGame) { unsubscribeGame(); unsubscribeGame = null; }
+  if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
+
+  // Reset UI state
+  enableScorecard(false);
+  setUnreadBadge(false);
+  setStatus("Not in a game. Create or join to start.");
+}
+
+function showNewGameConfirm() {
+  const confirmed = window.confirm(
+    "This device will leave the current game and start fresh.\n\nGot the old code saved? You’ll need it to come back."
+  );
+
+  if (!confirmed) return;
+
+  clearSavedGame();
+  openCreateFlow();
+}
 
     function handleCreateGameClick() {
       if (hasExistingGameData()) {
@@ -2970,10 +2989,6 @@ if (inviteShareBtn) {
     window.location.href = "mailto:?subject=" + subject + "&body=" + body;
   });
 }
-
-    if (newGameCancelBtn) {
-      newGameCancelBtn.addEventListener("click", hideNewGameConfirm);
-    }
 
     if (newGameConfirmBtn) {
       newGameConfirmBtn.addEventListener("click", () => {
