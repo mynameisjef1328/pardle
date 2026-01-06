@@ -3178,8 +3178,12 @@ function wireGameIdCopy(){
 
   row.addEventListener("click", copyGameId);
   row.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") copyGameId();
-  });
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    copyGameId();
+  }
+});
+
 }
 
     wireGameIdCopy();
