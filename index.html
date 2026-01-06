@@ -2990,16 +2990,6 @@ if (inviteShareBtn) {
   });
 }
 
-    if (newGameConfirmBtn) {
-      newGameConfirmBtn.addEventListener("click", () => {
-        hideNewGameConfirm();
-        createGame().catch(err => {
-          console.error(err);
-          setStatus("Error creating game.", true);
-        });
-      });
-    }
-
     if (settingsButton) {
       settingsButton.addEventListener("click", openSettingsSheet);
     }
