@@ -2798,17 +2798,16 @@ function closeRulesSheet() {
     }
 
     function handleStartPlayClick() {
-      hideStartModal();
-      syncSheetOpenClass();
-    
-      // If you already have a game or any data, confirm first
-      if (hasExistingGameData()) {
-        showNewGameConfirm();
-        return;
-      }
-    
-      openCreateFlow();
+    hideStartModal();
+    syncSheetOpenClass();
+  
+    if (hasSavedGame()) {
+      showNewGameConfirm();
+      return;
     }
+  
+    openCreateFlow();
+  }
 
     function handleStartNewGameClick() {
       hideStartModal();
