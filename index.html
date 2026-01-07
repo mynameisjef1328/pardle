@@ -968,7 +968,8 @@ body[data-mode="dark"] .sheet-header-row button {
       }
     }
 
-:root{
+/* Start menu theme vars (SCOPED so they don't override app theme vars) */
+#startModal{
   --bg-0: #050506;
   --bg-1: #0d0d10;
 
@@ -980,7 +981,6 @@ body[data-mode="dark"] .sheet-header-row button {
   --orange-0: #ffb000;
   --orange-1: #ff8c00;
 
-  /* subtle orange border for the bottom three */
   --orange-border: rgba(255, 159, 10, 0.26);
   --orange-border-hover: rgba(255, 159, 10, 0.55);
 
@@ -989,6 +989,12 @@ body[data-mode="dark"] .sheet-header-row button {
 
   --shadow-1: 0 28px 70px rgba(0,0,0,0.62);
   --shadow-2: 0 10px 26px rgba(0,0,0,0.45);
+}
+
+/* Make sure the start modal uses its scoped text color */
+#startModal .start-modal,
+#startModal .start-inner{
+  color: var(--text);
 }
 
 /* overlay */
