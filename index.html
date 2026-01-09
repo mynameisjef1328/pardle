@@ -2081,9 +2081,9 @@ try {
             if (typeof parVal !== "number") return;
 
             if (score > parVal) {
-              const diff = score - parVal;
-              alert("Bruh. " + score + " on a par " + parVal + " is " + diff + " over. That is rough. Do better.");
-            }
+          const diff = score - parVal;
+          showToast("Bruh. " + score + " on a par " + parVal + " is " + diff + " over. That is rough. Do better.");
+        }
           });
         });
       });
