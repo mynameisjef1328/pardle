@@ -4,10 +4,6 @@
   <meta charset="UTF-8" />
   <title>Pardle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Pardle" />
-  <meta name="theme-color" content="#101010" />
 
   <!-- Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -1154,30 +1150,6 @@ body[data-mode="dark"] .sheet-header-row button {
   opacity: 0.85;
 }
 
-.pardle-toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: rgba(0, 0, 0, 0.85);
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  max-width: 320px;
-  text-align: center;
-  opacity: 0;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-.pardle-toast.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
   </style>
 </head>
 <body data-mode="dark" data-accent="normal">
@@ -1329,96 +1301,96 @@ body[data-mode="dark"] .sheet-header-row button {
                   <th class="player-label">
                     <input class="player-name" placeholder="Player 1" disabled />
                   </th>
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td class="total-col">E</td>
                 </tr>
                 <tr class="player-row" data-slot="1">
                   <th class="player-label">
                     <input class="player-name" placeholder="Player 2" disabled />
                   </th>
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td class="total-col">E</td>
                 </tr>
                 <tr class="player-row" data-slot="2">
                   <th class="player-label">
                     <input class="player-name" placeholder="Player 3" disabled />
                   </th>
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td class="total-col">E</td>
                 </tr>
                 <tr class="player-row" data-slot="3">
                   <th class="player-label">
                     <input class="player-name" placeholder="+ Add Player" disabled />
                   </th>
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
-                  <input class="score-input" type="number" min="1" max="7" inputmode="numeric" disabled />
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
+                  <td><input class="score-input" type="number" min="1" disabled /></td>
                   <td class="total-col">E</td>
                 </tr>
               </tbody>
@@ -1983,25 +1955,6 @@ try {
         }
       });
     }
-
-   function showToast(message, duration = 3000) {
-  const existing = document.querySelector('.pardle-toast');
-  if (existing) existing.remove();
-
-  const toast = document.createElement('div');
-  toast.className = 'pardle-toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-
-  requestAnimationFrame(() => {
-    toast.classList.add('visible');
-  });
-
-  setTimeout(() => {
-    toast.classList.remove('visible');
-    setTimeout(() => toast.remove(), 300);
-  }, duration);
-} 
 
     function applyGameToUI(data) {
       if (!data) return;
