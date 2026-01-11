@@ -1150,6 +1150,30 @@ body[data-mode="dark"] .sheet-header-row button {
   opacity: 0.85;
 }
 
+.pardle-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 320px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.pardle-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
   </style>
 </head>
 <body data-mode="dark" data-accent="normal">
