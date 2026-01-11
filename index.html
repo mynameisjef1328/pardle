@@ -1956,6 +1956,25 @@ try {
       });
     }
 
+   function showToast(message, duration = 3000) {
+  const existing = document.querySelector('.pardle-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'pardle-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add('visible');
+  });
+
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+} 
+
     function applyGameToUI(data) {
       if (!data) return;
 
